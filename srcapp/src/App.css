@@ -28,6 +28,18 @@
   color: #61dafb;
 }
 
+body {
+  background-image: url(./img/background.jpg);
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+canvas {
+  _border: 1px dashed black;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
