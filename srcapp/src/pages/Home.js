@@ -32,16 +32,16 @@ const Home = () => {
                 {/* <TopSection /> */}
                 <Canvas>
                     <Suspense fallback={null}>
-                        <OrbitControls
-                            enableRotate
-                            enablePan={false}
-                            enableZoom={true}
-                            zoomSpeed={0.6}
-                            panSpeed={0.5}
-                            minDistance={1.15} // 최소 줌 거리를 원하는 값으로 설정하십시오.
-                            maxDistance={4} // 최대 줌 거리를 원하는 값으로 설정하십시오.
-                            target={[0, 0, 3]}
-                        />
+                        {/*<OrbitControls*/}
+                        {/*    enableRotate*/}
+                        {/*    enablePan={false}*/}
+                        {/*    enableZoom={true}*/}
+                        {/*    zoomSpeed={0.6}*/}
+                        {/*    panSpeed={0.5}*/}
+                        {/*    minDistance={1.15} // 최소 줌 거리를 원하는 값으로 설정하십시오.*/}
+                        {/*    maxDistance={4} // 최대 줌 거리를 원하는 값으로 설정하십시오.*/}
+                        {/*    target={[0, 0, 3]}*/}
+                        {/*/>*/}
                         <Earth/>
                     </Suspense>
                 </Canvas>
