@@ -1,6 +1,7 @@
 import {Navigate, Outlet, useNavigate} from 'react-router-dom';
 import {useState, useEffect} from 'react';
 import './Layout.css';
+import React from 'react';
 
 const Layout = () => {
     const navigate = useNavigate();
@@ -73,7 +74,7 @@ const Layout = () => {
     }, []);
 
     const login = () => {
-        navigate('/login');
+        // navigate('/login');
     };
 
     const join = () => {

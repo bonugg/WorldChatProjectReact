@@ -6,7 +6,7 @@ header{
     box-sizing: border-box;
     font-size: 0px;
     height: 70px;
-    display: flex;
+    display: none;
     justify-content: flex-end;
     align-items: center;
     opacity: 0.5;
