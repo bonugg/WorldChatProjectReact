@@ -29,11 +29,7 @@
 }
 
 body {
-  background-image: url(./img/background.jpg);
-  background-repeat: no-repeat;
-  background-position: top center;
-  background-size: cover;
-  background-attachment: fixed;
+background-color: gray;
 }
 
 canvas {

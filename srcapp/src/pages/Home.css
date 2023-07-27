@@ -32,7 +32,8 @@ a {
     position: fixed; /* 스크롤을 따라오도록 지정 */
     left: 0;
     top: 10%;
-    background-color: rgba(28, 28, 28, 0.8);
+    background-color: rgba(20, 20, 20, 0.8);
+    border: 1px solid rgba(128, 128, 128, 0.4);
     width: var(--side-bar-width);
     height: 80vh; /* 사이드바의 높이를 전체 화면 높이의 90%로 지정 */
 }
@@ -115,7 +116,7 @@ a {
 }
 
 .menu_li:hover {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(30, 30, 30, 0.5);
 }
 
 .menu_a:focus {
@@ -167,7 +168,7 @@ a {
 
 /* 모든 메뉴가 마우스 인식 시 반응 */
 .side-bar ul > li:hover > a {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(50, 50, 50, 0.5);
 }
 
 /* 1차 메뉴의 항목이 마우스 인식 시에 2차 메뉴 등장 */
@@ -181,7 +182,7 @@ a {
 }
 
 .menu_li_li:hover {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(40, 40, 40, 0.5);
 }
 
 /* 사이드바 너비의 80%만큼 왼쪽으로 이동 */
@@ -202,9 +203,9 @@ a {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 500px;
-    height: 600px;
-    border-radius: 50px;
+    width: 700px;
+    height: 700px;
+    border-radius: 30%;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
@@ -216,7 +217,6 @@ a {
 }
 .signupDiv_2{
     width: 70%;
-    height: 65%;
 }
 
 input[type=text], input[type=password]{
@@ -232,6 +232,18 @@ input[type=text], input[type=password]{
 }
 .inputFromText{
     color: white;
+}
+.inputFromText2{
+    color: white;
+    transition: all 0.25s ease-in-out;
+}
+.NoinputFromText{
+    color: indianred;
+    transition: all 0.25s ease-in-out;
+}
+.emptyFromText{
+    color: white;
+    transition: all 0.25s ease-in-out;
 }
 input[type=text]:focus, input[type=password]:focus{
     border: 0.2rem solid rgba(200, 200, 200, 0.2);
@@ -274,7 +286,7 @@ input[type=text]:focus, input[type=password]:focus{
     box-sizing: border-box;
 }
 button[type=submit]{
-    width: 100%;
+    width: 90%;
     height: 70%;
     padding-left: 20px;
     box-sizing: border-box;
@@ -338,10 +350,26 @@ button[type=button]:hover{
     background-color: rgba(28, 28, 28, 0.8);
 }
 #id_ID{
+    margin: auto;
+    width: 90%;
     position: relative;
 }
 #id_PWD{
+    margin: auto;
+    width: 90%;
     position: relative;
+}
+#id_EMAIL{
+    width: 90%;
+    margin: 10px auto auto;
+}
+#id_Login_ID{
+    margin: auto;
+    width: 90%;
+}
+#id_Login_PWD{
+    margin: auto;
+    width: 90%;
 }
 .Text_sign{
     position: absolute;
@@ -355,5 +383,5 @@ button[type=button]:hover{
     top: 63px;
     left: 20px;
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
+    color: #d73636;
 }

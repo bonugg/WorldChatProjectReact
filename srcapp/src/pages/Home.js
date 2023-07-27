@@ -10,11 +10,17 @@ import * as THREE from "three";
 import {keyframes} from 'styled-components';
 import styles from "./Login.module.css";
 import Logo from "../img/logo.png";
+import Background from "../img/background.jpg";
 
 const CanvasContainer = styled.div`
   width: 100vw;
   height: 100vh;
   background: black;
+  // background-image: url(${Background});
+  // background-repeat: no-repeat;
+  // background-position: top center;
+  // background-size: cover;
+  // background-attachment: fixed;
 `;
 
 const slideDown = keyframes`
@@ -71,6 +77,9 @@ const Home = () => {
         const [isSubmitDisabled, setIsSubmitDisabled] = useState(true); // 추가한 상태
         const [isIdCheckDisabled, setisIdCheckDisabled] = useState(true);
         const [PasswordCheck, setPasswordCheck] = useState("At least 8 characters consisting of English and numbers, including 2 special characters");
+        const [emailCheckError, setEmailCheckError] = useState(false);
+        const [emailCheckError2, setEmailCheckError2] = useState(false);
+
         //로그인 로직
         const handleSubmit = async (e) => {
             e.preventDefault();
@@ -134,12 +143,12 @@ const Home = () => {
                 if (response == "ok") {
                     setIdCheckError(true);
                     setIdCheckError2(false);
-                    setIsSubmitDisabled(false); // 성공한 경우
+                    // setIsSubmitDisabled(false); // 성공한 경우
                     setisIdCheckDisabled(false);
                 } else if (response == "fail") {
                     setIdCheckError(false);
                     setIdCheckError2(true);
-                    setIsSubmitDisabled(true); // 실패한 경우
+                    // setIsSubmitDisabled(true); // 실패한 경우
                     setisIdCheckDisabled(true);
                 }
             }
@@ -147,7 +156,7 @@ const Home = () => {
         const handleUsernameChange = (e) => {
             setIdCheckError(false);
             setIdCheckError2(false);
-            setIsSubmitDisabled(true); // 사용자 이름을 수정할 때마다 중복 확인 해제
+            // setIsSubmitDisabled(true); // 사용자 이름을 수정할 때마다 중복 확인 해제
             setisIdCheckDisabled(true);
 
             const newUsername = e.target.value;
@@ -156,7 +165,7 @@ const Home = () => {
             if (!isValidId(newUsername)) {
                 setIdCheckError(false);
                 setIdCheckError2(true);
-                setIsSubmitDisabled(true);
+                // setIsSubmitDisabled(true);
                 setisIdCheckDisabled(true);
             } else {
                 setIdCheckError(false);
@@ -169,22 +178,48 @@ const Home = () => {
             setSignPassword(newPassword);
 
             // 비밀번호가 유효하지 않은 경우
-            if (!isValidPassword(newPassword)) {
-                setPasswordCheck("Validation Pass Failed");
-                setIsSubmitDisabled(true);
-            } else {
+            if (newPassword == "") {
                 setPasswordCheck("At least 8 characters consisting of English and numbers, including 2 special characters");
+            }else if(!isValidPassword(newPassword)){
+                setPasswordCheck("Validation Pass Failed");
+                // setIsSubmitDisabled(true);
+            } else {
+                setPasswordCheck("Available PASSWORD");
             }
         };
+        const handleEmailChange = (e) => {
+            const newEmail = e.target.value;
+            setSignEmail(newEmail);
+
+            // 이메일이 유효하지 않은 경우
+            if (!isValidEmail(newEmail)) {
+                setEmailCheckError(false);
+                setEmailCheckError2(true);
+                // setIsSubmitDisabled(true);
+            } else {
+                setEmailCheckError(true);
+                setEmailCheckError2(false);
+
+            }
+        };
+        //아이디 유효성 검사
         const isValidId = (id) => {
             const idPattern = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{7,}$/;
             return idPattern.test(id);
         };
+        //패스워드 유효성 검사
         const isValidPassword = (password) => {
             const passwordPattern = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
             const countSpecialChar = (password.match(/[!@#$%^&*]/g) || []).length;
             return passwordPattern.test(password) && countSpecialChar >= 2;
         };
+
+        //이메일 유효성 검사
+        const isValidEmail = (email) => {
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return emailPattern.test(email);
+        };
+        
         //에러 후에 인풋창 클릭 시 다시 로그인 버튼 텍스트 변경
         const resetButton = () => {
             setButtonText("LOGIN");
@@ -237,10 +272,10 @@ const Home = () => {
                                     if (response.ok) {
                                         localStorage.removeItem('Authorization');
                                         localStorage.removeItem('userName');
-                                        alert("로그인 시간 만료.");
+                                        alert("Login Timeout");
                                         islogin = false;
                                     } else {
-                                        throw new Error('로그아웃 실패.');
+                                        throw new Error('Logout Fail');
                                     }
                                 }
                             }
@@ -268,13 +303,13 @@ const Home = () => {
                 if (response.ok) {
                     localStorage.removeItem('Authorization');
                     localStorage.removeItem('userName');
-                    alert("로그아웃 완료.");
+                    alert("Logout Success");
                     setLoggedIn(false);
                 } else {
-                    throw new Error('로그아웃 실패.');
+                    throw new Error('Logout Fail');
                 }
             } catch (error) {
-                alert("로그아웃 실패.");
+                alert("Logout Fail");
             }
         };
 
@@ -373,8 +408,9 @@ const Home = () => {
             setSignPassword('');
             setSignEmail('');
             setIdCheckError(false);
+            setEmailCheckError(false);
             setIdCheckError2(false);
-            setIsSubmitDisabled(true);
+
             setisIdCheckDisabled(true);
 
             setTargetPosition(new THREE.Vector3(35.147, 0, -63));
@@ -436,8 +472,9 @@ const Home = () => {
                                     <img className={"LogoImg"} src={Logo}></img>
                                 </div>
                                 <form onSubmit={handleSubmit}>
-                                    <div className={"loginForm"}>
+                                    <div className={"loginForm"} id={"id_Login_ID"}>
                                         <input
+                                            className={"inputFromText"}
                                             placeholder={"Please enter your ID"}
                                             type='text'
                                             value={username}
@@ -445,8 +482,9 @@ const Home = () => {
                                             onFocus={resetButton}
                                         />
                                     </div>
-                                    <div className={"loginForm"}>
+                                    <div className={"loginForm"} id={"id_Login_PWD"}>
                                         <input
+                                            className={"inputFromText"}
                                             placeholder={"Please enter your PASSWORD"}
                                             type='password'
                                             value={password}
@@ -477,7 +515,7 @@ const Home = () => {
                                             placeholder={"Please enter your ID"}
                                             type='text'
                                             value={SginuserName}
-                                            onChange={handleUsernameChange}                                            onFocus={resetButton}
+                                            onChange={handleUsernameChange}
                                         />
                                         <button
                                             disabled={isIdCheckDisabled}
@@ -491,26 +529,30 @@ const Home = () => {
                                             placeholder={"Please enter your PASSWORD"}
                                             type='password'
                                             value={SignuserPwd}
-                                            onChange={handlePasswordChange}                                         onFocus={resetButton}
+                                            onChange={handlePasswordChange}
                                         />
                                         <p className={PasswordCheck === 'At least 8 characters consisting of English and numbers, including 2 special characters' ?
-                                            "Text_sign" : "Text_sign_Error"
+                                            "Text_sign" : PasswordCheck === "Available PASSWORD" ?
+                                                "Text_sign" : "Text_sign_Error"
                                         }>{PasswordCheck}</p>
                                     </div>
-                                    <div className={"loginForm"} >
+                                    <div className={"loginForm"} id={"id_EMAIL"}>
                                         <input
-                                            className={"inputFromText"}
+                                            className={emailCheckError ? "inputFromText2" : emailCheckError2 ? "NoinputFromText"
+                                            : "emptyFromText"}
                                             placeholder={"Please enter your EMAIL"}
                                             type='text'
                                             value={SignuserEmail}
-                                            onChange={(e) => setSignEmail(e.target.value)}                                            onFocus={resetButton}
+                                            onChange={handleEmailChange}
                                         />
                                     </div>
                                     <div className={"login_btn"}>
                                         <button
                                             className={"SignUpBtn"}
                                             type='submit'
-                                            disabled={isSubmitDisabled}>SignUp</button>
+                                            disabled={PasswordCheck !== "Available PASSWORD"
+                                            || !IdCheckError || !emailCheckError
+                                        }>SignUp</button>
                                     </div>
                                 </form>
 
