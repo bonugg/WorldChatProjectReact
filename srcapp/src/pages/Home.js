@@ -1,22 +1,26 @@
-import {Link} from 'react-router-dom';
-import "../pages/Home.css";
+import "./css/Home.css";
+import './css/Fallback.css';
 import React, {useRef, useState, useEffect} from "react";
 import styled from "styled-components";
-import {Earth} from "../components/earth/index";
 import {useFrame, useThree, Canvas} from "@react-three/fiber";
-import {OrbitControls} from "@react-three/drei";
 import {Suspense} from "react";
 import * as THREE from "three";
 import {keyframes} from 'styled-components';
-import styles from "./Login.module.css";
 import Logo from "../img/logo.png";
 import Background from "../img/background.jpg";
+import Logo_no_text from "../img/logo_no_text.png";
+import Logo_text from "../img/logo_text.png";
+
+import {Earth} from "../components/earth/index";
+import Join from './Join';
+import MyPage from './MyPage';
+import PasswordChange from './PasswordChange';
 
 const CanvasContainer = styled.div`
   width: 100vw;
   height: 100vh;
   background: black;
-  // background-image: url(${Background});
+    // background-image: url(${Background});
   // background-repeat: no-repeat;
   // background-position: top center;
   // background-size: cover;
@@ -49,6 +53,7 @@ const Home = () => {
         const [maxZoom, setMaxZoom] = useState(4);
         const [isLoginZoom, setIsLoginZoom] = useState(false);
         const [isSignUpZoom, setIsSignUpZoom] = useState(false);
+        const [isMapageZoom, setIsMapageZoom] = useState(false);
         const [LoginZoom, setLoginZoom] = useState(0);
         const [mouseLock, setMouseLock] = useState(false);
 
@@ -60,6 +65,7 @@ const Home = () => {
         //로그인 및 회원가입 화면 창 띄우기
         const [LoginDiv, setLoginDiv] = useState(false);
         const [SignUpDiv, setSignUpDiv] = useState(false);
+        const [MyPageDiv, setMyPageDiv] = useState(false);
 
         //로그인
         const [loggedIn, setLoggedIn] = useState(false); //로그인 상태확인
@@ -68,17 +74,49 @@ const Home = () => {
         const [error, setError] = useState('');
         const [buttonText, setButtonText] = useState("LOGIN");
 
+        //로그아웃
+        const [loggedOut, setLoggedOut] = useState(false); //로그아웃 상태확인
+
         //회원가입
         const [SginuserName, setSignUsername] = useState('');
         const [SignuserPwd, setSignPassword] = useState('');
         const [SignuserEmail, setSignEmail] = useState('');
+        const [SignuserNickName, setSignuserNickName] = useState('');
+        const [SignuserNationality, setSignuserNationality] = useState('');
+        const [SignuserPhone, setSignuserPhone] = useState('');
         const [IdCheckError, setIdCheckError] = useState(false);
         const [IdCheckError2, setIdCheckError2] = useState(false);
-        const [isSubmitDisabled, setIsSubmitDisabled] = useState(true); // 추가한 상태
         const [isIdCheckDisabled, setisIdCheckDisabled] = useState(true);
         const [PasswordCheck, setPasswordCheck] = useState("At least 8 characters consisting of English and numbers, including 2 special characters");
         const [emailCheckError, setEmailCheckError] = useState(false);
         const [emailCheckError2, setEmailCheckError2] = useState(false);
+        const [NickNameCheckError, setNickNameCheckError] = useState(false);
+        const [NickNameCheckError2, setNickNameCheckError2] = useState(false);
+        const [isNickNameCheckError, setisNickNameCheckError] = useState(true);
+        const [phoneCheckError, setPhoneCheckError] = useState(false);
+        const [phoneCheckError2, setPhoneCheckError2] = useState(false);
+
+        //패스워드 수정 버튼 클릭 상태
+        const [isPasswordChangeDiv, setIsPasswordChangeDiv] = useState(false);
+        //패스워드 수정 창 외의 화면 클릭 시 상태
+        const passwordChangeDivRef = useRef(null);
+        const onPasswordChange = (newValue) => {
+            setIsPasswordChangeDiv(newValue);
+        };
+        //패스워드 수정 창 띄우고 창 밖 클릭 시 창 닫힘
+        useEffect(() => {
+            const handleOutsideClick = (event) => {
+                if (passwordChangeDivRef.current && !passwordChangeDivRef.current.contains(event.target)) {
+                    setIsPasswordChangeDiv(false);
+                }
+            };
+            if (isPasswordChangeDiv) {
+                document.addEventListener("click", handleOutsideClick);
+            }
+            return () => {
+                document.removeEventListener("click", handleOutsideClick);
+            };
+        }, [isPasswordChangeDiv]);
 
         //로그인 로직
         const handleSubmit = async (e) => {
@@ -101,13 +139,15 @@ const Home = () => {
                 setUsername('');
                 setPassword('');
                 setLoggedIn(true);
+                setLoggedOut(false);
                 home();
             } else {
                 // 실패시 오류 메시지 설정
                 setUsername('');
                 setPassword('');
-                setButtonText("ID or PASSWORD error");
+                setButtonText("ID OR PASSWORD ERROR");
                 setLoggedIn(false);
+                setLoggedOut(true);
             }
         };
         //회원가입 로직
@@ -116,19 +156,21 @@ const Home = () => {
             let userName = SginuserName;
             let userPwd = SignuserPwd;
             let userEmail = SignuserEmail;
+            let userNickName = SignuserNickName;
+            let userNationality = SignuserNationality;
+            let userPhone = SignuserPhone;
             const response = await fetch('api/v1/join', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userName, userPwd, userEmail}),
+                body: JSON.stringify({userName, userPwd, userEmail, userNickName, userNationality, userPhone}),
             });
             if (response.ok) {
                 // 페이지 이동
                 login();
             }
         };
-
         // 중복 확인 로직
         const idCheck = async () => {
             const IdCheck = await fetch('/api/v1/idCheck', {
@@ -138,7 +180,7 @@ const Home = () => {
                 },
                 body: SginuserName, // JSON.stringify 제거
             });
-            if(IdCheck.ok) {
+            if (IdCheck.ok) {
                 const response = await IdCheck.text();
                 if (response == "ok") {
                     setIdCheckError(true);
@@ -153,16 +195,41 @@ const Home = () => {
                 }
             }
         };
+        //닉네임 중복 확인
+        const NickNameCheck = async () => {
+            const NickNameCheck = await fetch('/api/v1/nickNameCheck', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain', // 변경한 Content-Type
+                },
+                body: SignuserNickName, // JSON.stringify 제거
+            });
+            if (NickNameCheck.ok) {
+                const response = await NickNameCheck.text();
+                if (response == "ok") {
+                    setNickNameCheckError(true);
+                    setNickNameCheckError2(false);
+                    setisNickNameCheckError(false);
+                } else if (response == "fail") {
+                    setNickNameCheckError(false);
+                    setNickNameCheckError2(true);
+                    setisNickNameCheckError(true);
+                }
+            }
+        };
         const handleUsernameChange = (e) => {
             setIdCheckError(false);
             setIdCheckError2(false);
-            // setIsSubmitDisabled(true); // 사용자 이름을 수정할 때마다 중복 확인 해제
             setisIdCheckDisabled(true);
 
             const newUsername = e.target.value;
             setSignUsername(newUsername);
             // 아이디가 유효하지 않은 경우
-            if (!isValidId(newUsername)) {
+            if(newUsername == ""){
+                setIdCheckError(false);
+                setIdCheckError2(false);
+                setisIdCheckDisabled(true);
+            } else if (!isValidId(newUsername)) {
                 setIdCheckError(false);
                 setIdCheckError2(true);
                 // setIsSubmitDisabled(true);
@@ -180,7 +247,7 @@ const Home = () => {
             // 비밀번호가 유효하지 않은 경우
             if (newPassword == "") {
                 setPasswordCheck("At least 8 characters consisting of English and numbers, including 2 special characters");
-            }else if(!isValidPassword(newPassword)){
+            } else if (!isValidPassword(newPassword)) {
                 setPasswordCheck("Validation Pass Failed");
                 // setIsSubmitDisabled(true);
             } else {
@@ -192,7 +259,10 @@ const Home = () => {
             setSignEmail(newEmail);
 
             // 이메일이 유효하지 않은 경우
-            if (!isValidEmail(newEmail)) {
+            if(newEmail == ""){
+                setEmailCheckError(false);
+                setEmailCheckError2(false);
+            }else if (!isValidEmail(newEmail)) {
                 setEmailCheckError(false);
                 setEmailCheckError2(true);
                 // setIsSubmitDisabled(true);
@@ -202,9 +272,52 @@ const Home = () => {
 
             }
         };
+        const handleNickNameChange = (e) => {
+            setNickNameCheckError(false);
+            setNickNameCheckError2(false);
+            setisNickNameCheckError(true);
+
+            const newUserNickName = e.target.value;
+            setSignuserNickName(newUserNickName);
+            // 아이디가 유효하지 않은 경우
+            if(newUserNickName == ""){
+                setNickNameCheckError(false);
+                setNickNameCheckError2(false);
+                setisNickNameCheckError(true);
+            }else if (!isValidNickName(newUserNickName)) {
+                setNickNameCheckError(false);
+                setNickNameCheckError2(true);
+                // setIsSubmitDisabled(true);
+                setisNickNameCheckError(true);
+            } else {
+                setNickNameCheckError(false);
+                setNickNameCheckError2(false);
+                setisNickNameCheckError(false);
+            }
+        };
+        const handleCountryChange = (e) => {
+            setSignuserNationality(e.target.value); // 선택된 나라 값을 상태변수에 저장
+        };
+        const handlePhoneChange = (e) => {
+            const newPhone = e.target.value;
+            setSignuserPhone(newPhone);
+
+            // 핸드폰 번호가 유효하지 않은 경우
+            if(newPhone == ""){
+                setPhoneCheckError(false);
+                setPhoneCheckError2(false);
+            }else if (!isValidPhone(newPhone)) {
+                setPhoneCheckError(false);
+                setPhoneCheckError2(true);
+            } else {
+                setPhoneCheckError(true);
+                setPhoneCheckError2(false);
+            }
+        };
+
         //아이디 유효성 검사
         const isValidId = (id) => {
-            const idPattern = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{7,}$/;
+            const idPattern = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{7,10}$/;
             return idPattern.test(id);
         };
         //패스워드 유효성 검사
@@ -213,13 +326,22 @@ const Home = () => {
             const countSpecialChar = (password.match(/[!@#$%^&*]/g) || []).length;
             return passwordPattern.test(password) && countSpecialChar >= 2;
         };
-
         //이메일 유효성 검사
+
         const isValidEmail = (email) => {
             const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             return emailPattern.test(email);
         };
-        
+        const isValidPhone = (phone) => {
+            const phonePattern = /^\d{9,12}$/
+            return phonePattern.test(phone);
+        };
+        //닉네임 유효성 검사
+        const isValidNickName = (nickName) => {
+            const nickNamePattern = /^[a-zA-Z0-9]{1,10}$/;
+            return nickNamePattern.test(nickName);
+        };
+
         //에러 후에 인풋창 클릭 시 다시 로그인 버튼 텍스트 변경
         const resetButton = () => {
             setButtonText("LOGIN");
@@ -227,6 +349,7 @@ const Home = () => {
         useEffect(() => {
             const token = localStorage.getItem('Authorization');
             setLoggedIn(!!token);
+            setLoggedOut(!token);
         }, []);
         //토큰 검증 로직
         useEffect(() => {
@@ -274,6 +397,7 @@ const Home = () => {
                                         localStorage.removeItem('userName');
                                         alert("Login Timeout");
                                         islogin = false;
+                                        home();
                                     } else {
                                         throw new Error('Logout Fail');
                                     }
@@ -285,6 +409,7 @@ const Home = () => {
                     }
                 }
                 setLoggedIn(islogin);
+                setLoggedOut(!islogin);
             };
 
             verifyToken();
@@ -305,6 +430,8 @@ const Home = () => {
                     localStorage.removeItem('userName');
                     alert("Logout Success");
                     setLoggedIn(false);
+                    setLoggedOut(true);
+                    home();
                 } else {
                     throw new Error('Logout Fail');
                 }
@@ -312,6 +439,7 @@ const Home = () => {
                 alert("Logout Fail");
             }
         };
+
 
         const CameraControl = ({targetPosition, cameraPosition}) => {
             const {camera} = useThree();
@@ -327,15 +455,31 @@ const Home = () => {
 
             useFrame(() => {
                     if (target.current && position.current) {
+                        const distance = camera.position.distanceTo(target.current);
+                        // 카메라 이동률을 거리에 따라 부드럽게 줄이는 식을 만듭니다.
+                        let moveSpeed = 0.07;
+                        if (distance < 10) {
+                            moveSpeed = 0.02;
+                        }
                         if (!isAtInitialPosition) {
                             const EarthPosition = new THREE.Vector3(0, 0, 3);
+                            const MypagePosition = new THREE.Vector3(0, -60, -30);
                             if (position.current.z == EarthPosition.z) {
                                 camera.position.lerp(target.current, 0.06);
                                 camera.lookAt(position.current);
-                                console.log(camera.position.distanceTo(target.current));
                                 if (camera.position.distanceTo(target.current) < 0.05) {
-                                    console.log("loginzoom : " + isLoginZoom);
-                                    console.log("SignUpZoom : " + isSignUpZoom);
+                                    setLoginZoom(0);
+                                    setIsAtInitialPosition(true);
+                                    setMouseLock(false);
+                                } else {
+                                    setIsAtInitialPosition(false);
+                                }
+
+                            } else if (position.current.y == MypagePosition.y && position.current.z == MypagePosition.z) {
+                                camera.position.lerp(target.current, 0.03);
+                                camera.lookAt(position.current);
+                                if (camera.position.distanceTo(target.current) < 2.0000000000010001) {
+                                    setMyPageDiv(true);
                                     setLoginZoom(0);
                                     setIsAtInitialPosition(true);
                                     setMouseLock(false);
@@ -343,12 +487,12 @@ const Home = () => {
                                     setIsAtInitialPosition(false);
                                 }
                             } else {
-                                camera.position.lerp(target.current, 0.03);
+                                // 이동률에 따라 카메라를 이동시키고 목표를 바라봅니다.
+                                camera.position.lerp(target.current, 0.025);
                                 camera.lookAt(position.current);
-                                console.log(camera.position.distanceTo(target.current))
-                                if (camera.position.distanceTo(target.current) <= 3.841278) {
-                                    console.log("loginzoom : " + isLoginZoom);
-                                    console.log("SignUpZoom : " + isSignUpZoom);
+                                if (camera.position.distanceTo(target.current) < 2.1) {
+
+                                    // 카메라가 움직임이 거의 멈췄다면 실행되는 조건문을 작성합니다.
                                     if (isLoginZoom) {
                                         setLoginDiv(true);
                                     }
@@ -356,7 +500,6 @@ const Home = () => {
                                     if (isSignUpZoom) {
                                         setSignUpDiv(true);
                                     }
-
                                     setLoginZoom(2);
                                     setIsAtInitialPosition(true);
                                     setMouseLock(false);
@@ -364,6 +507,7 @@ const Home = () => {
                                     setIsAtInitialPosition(false);
                                 }
                             }
+
                         }
                     }
                 }
@@ -387,18 +531,22 @@ const Home = () => {
             if (isLoginZoom) {
                 return null;
             }
+            setButtonText("LOGIN");
             setTargetPosition(new THREE.Vector3(-35.147, 0, -63));
             setCameraPosition(new THREE.Vector3(-30, 0, -60));
             setZoom(1.5);
             setMaxZoom(2);
             setIsLoginZoom(true);
             setIsSignUpZoom(false);
+            setIsMapageZoom(false);
             setLoginZoom(0);
             setMainCamera(new THREE.Vector3(-30, 0, -60));
             setIsAtInitialPosition(false);
             setMouseLock(true);
 
             setSignUpDiv(false);
+            setMyPageDiv(false);
+
         };
         const signup = () => {
             if (isSignUpZoom) {
@@ -407,6 +555,9 @@ const Home = () => {
             setSignUsername('');
             setSignPassword('');
             setSignEmail('');
+            setSignuserNickName('');
+            setSignuserNationality("");
+            setSignuserPhone("");
             setIdCheckError(false);
             setEmailCheckError(false);
             setIdCheckError2(false);
@@ -418,6 +569,7 @@ const Home = () => {
             setZoom(1.5);
             setMaxZoom(2);
             setIsSignUpZoom(true);
+            setIsMapageZoom(false);
             setIsLoginZoom(false);
             setLoginZoom(0);
             setMainCamera(new THREE.Vector3(30, 0, -60));
@@ -425,17 +577,38 @@ const Home = () => {
             setMouseLock(true);
 
             setLoginDiv(false);
+            setMyPageDiv(false);
         };
-        const home = () => {
-            if (!isSignUpZoom && !isLoginZoom) {
+        const mypage = () => {
+            if (isMapageZoom) {
                 return null;
             }
-            setTargetPosition(new THREE.Vector3(0, 0, 6));
+            setTargetPosition(new THREE.Vector3(0, -67, -30));
+            setCameraPosition(new THREE.Vector3(0, -60, -30));
+            setZoom(1.5);
+            setMaxZoom(4);
+            setIsMapageZoom(true);
+            setIsLoginZoom(false);
+            setIsSignUpZoom(false);
+            setLoginZoom(0);
+            setMainCamera(new THREE.Vector3(0, -60, -30));
+            setIsAtInitialPosition(false);
+            setMouseLock(true);
+
+            setSignUpDiv(false);
+            setLoginDiv(false);
+        }
+        const home = () => {
+            if (!isSignUpZoom && !isLoginZoom && !isMapageZoom) {
+                return null;
+            }
+            setTargetPosition(new THREE.Vector3(0, 1.6, 6));
             setCameraPosition(new THREE.Vector3(0, 0, 3));
             setZoom(1.5);
             setMaxZoom(4);
             setIsLoginZoom(false);
             setIsSignUpZoom(false);
+            setIsMapageZoom(false);
             setLoginZoom(0);
             setMainCamera(new THREE.Vector3(0, 0, 3));
             setIsAtInitialPosition(false);
@@ -443,28 +616,59 @@ const Home = () => {
 
             setSignUpDiv(false);
             setLoginDiv(false);
+            setMyPageDiv(false);
         };
+
+        function Fallback() {
+            return (
+                <>
+                    <div className={"loading"}>
+                        <div className={"loading_2"}>
+                            <p className={"loading_text"}>Loading ...</p>
+                            <div className="spinner">
+                                <div className="spinner-text"></div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
+        }
 
         return (
             <div>
                 <div className={"fullScreen"}>
-                    <CanvasContainer>
-                        {/* <TopSection /> */}
-                        <Canvas>
-                            <Suspense fallback={null}>
+                    <img onClick={home} className={"logo_main"} src={Logo_no_text}></img>
+                    <img onClick={home} className={"logo_main_text"} src={Logo_text}></img>
+                    <Suspense fallback={<Fallback/>}>
+                        <CanvasContainer>
+                            <Canvas>
                                 <CameraControl targetPosition={targetPosition} cameraPosition={cameraPosition}/>
-                                <Earth mainCamera={mainCamera}
-                                       zoom={zoom}
-                                       maxZoom={maxZoom}
-                                       isLoginZoom={isLoginZoom}
-                                       LoginZoom={LoginZoom}
-                                       mouseLock={mouseLock}
-                                       loggedIn={loggedIn}
-                                ></Earth>
-                            </Suspense>
-                        </Canvas>
-                    </CanvasContainer>
-                    <LoginDivStyled visible={LoginDiv}>
+                                <Earth
+                                    mainCamera={mainCamera}
+                                    zoom={zoom}
+                                    maxZoom={maxZoom}
+                                    isLoginZoom={isLoginZoom}
+                                    LoginZoom={LoginZoom}
+                                    mouseLock={mouseLock}
+                                    loggedIn={loggedIn}
+                                    loggedOut={loggedOut}
+                                    isMapageZoom={isMapageZoom}
+                                />
+                            </Canvas>
+                        </CanvasContainer>
+                    </Suspense>
+                    <LoginDivStyled visible={MyPageDiv ? "visible" : ""}>
+                        {/* Content inside the loginDiv */}
+                        <MyPage
+                            MyPageDiv={MyPageDiv}
+                            onPasswordChange={onPasswordChange}/>
+                    </LoginDivStyled>
+                    {/*<LoginDivStyled visible={isPasswordChangeDiv ? "visible" : ""} ref={passwordChangeDivRef}>*/}
+                    <LoginDivStyled visible={isPasswordChangeDiv ? "visible" : ""} ref={passwordChangeDivRef}>
+                        {/* Content inside the loginDiv */}
+                        <PasswordChange isPasswordChangeDiv={isPasswordChangeDiv}></PasswordChange>
+                    </LoginDivStyled>
+                    <LoginDivStyled visible={LoginDiv ? "visible" : ""}>
                         {/* Content inside the loginDiv */}
                         <div className={"loginDiv"}>
                             <div className={"loginDiv_2"}>
@@ -492,10 +696,10 @@ const Home = () => {
                                             onFocus={resetButton}
                                         />
                                     </div>
-                                    <div className={"login_btn"}>
+                                    <div className={"login_btn"} id={"id_Login_BTN"}>
                                         <button
                                             type="submit"
-                                            className={buttonText === "ID or PASSWORD error" ? "error_text" : "no_error_text"}>
+                                            className={buttonText === "ID OR PASSWORD ERROR" ? "error_text" : "no_error_text"}>
                                             {buttonText}
                                         </button>
                                     </div>
@@ -504,9 +708,9 @@ const Home = () => {
                             </div>
                         </div>
                     </LoginDivStyled>
-                    <LoginDivStyled visible={SignUpDiv}>
+                    <LoginDivStyled visible={SignUpDiv ? "visible" : ""}>
                         {/* Content inside the loginDiv */}
-                        <div className={"loginDiv"}>
+                        <div className={"signDiv"}>
                             <div className={"signupDiv_2"}>
                                 <form onSubmit={handleSubmitSignUp}>
                                     <div className={"loginForm"} id={"id_ID"}>
@@ -520,8 +724,10 @@ const Home = () => {
                                         <button
                                             disabled={isIdCheckDisabled}
                                             type={"button"}
-                                            onClick={idCheck}>Check</button>
-                                        <p className={"Text_sign"}>At least 7 characters consisting of English and numbers</p>
+                                            onClick={idCheck}>Check
+                                        </button>
+                                        <p className={"Text_sign"}>7 to 10 characters consisting of English letters and
+                                            numbers</p>
                                     </div>
                                     <div className={"loginForm"} id={"id_PWD"}>
                                         <input
@@ -533,26 +739,79 @@ const Home = () => {
                                         />
                                         <p className={PasswordCheck === 'At least 8 characters consisting of English and numbers, including 2 special characters' ?
                                             "Text_sign" : PasswordCheck === "Available PASSWORD" ?
-                                                "Text_sign" : "Text_sign_Error"
+                                                "Text_sign" : "Text_sign_Error_sign"
                                         }>{PasswordCheck}</p>
                                     </div>
                                     <div className={"loginForm"} id={"id_EMAIL"}>
                                         <input
                                             className={emailCheckError ? "inputFromText2" : emailCheckError2 ? "NoinputFromText"
-                                            : "emptyFromText"}
+                                                : "emptyFromText"}
                                             placeholder={"Please enter your EMAIL"}
                                             type='text'
                                             value={SignuserEmail}
                                             onChange={handleEmailChange}
                                         />
                                     </div>
-                                    <div className={"login_btn"}>
+                                    <div className={"loginForm"} id={"id_NINKNAME"}>
+                                        <input
+                                            className={NickNameCheckError ? "yesIDinput2" : NickNameCheckError2 ? "noIDinput2" : "emptyID2"}
+                                            placeholder={"Please enter your NICKNAME"}
+                                            type='text'
+                                            value={SignuserNickName}
+                                            onChange={handleNickNameChange}
+                                        />
+                                        <button
+                                            disabled={isNickNameCheckError}
+                                            type={"button"}
+                                            onClick={NickNameCheck}>Check
+                                        </button>
+                                        <p className={"Text_sign"}>
+                                            Consists of 10 characters or less, with or without English or numbers</p>
+                                    </div>
+                                    <div className={"loginForm"} id={"id_NATIONALITY"}>
+                                        <div className="custom_select_wrapper">
+                                            <select className={"custom_select"} onChange={handleCountryChange}
+                                                    value={SignuserNationality}>
+                                                <option value="" hidden disabled>Please select a COUNTRY</option>
+                                                <option value="KR">KR</option>
+                                                <option value="US">US</option>
+                                                <option value="CA">CA</option>
+                                                {/* 캐나다 추가 */}
+                                                <option value="JP">JP</option>
+                                                <option value="CN">CN</option>
+                                                <option value="PH">PH</option>
+                                                {/* 필리핀 추가 */}
+                                                <option value="RU">RU</option>
+                                                {/* 러시아 추가 */}
+                                                <option value="TW">TW</option>
+                                                {/* 대만 추가 */}
+                                                <option value="UA">UA</option>
+                                                {/* 우크라이나 추가 */}
+                                                <option value="AU">AU</option>
+                                                {/* 호주 추가 */}
+                                                <option value="IT">IT</option>
+                                                {/* 이탈리아 추가 */}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className={"loginForm"} id={"id_PHONE"}>
+                                        <input
+                                            className={phoneCheckError ? "inputFromText3" : phoneCheckError2 ? "NoinputFromText2"
+                                                : "emptyFromText2"}
+                                            placeholder={"Please enter your PHONE"}
+                                            type='text'
+                                            value={SignuserPhone}
+                                            onChange={handlePhoneChange}
+                                        />
+                                    </div>
+                                    <div className={"login_btn"} id={"id_SignUp_BTN"}>
                                         <button
                                             className={"SignUpBtn"}
                                             type='submit'
                                             disabled={PasswordCheck !== "Available PASSWORD"
-                                            || !IdCheckError || !emailCheckError
-                                        }>SignUp</button>
+                                                || !IdCheckError || !emailCheckError || !NickNameCheckError || SignuserNationality == "" || !phoneCheckError
+                                            }>SignUp
+                                        </button>
                                     </div>
                                 </form>
 
@@ -573,6 +832,10 @@ const Home = () => {
                             </li>
                             {loggedIn ? (
                                 <>
+                                    <li className="menu_li">
+                                        <a className="menu_a" id="menu_a2" onClick={mypage}>MyPage
+                                        </a>
+                                    </li>
                                     <li className="menu_li">
                                         <a className="menu_a" id="menu_a2" onClick={logout}>Logout
                                         </a>
