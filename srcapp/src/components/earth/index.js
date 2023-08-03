@@ -15,8 +15,6 @@ import SunMap from "../../assets/textures/sun.jpg";
 
 export function Earth(props) {
     const mainCamera = props.mainCamera;
-    const minzoom = props.zoom;
-    const maxzoom = props.maxZoom;
     const mouseLock = props.mouseLock;
     const LoginZoom = props.LoginZoom;
     const loggedIn = props.loggedIn;
@@ -52,9 +50,10 @@ export function Earth(props) {
     const mouse = new THREE.Vector2();
     const raycaster = new THREE.Raycaster();
     const {camera} = useThree(); // 카메라 객체 가져오기
-    const { scene } = useThree();
+    const {scene} = useThree();
     //원 배열에 담기 (삭제 기능)
     const [circles, setCircles] = useState([]);
+
 
     useEffect(() => {
         if (loggedIn) {
@@ -72,16 +71,6 @@ export function Earth(props) {
     //     }, 5000);
     // }, []);
 
-    useEffect(() => {
-        if (selectedCity) {
-            if (zoomIn) {
-                selectedCity.material.color.set("#cb3434");
-            } else if (!zoomIn) {
-                selectedCity.material.color.set("indianred");
-            }
-        }
-    }, [selectedCity]);
-
     // 지구 회전 코드
     useFrame(({clock}) => {
         // if (!earthR) {
@@ -96,8 +85,23 @@ export function Earth(props) {
     });
 
     useFrame(({camera}) => {
+        if (selectedCity) {
+            if (zoomIn) {
+                selectedCity.material.color.set("#cb3434");
+            } else if (!zoomIn) {
+                selectedCity.material.color.set("indianred");
+            }
+        }
+        //로그아웃 시 줌 해제
         if (loggedOut) {
             setZoomIn(false);
+        }
+        //마이페이지 클릭 시 줌 해제
+        if (isMapageZoom) {
+            setClickedCity(null);
+            setSelectedCity(null);
+            setZoomIn(false);
+            setTarget(null);
         }
         // 카메라 위치 변경
         if (zoomIn && target) {
@@ -109,18 +113,24 @@ export function Earth(props) {
                 setIsAtInitialPosition(false);
             }
         } else {
-            setearthR(false);
-            setZoomInLock(false);
-            if (initialCameraPosition) {
-                if (!isAtInitialPosition) {
-                    setearthR(true);
-                    setZoomInLock(true);
-                    camera.position.lerp(initialCameraPosition, 0.03);
-                    camera.lookAt(new THREE.Vector3(0, 0, 3));
-                    if (camera.position.distanceTo(initialCameraPosition) < 0.05) {
-                        setIsAtInitialPosition(true);
-                    } else {
-                        setIsAtInitialPosition(false);
+            if(isMapageZoom){
+                setearthR(false);
+                setZoomInLock(false);
+                setIsAtInitialPosition(true);
+            }else {
+                setearthR(false);
+                setZoomInLock(false);
+                if (initialCameraPosition) {
+                    if (!isAtInitialPosition) {
+                        setearthR(true);
+                        setZoomInLock(true);
+                        camera.position.lerp(initialCameraPosition, 0.03);
+                        camera.lookAt(new THREE.Vector3(0, 0, 3));
+                        if (camera.position.distanceTo(initialCameraPosition) < 0.05) {
+                            setIsAtInitialPosition(true);
+                        } else {
+                            setIsAtInitialPosition(false);
+                        }
                     }
                 }
             }
@@ -201,7 +211,7 @@ export function Earth(props) {
                 />
             </mesh>
             <mesh position={[0, -60, -30]}>
-                <torusGeometry args={[1.75, 0.18, 16, 100]} />
+                <torusGeometry args={[1.75, 0.18, 16, 100]}/>
                 <meshPhongMaterial
                     map={cloudsMap2}
                     opacity={0.3}
@@ -211,7 +221,7 @@ export function Earth(props) {
                 />
             </mesh>
             <mesh position={[0, -60, -30]}>
-                <torusGeometry args={[1.75, 0.1, 16, 100]} />
+                <torusGeometry args={[1.75, 0.1, 16, 100]}/>
                 <meshPhongMaterial
                     color={"black"}
                     depthWrite={true}
@@ -261,17 +271,14 @@ export function Earth(props) {
             </group>
 
 
-
             <OrbitControls
                 enableRotate={mouseLock ? !mouseLock : !zoomInLock}
                 enablePan={false}
                 enableZoom={mouseLock ? !mouseLock : !zoomInLock}
                 zoomSpeed={0.6}
                 panSpeed={0.5}
-                // minDistance={LoginZoom == 2 ? 2.12 : isMapageZoom ? 2.200505: minzoom} // 최소 줌 거리를 원하는 값으로 설정하십시오.
-                // maxDistance={LoginZoom == 2 ? 2.12 : isMapageZoom? 2.200505 : maxzoom} // 최대 줌 거리를 원하는 값으로 설정하십시오.
-                minDistance={LoginZoom == 2 ? 2 : isMapageZoom? 2 : 1.5}
-                maxDistance={LoginZoom == 2 ? 5 : isMapageZoom? 5 : 4}
+                minDistance={LoginZoom == 2 ? 2 : isMapageZoom ? 2 : 1.5}
+                maxDistance={LoginZoom == 2 ? 5 : isMapageZoom ? 5 : 4}
                 target={mainCamera}
             />
         </>

@@ -1,150 +1,261 @@
 import React, {useEffect, useRef, useState} from "react";
-import Logo from "../img/logo.png";
+import Profile from "../img/profile.png";
 import "./css/Home.css";
+import home from "./Home";
 
 
-const MyPage = ({onPasswordChange, MyPageDiv}) => {
-    //마이페이지
-    const [MypageuserName, setMypageuserName] = useState('');
-    const [MypageuserNickName, setMypageuserNickName] = useState('');
-    const [MypageuserNationality, setMypageuserNationality] = useState('');
-    const [MypageuserEmail, setMypageuserEmail] = useState('');
-    const [MypageuserPhone, setMypageuserPhone] = useState('');
-    const [textAreaValue, setTextAreaValue] = useState("");
-    const [messageButtonText, setMessageButtonText] = useState("Change Message");
+const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
+        //마이페이지
+        const [MypageuserName, setMypageuserName] = useState('');
+        const [MypageuserNickName, setMypageuserNickName] = useState('');
+        const [MypageuserNationality, setMypageuserNationality] = useState('');
+        const [MypageuserEmail, setMypageuserEmail] = useState('');
+        const [MypageuserPhone, setMypageuserPhone] = useState('');
+        const [textAreaValue, setTextAreaValue] = useState("");
+        const [MypageuserProfileName, setMypageuserProfileName] = useState("");
+        const [messageButtonText, setMessageButtonText] = useState("Change Message");
+        const [profileButtonText, setProfileButtonText] = useState("Change Picture");
 
-    const [isPasswordChangeDiv, setisPasswordChangeDiv] = useState(false);
+        const [isPasswordChangeDiv, setisPasswordChangeDiv] = useState(false);
 
-    //유저 정보 가져오는 로직
-    const userInfo = async () => {
-        const response = await fetch('/api/v1/user', {
-            method: 'GET',
-            headers: {
-                'Authorization': localStorage.getItem('Authorization'),
-            },
-        });
+        const userInfo = async (retry = true) => {
+            setPreviewImage(null);
+            setMypageuserName("loading...");
+            setMypageuserEmail("loading...");
+            setMypageuserPhone("loading...");
+            setMypageuserNationality("loading...");
+            setMypageuserNickName("loading...");
+            setTextAreaValue("loading...");
+            setMypageuserProfileName(null);
+            try {
+                const response = await fetch('/api/v1/user', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': localStorage.getItem('Authorization'),
+                        'userName': localStorage.getItem('userName'),
+                    },
+                });
 
-        if (response.ok) {
-            const data = await response.json(); // 데이터를 JSON 객체로 변환
-            setMypageuserName(data.user.userName);
-            setMypageuserEmail(data.user.userEmail);
-            setMypageuserPhone(data.user.userPhone);
-            setMypageuserNationality(data.user.userNationality);
-            setMypageuserNickName(data.user.userNickName);
-            setTextAreaValue(data.user.userMessage);
-        } else {
+                const accessToken = response.headers.get('Authorization');
+                if (accessToken != null) {
+                    localStorage.setItem('Authorization', accessToken);
+                }
+                if (response.headers.get('refresh') != null) {
+                    alert("Login Timeout");
+                    logoutApi(true); // Home.js에 이벤트 전달
+                    return;
+                }
+                if (response.ok) {
+                    const data = await response.json(); // 데이터를 JSON 객체로 변환
+                    setMypageuserName(data.user.userName);
+                    setMypageuserEmail(data.user.userEmail);
+                    setMypageuserPhone(data.user.userPhone);
+                    setMypageuserNationality(data.user.userNationality);
+                    setMypageuserNickName(data.user.userNickName);
+                    setTextAreaValue(data.user.userMessage);
+                    setMypageuserProfileName(data.user.userProfileName);
+                }
+            } catch (error) {
+                if (retry) {
+                    await userInfo(false);
+                }
+            }
+        };
+
+        useEffect(() => {
+            if (MyPageDiv) {
+                userInfo();
+            }
+        }, [MyPageDiv]);
+
+//패스워드 수정 버튼 클릭 시 동작
+        const passwordChangeDiv = () => {
+            setisPasswordChangeDiv(true);
+            onPasswordChange(true); // Home.js에 이벤트 전달
         }
-    };
 
-    useEffect(() => {
-        if(MyPageDiv){
-            userInfo();
-        }
-    }, [MyPageDiv]);
+//textarea 100자 이내 입력
 
-    useEffect(() => {
-       console.log(isPasswordChangeDiv);
-    }, [isPasswordChangeDiv]);
+        const handleTextAreaChange = (e) => {
+            const currentText = e.target.value;
 
-    //패스워드 수정 버튼 클릭 시 동작
-    const passwordChangeDiv = () => {
-        setisPasswordChangeDiv(true);
-        onPasswordChange(true); // Home.js에 이벤트 전달
-    }
+            if (currentText.length > 100) {
+                return;
+            }
 
-    //textarea 100자 이내 입력
-    const handleTextAreaChange = (e) => {
-        const currentText = e.target.value;
+            setTextAreaValue(currentText);
+        };
 
-        if (currentText.length > 100) {
-            return;
-        }
+        // 이미지 미리보기 상태를 추가합니다.
+        const [previewImage, setPreviewImage] = useState(Profile);
+        const [selectedFile, setSelectedFile] = useState(null);
+        // 이미지 선택 처리 함수
+        const handleImageChange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setMypageuserProfileName(null);
+                setPreviewImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+            setSelectedFile(file);
+        };
 
-        setTextAreaValue(currentText);
-    };
-    //사용자 상태 메시지 변경 로직
-    const userMessageChange = async () => {
-        const response = await fetch('/api/v1/user/messageChange', {
-            method: 'PUT',
-            headers: {
-                'Authorization': localStorage.getItem('Authorization'),
-            },
-            body: textAreaValue, // JSON.stringify 제거
-        });
+        // 이미지 미리보기 처리 함수
+        const handleClickImage = () => {
+            document.getElementById("imageInput").click();
+        };
 
-        if (response.ok) {
-            setMessageButtonText("Change Success");
-        } else {
-            setMessageButtonText("Change Fail");
-        }
-        // 1.5초 후에 버튼 텍스트를 되돌립니다.
-        setTimeout(() => {
-            setMessageButtonText("Change Message");
-        }, 1500);
-    };
+        const uploadImage = async (retry = true) => {
+            try {
+                if (previewImage === Profile) {
+                    alert("Please select an image to upload");
+                    return;
+                }
 
-    return (
-        <div className={"myPageDiv"}>
-            <div className={"myPageDiv2"}>
-                <div className={"myPageDiv_profile"}>
-                    <img className={"myPageDiv_profile_img"} src={Logo}></img>
-                </div>
-                <div className={"myPageDiv_profile_btn"}>
-                    <button className={"myPageDiv_profile_btn2"}>Change Picture</button>
-                </div>
-            </div>
-            <div className={"myPageDiv3"}>
-                <div className={"myPageDiv_info_1"}>
-                    <div className={"myPageDiv_info_1_1"}>
-                        <h5 className={"myPageDiv_info_1_text"}>ID</h5>
-                        <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
-                               value={MypageuserName}/>
-                        <h5 className={"myPageDiv_info_2_text"}>NICKNAME</h5>
-                        <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
-                               value={MypageuserNickName}/>
-                        <h5 className={"myPageDiv_info_3_text"}>NATIONALITY</h5>
-                        <input type={"text"} className={"myPageDiv_info_1_1_input"} readOnly={true}
-                               value={MypageuserNationality}/>
+                let formData = new FormData();
+                formData.append("imageFile", selectedFile);
+
+                const response = await fetch("/api/v1/user/uploadImage", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": localStorage.getItem("Authorization"),
+                        'userName': localStorage.getItem('userName'),
+                    },
+                    body: formData,
+                });
+
+                const accessToken = response.headers.get('Authorization');
+                if (accessToken != null) {
+                    localStorage.setItem('Authorization', accessToken);
+                }
+                if (response.headers.get('refresh') != null) {
+                    alert("Login Timeout");
+                    logoutApi(true); // Home.js에 이벤트 전달
+                    return;
+                }
+                const data = await response.text(); // 데이터를 JSON 객체로 변환
+
+
+                if (response.ok) {
+                    if(data == "image upload"){
+                        console.log(data);
+                        setProfileButtonText("Change Success");
+                    }else {
+                        if (retry) {
+                            await uploadImage(false);
+                        }
+                    }
+                }
+                setTimeout(() => {
+                    setProfileButtonText("Change Picture");
+                }, 1500);
+            } catch (error) {
+                if (retry) {
+                    await uploadImage(false);
+                }
+            }
+        };
+
+//사용자 상태 메시지 변경 로직
+        const userMessageChange = async () => {
+            const response = await fetch('/api/v1/user/messageChange', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': localStorage.getItem('Authorization'),
+                },
+                body: textAreaValue, // JSON.stringify 제거
+            });
+
+            if (response.ok) {
+                setMessageButtonText("Change Success");
+            } else {
+                setMessageButtonText("Change Fail");
+            }
+            // 1.5초 후에 버튼 텍스트를 되돌립니다.
+            setTimeout(() => {
+                setMessageButtonText("Change Message");
+            }, 1500);
+        };
+
+        return (
+            <div className={"myPageDiv"}>
+                <div className={"myPageDiv2"}>
+                    <div className={"myPageDiv_profile"}>
+                        <img
+                            className={"myPageDiv_profile_img"}
+                            src={MypageuserProfileName ? "/upload/"+ MypageuserProfileName : previewImage ? previewImage :Profile}
+                            onClick={handleClickImage}
+                        />
+                        <input
+                            type="file"
+                            id="imageInput"
+                            accept="image/*"
+                            style={{display: "none"}}
+                            onChange={handleImageChange}
+                        />
+
+                    </div>
+                    <div className={"myPageDiv_profile_btn"}>
+                        <button
+                            className={profileButtonText == 'Change Picture' ? "myPageDiv_profile_btn2" : "myPageDiv_profile_btn3"}
+                            onClick={uploadImage}>{profileButtonText}</button>
                     </div>
                 </div>
-                <div className={"myPageDiv_info_2"}>
-                    <div className={"myPageDiv_info_1_1"}>
-                        <h5 className={"myPageDiv_info_1_text"}>EMAIL</h5>
-                        <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
-                               value={MypageuserEmail}/>
-                        <h5 className={"myPageDiv_info_2_text"}>PHONE</h5>
-                        <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
-                               value={MypageuserPhone}/>
-                        <div>
-                            <button className={"myPageDiv_info_1_btn"} onClick={passwordChangeDiv}>Change
-                                Password
-                            </button>
+                <div className={"myPageDiv3"}>
+                    <div className={"myPageDiv_info_1"}>
+                        <div className={"myPageDiv_info_1_1"}>
+                            <h5 className={"myPageDiv_info_1_text"}>ID</h5>
+                            <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
+                                   value={MypageuserName}/>
+                            <h5 className={"myPageDiv_info_2_text"}>NICKNAME</h5>
+                            <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
+                                   value={MypageuserNickName}/>
+                            <h5 className={"myPageDiv_info_3_text"}>NATIONALITY</h5>
+                            <input type={"text"} className={"myPageDiv_info_1_1_input"} readOnly={true}
+                                   value={MypageuserNationality}/>
+                        </div>
+                    </div>
+                    <div className={"myPageDiv_info_2"}>
+                        <div className={"myPageDiv_info_1_1"}>
+                            <h5 className={"myPageDiv_info_1_text"}>EMAIL</h5>
+                            <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
+                                   value={MypageuserEmail}/>
+                            <h5 className={"myPageDiv_info_2_text"}>PHONE</h5>
+                            <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
+                                   value={MypageuserPhone}/>
+                            <div>
+                                <button className={"myPageDiv_info_1_btn"} onClick={passwordChangeDiv}>Change
+                                    Password
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div className={"myPageDiv4"}>
-                <div className={"myPageDiv_Message_div"}>
-                    <div className={"myPageDiv_Message_text"}>
+                <div className={"myPageDiv4"}>
+                    <div className={"myPageDiv_Message_div"}>
+                        <div className={"myPageDiv_Message_text"}>
                                         <textarea className={"myPageDiv_Message_textarea"}
                                                   onChange={handleTextAreaChange}
                                                   value={textAreaValue}
                                                   placeholder={"Please enter within 100 characters"}
                                         >
                                         </textarea>
-                    </div>
-                    <div className={"myPageDiv_Message_btn_div"}>
-                        <button
-                            className={messageButtonText == 'Change Message' ? "myPageDiv_Message_btn" : "myPageDiv_Message_btn2"}
-                            onClick={userMessageChange}>
-                            {messageButtonText}
-                        </button>
+                        </div>
+                        <div className={"myPageDiv_Message_btn_div"}>
+                            <button
+                                className={messageButtonText == 'Change Message' ? "myPageDiv_Message_btn" : "myPageDiv_Message_btn2"}
+                                onClick={userMessageChange}>
+                                {messageButtonText}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    );
-};
+        );
+    }
+;
 
 
 export default MyPage;
