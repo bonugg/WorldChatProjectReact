@@ -125,16 +125,21 @@ const Home = () => {
         const onPasswordChange = (newValue) => {
             setIsPasswordChangeDiv(newValue);
             setIsPasswordChangeDiv2(true);
-            console.log(isPasswordChangeDiv2);
         };
         const isPasswordChangeDivClose = (newValue) => {
             setIsPasswordChangeDiv(newValue);
             setIsPasswordChangeDiv2(true);
-            console.log(isPasswordChangeDiv2);
         };
 
         const logoutApi = (newValue) => {
             if(newValue){
+                logout();
+            }
+        };
+        const logoutApi2 = (newValue) => {
+            if(newValue){
+                setIsPasswordChangeDiv(false);
+                setIsPasswordChangeDiv2(true);
                 logout();
             }
         };
@@ -441,7 +446,7 @@ const Home = () => {
                 if (response.ok) {
                     localStorage.removeItem('Authorization');
                     localStorage.removeItem('userName');
-                    alert("Logout Success");
+                    alert("Logout");
                     setLoggedIn(false);
                     setLoggedOut(true);
                     home();
@@ -689,7 +694,7 @@ const Home = () => {
                                 <PasswordChange
                                     isPasswordChangeDiv={isPasswordChangeDiv}
                                     isPasswordChangeDivClose={isPasswordChangeDivClose}
-                                    logoutApi={logoutApi}
+                                    logoutApi2={logoutApi2}
                                 >
                                 </PasswordChange>
                             </DivStyled>

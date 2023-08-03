@@ -491,6 +491,19 @@ a {
     transition: all 0.25s ease-in-out;
     margin-top: 1px;
 }
+.myPageDiv_profile_btn4{
+    width: 120px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 11px;
+    color: indianred;
+    background-color: black;
+    outline: none;
+    cursor: pointer;
+    border: 1px solid black;
+    transition: all 0.25s ease-in-out;
+    margin-top: 1px;
+}
 .myPageDiv_profile_btn2:hover{
     background-color: rgba(28, 28, 28, 0.8);
 }

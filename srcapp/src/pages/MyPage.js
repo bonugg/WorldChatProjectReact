@@ -13,6 +13,7 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
         const [MypageuserPhone, setMypageuserPhone] = useState('');
         const [textAreaValue, setTextAreaValue] = useState("");
         const [MypageuserProfileName, setMypageuserProfileName] = useState("");
+        const [MypageuserProfileOriginName, setMypageuserProfileOriginName] = useState("");
         const [messageButtonText, setMessageButtonText] = useState("Change Message");
         const [profileButtonText, setProfileButtonText] = useState("Change Picture");
 
@@ -20,6 +21,7 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
 
         const userInfo = async (retry = true) => {
             setPreviewImage(null);
+            setSelectedFile(null);
             setMypageuserName("loading...");
             setMypageuserEmail("loading...");
             setMypageuserPhone("loading...");
@@ -27,6 +29,7 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
             setMypageuserNickName("loading...");
             setTextAreaValue("loading...");
             setMypageuserProfileName(null);
+            setMypageuserProfileOriginName(null);
             try {
                 const response = await fetch('/api/v1/user', {
                     method: 'GET',
@@ -41,7 +44,6 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
                     localStorage.setItem('Authorization', accessToken);
                 }
                 if (response.headers.get('refresh') != null) {
-                    alert("Login Timeout");
                     logoutApi(true); // Home.js에 이벤트 전달
                     return;
                 }
@@ -54,6 +56,7 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
                     setMypageuserNickName(data.user.userNickName);
                     setTextAreaValue(data.user.userMessage);
                     setMypageuserProfileName(data.user.userProfileName);
+                    setMypageuserProfileOriginName(data.user.userProfileOrigin);
                 }
             } catch (error) {
                 if (retry) {
@@ -93,6 +96,28 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
         const handleImageChange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
+            // 파일 확장자 검사
+            const imageFileTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+            if (!imageFileTypes.includes(file.type)) {
+                setProfileButtonText("Not Image File");
+                setTimeout(() => {
+                    setProfileButtonText("Change Picture");
+                }, 1500);
+                return;
+            }
+
+            // 파일 크기 검사 (10MB 이상인 경우)
+            // 파일 크기 검사 (1000KB 이상인 경우)
+            const maxSizeInKB = 1000;
+            if (file.size > maxSizeInKB * 1024) {
+                setProfileButtonText("Over Capacity");
+                setTimeout(() => {
+                    setProfileButtonText("Change Picture");
+                }, 1500);
+                return;
+            }
+            
             const reader = new FileReader();
             reader.onloadend = () => {
                 setMypageuserProfileName(null);
@@ -109,8 +134,11 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
 
         const uploadImage = async (retry = true) => {
             try {
-                if (previewImage === Profile) {
-                    alert("Please select an image to upload");
+                if(selectedFile == null){
+                    setProfileButtonText("Same Picture");
+                    setTimeout(() => {
+                        setProfileButtonText("Change Picture");
+                    }, 1500);
                     return;
                 }
 
@@ -131,17 +159,15 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
                     localStorage.setItem('Authorization', accessToken);
                 }
                 if (response.headers.get('refresh') != null) {
-                    alert("Login Timeout");
                     logoutApi(true); // Home.js에 이벤트 전달
                     return;
                 }
+
                 const data = await response.text(); // 데이터를 JSON 객체로 변환
-
-
                 if (response.ok) {
                     if(data == "image upload"){
-                        console.log(data);
                         setProfileButtonText("Change Success");
+                        setSelectedFile(null);
                     }else {
                         if (retry) {
                             await uploadImage(false);
@@ -159,24 +185,42 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
         };
 
 //사용자 상태 메시지 변경 로직
-        const userMessageChange = async () => {
-            const response = await fetch('/api/v1/user/messageChange', {
-                method: 'PUT',
-                headers: {
-                    'Authorization': localStorage.getItem('Authorization'),
-                },
-                body: textAreaValue, // JSON.stringify 제거
-            });
+        const userMessageChange = async (retry = true) => {
+            try {
+                const response = await fetch('/api/v1/user/messageChange', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': localStorage.getItem('Authorization'),
+                        'userName': localStorage.getItem('userName'),
+                    },
+                    body: textAreaValue, // JSON.stringify 제거
+                });
 
-            if (response.ok) {
-                setMessageButtonText("Change Success");
-            } else {
-                setMessageButtonText("Change Fail");
+                const accessToken = response.headers.get('Authorization');
+                if (accessToken != null) {
+                    localStorage.setItem('Authorization', accessToken);
+                }
+                if (response.headers.get('refresh') != null) {
+                    logoutApi(true); // Home.js에 이벤트 전달
+                    return;
+                }
+
+                if (response.ok) {
+                    setMessageButtonText("Change Success");
+                } else {
+                    if (retry) {
+                        await userMessageChange(false);
+                    }
+                }
+                // 1.5초 후에 버튼 텍스트를 되돌립니다.
+                setTimeout(() => {
+                    setMessageButtonText("Change Message");
+                }, 1500);
+            }catch (error){
+                if (retry) {
+                    await userMessageChange(false);
+                }
             }
-            // 1.5초 후에 버튼 텍스트를 되돌립니다.
-            setTimeout(() => {
-                setMessageButtonText("Change Message");
-            }, 1500);
         };
 
         return (
@@ -199,7 +243,8 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
                     </div>
                     <div className={"myPageDiv_profile_btn"}>
                         <button
-                            className={profileButtonText == 'Change Picture' ? "myPageDiv_profile_btn2" : "myPageDiv_profile_btn3"}
+                            className={profileButtonText == 'Change Picture' ? "myPageDiv_profile_btn2" :
+                                profileButtonText == 'Change Success' ? "myPageDiv_profile_btn3" : "myPageDiv_profile_btn4"}
                             onClick={uploadImage}>{profileButtonText}</button>
                     </div>
                 </div>

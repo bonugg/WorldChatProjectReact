@@ -3,7 +3,7 @@ import Logo from "../img/logo.png";
 import "./css/Home.css";
 
 
-const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi}) => {
+const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi2}) => {
     //패스워드 변경
     const [userPwd, setUserPwd] = useState('');
     const [NewUserPwd, setNewUserPwd] = useState('');
@@ -94,8 +94,7 @@ const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi
                 localStorage.setItem('Authorization', accessToken);
             }
             if (response.headers.get('refresh') != null) {
-                alert("Login Timeout");
-                // logoutApi(true); // Home.js에 이벤트 전달
+                logoutApi2(true); // Home.js에 이벤트 전달
                 return;
             }
             if (response.ok) {

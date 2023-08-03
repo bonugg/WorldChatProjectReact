@@ -150,6 +150,8 @@ export function Earth(props) {
                 fade={true}
             />
 
+
+
             <mesh ref={cloudsRefMars} position={[-30, 0, -60]}>
                 <sphereGeometry args={[1.253, 47, 47]}/>
                 <meshPhongMaterial
