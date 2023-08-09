@@ -4,6 +4,7 @@ import NotFound from './pages/NotFound';
 import "./App.css";
 
 const App = () => {
+
     return (
             <Routes>
                 <Route index element={<Home />} />

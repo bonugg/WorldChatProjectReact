@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Noto+Sans+KR:wght@400;500&family=Orbit&family=Russo+One&display=swap');
+
+.friendsListDiv {
+    width: 450px;
+    height: 650px;
+    border-radius: 5px;
+    background-color: rgba(50, 50, 50, 0.5);
+    /*box-shadow: 0px 0px 10px 4px rgba(100, 100, 100, 0.7);*/
+}
+.nationally{
+    width: 100%;
+    height: 60px;
+    display: flex;
+    padding-left: 20px;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+}
+.nationally_text{
+    margin-left: 15px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+.flag{
+    opacity: 0.8;
+    width: 30px;
+    height: 30px;
+    margin-bottom: 5px;
+}
+.friendsList{
+    height: calc(100% - 60px);
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.friendsList_2{
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+    overflow-x: hidden;
+}
+.friendsList_2::-webkit-scrollbar {
+    background-color: #181818;
+    width: 8px;
+    height: 0px;
+    border-radius: 10px;
+}
+.friendsList_2::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+}
+
+.friendsList_2::-webkit-scrollbar-track {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+.friendsList_item_div{
+    width: 100%;
+    height: 90px;
+    margin-bottom: 10px;
+    padding: 0px 10px;
+    box-sizing: border-box;
+}
+.friendsList_item_div2{
+    background-color: rgba(50, 50, 50, 0.8);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+.friendsList_item_img{
+    width: 90px;
+    padding: 5px;
+    box-sizing: border-box;
+}
+.myPageDiv_profile_img2{
+    width: 100%;
+    height: 100%;
+    border-radius: 7px;
+    opacity: 0.8;
+}
+.friendsList_item_nickname{
+    width: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.7);
+}
+.friendsList_item_nickname_text{
+    text-align: center;
+    width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.friendsList_item_btn_div{
+    width: calc(100% - 190px);
+    height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.friendsList_item_btn{
+    min-width: 28% !important;
+    height: 40px !important;
+    background-color: rgba(0, 0, 0, 1) !important;
+    border: 1px solid black !important;
+    outline: none;
+    transition: all 0.25s ease-in-out;
+    cursor: pointer;
+    font-size: 10px !important;
+    font-family: 'Russo One', sans-serif !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    margin-right: 7px !important;
+    border-radius: 5px !important;
+}
+.friendsList_item_btn:hover{
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    color: rgba(255, 255, 255, 1) !important;
+}
+.friendsList_item_btn2{
+    min-width: 28% !important;
+    height: 40px !important;
+    background-color: rgba(17, 126, 0, 0.8) !important;
+    border: 1px solid rgba(17, 126, 0, 1) !important;
+    outline: none;
+    transition: all 0.25s ease-in-out;
+    cursor: pointer;
+    font-size: 10px !important;
+    font-family: 'Russo One', sans-serif !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    margin-right: 7px !important;
+    border-radius: 5px !important;
+}
+.friendsList_item_btn2:hover{
+    background-color: rgba(17, 126, 0, 0.3) !important;
+    border: 1px solid rgba(17, 126, 0, 0.5) !important;
+    color: rgba(255, 255, 255, 1);
+}

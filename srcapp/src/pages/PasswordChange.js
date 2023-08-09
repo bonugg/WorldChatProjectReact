@@ -1,6 +1,8 @@
 import React, {useEffect, useRef, useState} from "react";
 import Logo from "../img/logo.png";
+import Button from "@mui/material/Button";
 import "./css/Home.css";
+import "./css/PasswordChange.css";
 
 
 const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi2}) => {
@@ -174,11 +176,11 @@ const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi
                         value={userPwd}
                         onChange={handlePasswordChange}
                     />
-                    <button
+                    <Button
                         className={"passwordChangeDiv_btn"}
                         type={"button"}
                         onClick={PwdCheck}>Check
-                    </button>
+                    </Button>
                 </div>
                 <div className={"passwordChangeDiv_input_Form2"}>
                     <input
@@ -207,13 +209,13 @@ const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi
                     }>{NewPasswordCheckSame}</p>
                 </div>
                 <div className={"passwordChangeDiv_btn_submit_div"}>
-                    <button
+                    <Button
                         onClick={PwdSave}
                         className={"passwordChangeDiv_btn_submit"}
                         type='submit'
                         disabled={NewPasswordCheckSame != "Password Matching" || PasswordCheck != "Available PASSWORD" || !isPassword
                         }>Change Password
-                    </button>
+                    </Button>
                 </div>
             </div>
 
