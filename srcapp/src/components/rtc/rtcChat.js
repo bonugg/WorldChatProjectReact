@@ -15,8 +15,8 @@ const ChatRoom = () => {
     console.log("wss://" + host + "9002" + "/signal")
     host = host.slice(0,-4);
     console.log("wss://" + host + "9002" + "/signal")
-    const socket = new WebSocket("wss://" + host + "9002" + "/signal");
-    // const socket = new WebSocket("wss://localhost:9002/signal");
+    // const socket = new WebSocket("wss://" + host + "9002" + "/signal");
+    const socket = new WebSocket("wss://localhost:9002/signal");
 
     //유저 이름 임의 설정 -> 로그인 연동 후 해당 사용자의 고유값으로 변경 예정!
     const localUserName = Math.random();
