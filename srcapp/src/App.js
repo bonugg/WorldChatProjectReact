@@ -8,6 +8,8 @@ const App = () => {
             <Routes>
                 <Route index element={<Home />} />
                 <Route path="*" element={<NotFound />} />
+                <Route path="/randomTest" element={<RandomStart />} />
+                <Route path='/random/:randomRoomId' element={<RandomChat />} />
             </Routes>
     );
 };
