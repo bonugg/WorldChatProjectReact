@@ -119,7 +119,7 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
                 }, 1500);
                 return;
             }
-            
+
             const reader = new FileReader();
             reader.onloadend = () => {
                 setMypageuserProfileName(null);
@@ -292,7 +292,6 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
                                                   placeholder={"Please enter within 100 characters"}
                                         >
                                         </textarea>
-
                         </div>
                         <div className={"myPageDiv_Message_btn_div"}>
                             <Button

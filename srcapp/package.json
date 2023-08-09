@@ -52,6 +52,7 @@
     "three": "^0.154.0",
     "web-vitals": "^2.1.4",
     "websocket": "^1.0.34",
+    "@stomp/stompjs": "^7.0.0",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

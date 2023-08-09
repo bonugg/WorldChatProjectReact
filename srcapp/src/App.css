@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Noto+Sans+KR:wght@400;500&family=Orbit&family=Russo+One&display=swap');
 *{
   font-family: 'Russo One', sans-serif;
@@ -9,6 +8,7 @@
   /*font-family: 'Noto Sans KR', sans-serif;*/
   /*font-family: 'Orbit', sans-serif;*/
   /*font-family: 'Russo One', sans-serif;*/
+
 }
 
 .App-logo {
