@@ -200,7 +200,7 @@ const Message = ({ message }) => {
                 <Paper
                     variant="outlined"
                     sx={{
-                        p: 2,
+                        p: 1,
                         ml: me ? 1 : 0,
                         mr: me ? 0 : 1,
                         backgroundColor: me ? "primary.light" : "secondary.light",
