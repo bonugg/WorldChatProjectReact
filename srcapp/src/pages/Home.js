@@ -19,6 +19,7 @@ import MyPage from './MyPage';
 import FreindsList from './FreindsList';
 import PasswordChange from './PasswordChange';
 import CateChat from './CateChat';
+import ChatComponent from "../components/rtc/rtcChat";
 
 
 const CanvasContainer = styled.div`
@@ -150,6 +151,12 @@ const Home = () => {
         const [isPasswordChangeDiv2, setIsPasswordChangeDiv2] = useState(false);
         //패스워드 수정 창 외의 화면 클릭 시 상태
         const passwordChangeDivRef = useRef(null);
+
+        // rtc
+        const [showRtcChat, setShowRtcChat] = useState(false); // RtcChat 상태를 boolean으로 관리
+        const Rtc = () => {
+            setShowRtcChat(true); // RtcChat 상태를 true로 설정
+        }
 
         useEffect(() => {
             console.log(isPasswordChangeDiv2);
@@ -817,6 +824,12 @@ const Home = () => {
                                 </div>
                             </div>
                         </DivStyledMenu>
+
+                        {/*rtc*/}
+                        <DivStyledMenu visible={showRtcChat}>
+                            {showRtcChat && <ChatComponent/>} {/* RtcChat 상태가 true일 때 rtcChat 컴포넌트 렌더링 */}
+                        </DivStyledMenu>
+
                         <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
                             {/* Content inside the loginDiv */}
                             <div className={"signDiv"}>
@@ -887,18 +900,19 @@ const Home = () => {
                                                         value={SignuserNationality || ' '}
 
                                                 >
-                                                    <MenuItem className={"menu_li_select"} value={" "} disabled>Please select a COUNTRY</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value={" "} disabled>Please
+                                                        select a COUNTRY</MenuItem>
                                                     <MenuItem className={"menu_li_select"} value={"KR"}>KR</MenuItem>
                                                     <MenuItem className={"menu_li_select"} value={"US"}>US</MenuItem>
                                                     <MenuItem className={"menu_li_select"} value="CA">CA</MenuItem>
                                                     {/* 캐나다 추가 */}
                                                     <MenuItem className={"menu_li_select"} value="JP">JP</MenuItem>
                                                     <MenuItem className={"menu_li_select"} value="CN">CN</MenuItem>
-                                                    <MenuItem  className={"menu_li_select"}value="PH">PH</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value="PH">PH</MenuItem>
                                                     {/* 필리핀 추가 */}
-                                                    <MenuItem  className={"menu_li_select"}value="RU">RU</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value="RU">RU</MenuItem>
                                                     {/* 러시아 추가 */}
-                                                    <MenuItem className={"menu_li_select"}value="TW">TW</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value="TW">TW</MenuItem>
                                                     {/* 대만 추가 */}
                                                     <MenuItem className={"menu_li_select"} value="UA">UA</MenuItem>
                                                     {/* 우크라이나 추가 */}
@@ -947,6 +961,9 @@ const Home = () => {
                             <ul>
                                 <li className="menu_li">
                                     <a className="menu_a" onClick={home}>Home</a>
+                                </li>
+                                <li className="menu_li">
+                                    <a className="menu_a" onClick={Rtc}>Test</a>
                                 </li>
                                 {loggedIn ? (
                                     <>

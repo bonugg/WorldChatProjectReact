@@ -119,7 +119,7 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
                 }, 1500);
                 return;
             }
-            
+
             const reader = new FileReader();
             reader.onloadend = () => {
                 setMypageuserProfileName(null);
