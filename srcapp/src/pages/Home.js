@@ -1,3 +1,7 @@
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import "./css/Home.css";
 import React, {useRef, useState, useEffect} from "react";
 import styled from "styled-components";
@@ -11,14 +15,17 @@ import Logo_no_text from "../img/logo_no_text.png";
 import Logo_text from "../img/logo_text.png";
 
 import {Earth} from "../components/earth/index";
-import Join from './Join';
 import MyPage from './MyPage';
+import FreindsList from './FreindsList';
 import PasswordChange from './PasswordChange';
+import CateChat from './CateChat';
+
 
 const CanvasContainer = styled.div`
-  width: 100vw;
-  height: 100vh;
-  background: black;
+  width: 100%;
+  height: 100%;
+  //background: rgba(50, 50, 50, 0.3);
+  overflow: hidden;
     // background-image: url(${Background});
   // background-repeat: no-repeat;
   // background-position: top center;
@@ -32,6 +39,15 @@ const slideDown = keyframes`
   }
   100% {
     transform: scale(1);
+  }
+`;
+
+const slideDownFriends = keyframes`
+  0% {
+    height: 0;
+  }
+  100% {
+    height: 650px;
   }
 `;
 
@@ -52,7 +68,15 @@ const DivStyledMenu = styled.div`
   top: 50%;
   transform-origin: center;
   transform: ${props => props.visible ? 'translate(-50%, -50%) scaleY(1)' : 'translate(-50%, -50%) scaleY(0)'};
-  /* Add other CSS properties for the loginDiv here */
+`;
+const DivStyledMenu2 = styled.div`
+  visibility: ${props => props.visible ? 'visible' : 'hidden'};
+  animation: ${props => props.visible ? slideDownFriends : ""} 0.35s ease-in-out;
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  overflow: hidden; // 새로 추가된 속성
+  height: ${props => props.visible ? '650px' : '0'}; // 새로 추가된 속성
 `;
 const DivStyled = styled.div`
   visibility: ${props => props.visible === "visible" ? 'visible' : props.visible === "" ? "" : "hidden"};
@@ -67,6 +91,9 @@ const DivStyled = styled.div`
 
 
 const Home = () => {
+        //계정 기억 상태 변수
+        const [rememberAccount, setRememberAccount] = useState(false);
+
         const [mainCamera, setMainCamera] = useState(new THREE.Vector3(0, 0, 3));
         const [isLoginZoom, setIsLoginZoom] = useState(false);
         const [isSignUpZoom, setIsSignUpZoom] = useState(false);
@@ -78,6 +105,11 @@ const Home = () => {
         const [cameraPosition, setCameraPosition] = useState(null);
         //카메라 초기 위치로 돌아갔는지 확인
         const [isAtInitialPosition, setIsAtInitialPosition] = useState(false);
+
+        //도시 클릭 시 친구목록 띄우기
+        const [FriendsList, setFriendsList] = useState(false);
+        //도시 클릭 시 나라 이름 출력
+        const [FriendNationally, setFriendNationally] = useState('');
 
         //로그인 및 회원가입 화면 창 띄우기
         const [LoginDiv, setLoginDiv] = useState(false);
@@ -130,16 +162,30 @@ const Home = () => {
             setIsPasswordChangeDiv(newValue);
             setIsPasswordChangeDiv2(true);
         };
-
+        const isFriendsListZoom = (newValue) => {
+            if (newValue) {
+                setFriendsList(true);
+            } else {
+                setFriendsList(false);
+            }
+        };
+        const FriendsNationally = (newValue) => {
+            setFriendNationally(newValue);
+        };
         const logoutApi = (newValue) => {
-            if(newValue){
+            if (newValue) {
                 logout();
             }
         };
         const logoutApi2 = (newValue) => {
-            if(newValue){
+            if (newValue) {
                 setIsPasswordChangeDiv(false);
                 setIsPasswordChangeDiv2(true);
+                logout();
+            }
+        };
+        const logoutApi3 = (newValue) => {
+            if (newValue) {
                 logout();
             }
         };
@@ -180,6 +226,13 @@ const Home = () => {
                 setPassword('');
                 setLoggedIn(true);
                 setLoggedOut(false);
+                if (rememberAccount) {
+                    localStorage.setItem('savedUsername', username);
+                    localStorage.setItem('savedPassword', password);
+                } else {
+                    localStorage.removeItem('savedUsername');
+                    localStorage.removeItem('savedPassword');
+                }
                 home();
             } else {
                 // 실패시 오류 메시지 설정
@@ -265,7 +318,7 @@ const Home = () => {
             const newUsername = e.target.value;
             setSignUsername(newUsername);
             // 아이디가 유효하지 않은 경우
-            if(newUsername == ""){
+            if (newUsername == "") {
                 setIdCheckError(false);
                 setIdCheckError2(false);
                 setisIdCheckDisabled(true);
@@ -299,10 +352,10 @@ const Home = () => {
             setSignEmail(newEmail);
 
             // 이메일이 유효하지 않은 경우
-            if(newEmail == ""){
+            if (newEmail == "") {
                 setEmailCheckError(false);
                 setEmailCheckError2(false);
-            }else if (!isValidEmail(newEmail)) {
+            } else if (!isValidEmail(newEmail)) {
                 setEmailCheckError(false);
                 setEmailCheckError2(true);
                 // setIsSubmitDisabled(true);
@@ -320,11 +373,11 @@ const Home = () => {
             const newUserNickName = e.target.value;
             setSignuserNickName(newUserNickName);
             // 아이디가 유효하지 않은 경우
-            if(newUserNickName == ""){
+            if (newUserNickName == "") {
                 setNickNameCheckError(false);
                 setNickNameCheckError2(false);
                 setisNickNameCheckError(true);
-            }else if (!isValidNickName(newUserNickName)) {
+            } else if (!isValidNickName(newUserNickName)) {
                 setNickNameCheckError(false);
                 setNickNameCheckError2(true);
                 // setIsSubmitDisabled(true);
@@ -343,10 +396,10 @@ const Home = () => {
             setSignuserPhone(newPhone);
 
             // 핸드폰 번호가 유효하지 않은 경우
-            if(newPhone == ""){
+            if (newPhone == "") {
                 setPhoneCheckError(false);
                 setPhoneCheckError2(false);
-            }else if (!isValidPhone(newPhone)) {
+            } else if (!isValidPhone(newPhone)) {
                 setPhoneCheckError(false);
                 setPhoneCheckError2(true);
             } else {
@@ -412,13 +465,13 @@ const Home = () => {
                         if (accessToken != null) {
                             localStorage.setItem('Authorization', accessToken);
                         }
-                        if(response.headers.get('refresh') != null){
+                        if (response.headers.get('refresh') != null) {
                             islogin = false;
                             logout();
                             return;
                         }
                         if (response.ok) {
-                                islogin = true;
+                            islogin = true;
                         }
                     } catch (error) {
                         if (retry) {
@@ -450,6 +503,7 @@ const Home = () => {
                     setLoggedIn(false);
                     setLoggedOut(true);
                     home();
+
                 } else {
                     throw new Error('Logout Fail');
                 }
@@ -488,11 +542,10 @@ const Home = () => {
                                 }
 
                             } else if (position.current.y == MypagePosition.y && position.current.z == MypagePosition.z) {
-                                console.log("마이페이지 줌");
                                 camera.position.lerp(target.current, 0.03);
                                 camera.lookAt(position.current);
                                 if (camera.position.distanceTo(target.current) < 2.0) {
-                                    if(isMapageZoom){
+                                    if (isMapageZoom) {
                                         setMyPageDiv(true);
                                     }
                                     setLoginZoom(0);
@@ -503,7 +556,7 @@ const Home = () => {
                                 }
                             } else {
                                 // 이동률에 따라 카메라를 이동시키고 목표를 바라봄
-                                camera.position.lerp(target.current, 0.025);
+                                camera.position.lerp(target.current, 0.030);
                                 camera.lookAt(position.current);
                                 if (camera.position.distanceTo(target.current) < 2.1) {
                                     // 카메라가 움직임이 멈췄다면 실행
@@ -531,22 +584,20 @@ const Home = () => {
             return null;
         };
 
-// useEffect(() => {
-//     fetch("/api/v1/hello")
-//         .then((response) => {
-//             return response.json();
-//         })
-//         .then(function (data) {
-//             setMessage(data);
-//         });
-// }, []);
-
         const login = () => {
             if (isLoginZoom) {
                 return null;
             }
-            setUsername("");
-            setPassword("");
+            const savedUsername = localStorage.getItem('savedUsername');
+            const savedPassword = localStorage.getItem('savedPassword');
+            if (savedUsername && savedPassword) {
+                setUsername(savedUsername);
+                setPassword(savedPassword);
+                setRememberAccount(true);
+            } else {
+                setUsername("");
+                setPassword("");
+            }
             setButtonText("LOGIN");
 
             setTargetPosition(new THREE.Vector3(-35.147, 0, -63));
@@ -576,7 +627,9 @@ const Home = () => {
             setIdCheckError(false);
             setEmailCheckError(false);
             setIdCheckError2(false);
-
+            setNickNameCheckError(false);
+            setNickNameCheckError2(false);
+            setisNickNameCheckError(true);
             setisIdCheckDisabled(true);
 
             setTargetPosition(new THREE.Vector3(35.147, 0, -63));
@@ -653,254 +706,284 @@ const Home = () => {
         }
 
         return (
-            <div>
+            <div className={"full"}>
                 <Suspense fallback={<Fallback/>}>
-                        <div className={"fullScreen"}>
-                            <img
-                                onClick={home}
-                                className={`logo_main`}
-                                style={isLoading ? { display: "none" } : {}}
-                                src={Logo_no_text}
-                            ></img>
-                            <img
-                                onClick={home}
-                                className={`logo_main_text`}
-                                style={isLoading ? { display: "none" } : {}}
-                                src={Logo_text}
-                            ></img>
-                            <CanvasContainer>
-                                <Canvas>
-                                    <CameraControl targetPosition={targetPosition} cameraPosition={cameraPosition}/>
-                                    <Earth
-                                        mainCamera={mainCamera}
-                                        isLoginZoom={isLoginZoom}
-                                        LoginZoom={LoginZoom}
-                                        mouseLock={mouseLock}
-                                        loggedIn={loggedIn}
-                                        loggedOut={loggedOut}
-                                        isMapageZoom={isMapageZoom}
-                                    />
-                                </Canvas>
-                            </CanvasContainer>
-
-                            <DivStyledMenu visible={MyPageDiv ? "visible" : ""}>
-                                <MyPage
-                                    MyPageDiv={MyPageDiv}
-                                    onPasswordChange={onPasswordChange}
-                                    logoutApi={logoutApi}
+                    <div className={"fullScreen"}>
+                        <img
+                            onClick={home}
+                            className={`logo_main`}
+                            style={isLoading ? {display: "none"} : {}}
+                            src={Logo_no_text}
+                        ></img>
+                        <img
+                            onClick={home}
+                            className={`logo_main_text`}
+                            style={isLoading ? {display: "none"} : {}}
+                            src={Logo_text}
+                        ></img>
+                        <CanvasContainer>
+                            <Canvas>
+                                <CameraControl targetPosition={targetPosition} cameraPosition={cameraPosition}/>
+                                <Earth
+                                    mainCamera={mainCamera}
+                                    isLoginZoom={isLoginZoom}
+                                    isSignUpZoom={isSignUpZoom}
+                                    LoginZoom={LoginZoom}
+                                    mouseLock={mouseLock}
+                                    loggedIn={loggedIn}
+                                    loggedOut={loggedOut}
+                                    isMapageZoom={isMapageZoom}
+                                    FriendsList={FriendsList}
+                                    isFriendsListZoom={isFriendsListZoom}
+                                    FriendsNationally={FriendsNationally}
                                 />
-                            </DivStyledMenu>
-                            <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"} ref={passwordChangeDivRef}>
-                                <PasswordChange
-                                    isPasswordChangeDiv={isPasswordChangeDiv}
-                                    isPasswordChangeDivClose={isPasswordChangeDivClose}
-                                    logoutApi2={logoutApi2}
-                                >
-                                </PasswordChange>
-                            </DivStyled>
-                            <DivStyledMenu visible={LoginDiv ? "visible" : ""}>
-                                {/* Content inside the loginDiv */}
-                                <div className={"loginDiv"}>
-                                    <div className={"loginDiv_2"}>
-                                        <div className={"LogoDiv"}>
-                                            <img className={"LogoImg"} src={Logo}></img>
-                                        </div>
-                                        <form onSubmit={handleSubmit}>
-                                            <div className={"loginForm2"} id={"id_Login_ID"}>
-                                                <input
-                                                    className={"inputFromText"}
-                                                    placeholder={"Please enter your ID"}
-                                                    type='text'
-                                                    value={username}
-                                                    onChange={(e) => setUsername(e.target.value)}
-                                                    onFocus={resetButton}
-                                                />
-                                            </div>
-                                            <div className={"loginForm2"} id={"id_Login_PWD"}>
-                                                <input
-                                                    className={"inputFromText"}
-                                                    placeholder={"Please enter your PASSWORD"}
-                                                    type='password'
-                                                    value={password}
-                                                    onChange={(e) => setPassword(e.target.value)}
-                                                    onFocus={resetButton}
-                                                />
-                                            </div>
-                                            <div className={"login_btn2"} id={"id_Login_BTN"}>
-                                                <button
-                                                    type="submit"
-                                                    className={buttonText === "ID OR PASSWORD ERROR" ? "error_text" : "no_error_text"}>
-                                                    {buttonText}
-                                                </button>
-                                            </div>
-                                        </form>
+                            </Canvas>
+                        </CanvasContainer>
 
-                                    </div>
-                                </div>
-                            </DivStyledMenu>
-                            <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
-                                {/* Content inside the loginDiv */}
-                                <div className={"signDiv"}>
-                                    <div className={"signupDiv_2"}>
-                                        <form onSubmit={handleSubmitSignUp}>
-                                            <div className={"loginForm"} id={"id_ID"}>
-                                                <input
-                                                    className={IdCheckError ? "yesIDinput" : IdCheckError2 ? "noIDinput" : "emptyID"}
-                                                    placeholder={"Please enter your ID"}
-                                                    type='text'
-                                                    value={SginuserName}
-                                                    onChange={handleUsernameChange}
-                                                />
-                                                <button
-                                                    className={"checkbtn"}
-                                                    disabled={isIdCheckDisabled}
-                                                    type={"button"}
-                                                    onClick={idCheck}>Check
-                                                </button>
-                                                <p className={"Text_sign"}>7 to 10 characters consisting of English letters and
-                                                    numbers</p>
-                                            </div>
-                                            <div className={"loginForm"} id={"id_PWD"}>
-                                                <input
-                                                    className={"inputFromText"}
-                                                    placeholder={"Please enter your PASSWORD"}
-                                                    type='password'
-                                                    value={SignuserPwd}
-                                                    onChange={handlePasswordChange}
-                                                />
-                                                <p className={PasswordCheck === 'At least 8 characters consisting of English and numbers, including 2 special characters' ?
-                                                    "Text_sign" : PasswordCheck === "Available PASSWORD" ?
-                                                        "Text_sign" : "Text_sign_Error_sign"
-                                                }>{PasswordCheck}</p>
-                                            </div>
-                                            <div className={"loginForm"} id={"id_EMAIL"}>
-                                                <input
-                                                    className={emailCheckError ? "inputFromText2" : emailCheckError2 ? "NoinputFromText"
-                                                        : "emptyFromText"}
-                                                    placeholder={"Please enter your EMAIL"}
-                                                    type='text'
-                                                    value={SignuserEmail}
-                                                    onChange={handleEmailChange}
-                                                />
-                                            </div>
-                                            <div className={"loginForm"} id={"id_NINKNAME"}>
-                                                <input
-                                                    className={NickNameCheckError ? "yesIDinput2" : NickNameCheckError2 ? "noIDinput2" : "emptyID2"}
-                                                    placeholder={"Please enter your NICKNAME"}
-                                                    type='text'
-                                                    value={SignuserNickName}
-                                                    onChange={handleNickNameChange}
-                                                />
-                                                <button
-                                                    className={"checkbtn"}
-                                                    disabled={isNickNameCheckError}
-                                                    type={"button"}
-                                                    onClick={NickNameCheck}>Check
-                                                </button>
-                                                <p className={"Text_sign"}>
-                                                    Consists of 10 characters or less, with or without English or numbers</p>
-                                            </div>
-                                            <div className={"loginForm"} id={"id_NATIONALITY"}>
-                                                <div className="custom_select_wrapper">
-                                                    <select className={"custom_select"} onChange={handleCountryChange}
-                                                            value={SignuserNationality}>
-                                                        <option value="" hidden disabled>Please select a COUNTRY</option>
-                                                        <option value="KR">KR</option>
-                                                        <option value="US">US</option>
-                                                        <option value="CA">CA</option>
-                                                        {/* 캐나다 추가 */}
-                                                        <option value="JP">JP</option>
-                                                        <option value="CN">CN</option>
-                                                        <option value="PH">PH</option>
-                                                        {/* 필리핀 추가 */}
-                                                        <option value="RU">RU</option>
-                                                        {/* 러시아 추가 */}
-                                                        <option value="TW">TW</option>
-                                                        {/* 대만 추가 */}
-                                                        <option value="UA">UA</option>
-                                                        {/* 우크라이나 추가 */}
-                                                        <option value="AU">AU</option>
-                                                        {/* 호주 추가 */}
-                                                        <option value="IT">IT</option>
-                                                        {/* 이탈리아 추가 */}
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div className={"loginForm"} id={"id_PHONE"}>
-                                                <input
-                                                    className={phoneCheckError ? "inputFromText3" : phoneCheckError2 ? "NoinputFromText2"
-                                                        : "emptyFromText2"}
-                                                    placeholder={"Please enter your PHONE"}
-                                                    type='text'
-                                                    value={SignuserPhone}
-                                                    onChange={handlePhoneChange}
-                                                />
-                                            </div>
-                                            <div className={"login_btn"} id={"id_SignUp_BTN"}>
-                                                <button
-                                                    className={"SignUpBtn"}
-                                                    type='submit'
-                                                    disabled={PasswordCheck !== "Available PASSWORD"
-                                                        || !IdCheckError || !emailCheckError || !NickNameCheckError || SignuserNationality == "" || !phoneCheckError
-                                                    }>SignUp
-                                                </button>
-                                            </div>
-                                        </form>
-
-                                    </div>
-                                </div>
-                            </DivStyledMenu>
-                            <aside
-                                className={`side-bar`}
-                                style={isLoading ? { display: "none" } : {}}
+                        <DivStyledMenu visible={MyPageDiv ? "visible" : ""}>
+                            <MyPage
+                                MyPageDiv={MyPageDiv}
+                                onPasswordChange={onPasswordChange}
+                                logoutApi={logoutApi}
+                            />
+                        </DivStyledMenu>
+                        <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
+                            <FreindsList
+                                FriendsList={FriendsList}
+                                FriendNationally={FriendNationally}
+                                logoutApi3={logoutApi3}
+                            />
+                        </DivStyledMenu2>
+                        <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"}
+                                   ref={passwordChangeDivRef}>
+                            <PasswordChange
+                                isPasswordChangeDiv={isPasswordChangeDiv}
+                                isPasswordChangeDivClose={isPasswordChangeDivClose}
+                                logoutApi2={logoutApi2}
                             >
-                                <section className="side-bar__icon-box">
-                                    <section className="side-bar__icon-1">
-                                        <div></div>
-                                        <div></div>
-                                        <div></div>
-                                    </section>
+                            </PasswordChange>
+                        </DivStyled>
+                        {/*<DivStyledMenu visible={"visible"}>*/}
+                        {/*    <CateChat*/}
+                        {/*    >*/}
+                        {/*    </CateChat>*/}
+                        {/*</DivStyledMenu>*/}
+                        <DivStyledMenu visible={LoginDiv ? "visible" : ""}>
+                            {/* Content inside the loginDiv */}
+                            <div className={"loginDiv"}>
+                                <div className={"loginDiv_2"}>
+                                    <div className={"LogoDiv"}>
+                                        <img className={"LogoImg"} src={Logo}></img>
+                                    </div>
+                                    <form onSubmit={handleSubmit}>
+                                        <div className={"loginForm2"} id={"id_Login_ID"}>
+                                            <input
+                                                className={"inputFromText"}
+                                                placeholder={"Please enter your ID"}
+                                                type='text'
+                                                value={username}
+                                                onChange={(e) => setUsername(e.target.value)}
+                                                onFocus={resetButton}
+                                            />
+                                        </div>
+                                        <div className={"loginForm2"} id={"id_Login_PWD"}>
+                                            <input
+                                                className={"inputFromText"}
+                                                placeholder={"Please enter your PASSWORD"}
+                                                type='password'
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                onFocus={resetButton}
+                                            />
+                                        </div>
+                                        <div className={"loginForm_remmember"} id={"id_Remember_Account"}>
+                                            <Checkbox
+                                                className={"rememberAccountCheckbox"}
+                                                type="checkbox"
+                                                checked={rememberAccount}
+                                                onChange={() => setRememberAccount(!rememberAccount)}
+                                            />
+                                            <label className={"label_remmember"} htmlFor={"rememberAccount"}>Remember
+                                                Account</label>
+                                        </div>
+                                        <div className={"login_btn2"} id={"id_Login_BTN"}>
+                                            <Button
+                                                type="submit"
+                                                className={buttonText === "ID OR PASSWORD ERROR" ? "error_text" : "no_error_text"}>
+                                                {buttonText}</Button>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </DivStyledMenu>
+                        <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
+                            {/* Content inside the loginDiv */}
+                            <div className={"signDiv"}>
+                                <div className={"signupDiv_2"}>
+                                    <form onSubmit={handleSubmitSignUp}>
+                                        <div className={"loginForm"} id={"id_ID"}>
+                                            <input
+                                                className={IdCheckError ? "yesIDinput" : IdCheckError2 ? "noIDinput" : "emptyID"}
+                                                placeholder={"Please enter your ID"}
+                                                type='text'
+                                                value={SginuserName}
+                                                onChange={handleUsernameChange}
+                                            />
+                                            <Button
+                                                className={"checkbtn"}
+                                                disabled={isIdCheckDisabled}
+                                                type={"button"}
+                                                onClick={idCheck}>Check
+                                            </Button>
+                                            <p className={"Text_sign"}>7 to 10 characters consisting of English letters and
+                                                numbers</p>
+                                        </div>
+                                        <div className={"loginForm"} id={"id_PWD"}>
+                                            <input
+                                                className={"inputFromText"}
+                                                placeholder={"Please enter your PASSWORD"}
+                                                type='password'
+                                                value={SignuserPwd}
+                                                onChange={handlePasswordChange}
+                                            />
+                                            <p className={PasswordCheck === 'At least 8 characters consisting of English and numbers, including 2 special characters' ?
+                                                "Text_sign" : PasswordCheck === "Available PASSWORD" ?
+                                                    "Text_sign" : "Text_sign_Error_sign"
+                                            }>{PasswordCheck}</p>
+                                        </div>
+                                        <div className={"loginForm"} id={"id_EMAIL"}>
+                                            <input
+                                                className={emailCheckError ? "inputFromText2" : emailCheckError2 ? "NoinputFromText"
+                                                    : "emptyFromText"}
+                                                placeholder={"Please enter your EMAIL"}
+                                                type='text'
+                                                value={SignuserEmail}
+                                                onChange={handleEmailChange}
+                                            />
+                                        </div>
+                                        <div className={"loginForm"} id={"id_NINKNAME"}>
+                                            <input
+                                                className={NickNameCheckError ? "yesIDinput2" : NickNameCheckError2 ? "noIDinput2" : "emptyID2"}
+                                                placeholder={"Please enter your NICKNAME"}
+                                                type='text'
+                                                value={SignuserNickName}
+                                                onChange={handleNickNameChange}
+                                            />
+                                            <Button
+                                                className={"checkbtn"}
+                                                disabled={isNickNameCheckError}
+                                                type={"button"}
+                                                onClick={NickNameCheck}>Check
+                                            </Button>
+                                            <p className={"Text_sign"}>
+                                                Consists of 10 characters or less, with or without English or numbers</p>
+                                        </div>
+                                        <div className={"loginForm"} id={"id_NATIONALITY"}>
+                                            <div className="custom_select_wrapper">
+                                                <Select className={"custom_select"}
+                                                        onChange={handleCountryChange}
+                                                        id="demo-simple-select"
+                                                        value={SignuserNationality || ' '}
+
+                                                >
+                                                    <MenuItem className={"menu_li_select"} value={" "} disabled>Please select a COUNTRY</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value={"KR"}>KR</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value={"US"}>US</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value="CA">CA</MenuItem>
+                                                    {/* 캐나다 추가 */}
+                                                    <MenuItem className={"menu_li_select"} value="JP">JP</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value="CN">CN</MenuItem>
+                                                    <MenuItem  className={"menu_li_select"}value="PH">PH</MenuItem>
+                                                    {/* 필리핀 추가 */}
+                                                    <MenuItem  className={"menu_li_select"}value="RU">RU</MenuItem>
+                                                    {/* 러시아 추가 */}
+                                                    <MenuItem className={"menu_li_select"}value="TW">TW</MenuItem>
+                                                    {/* 대만 추가 */}
+                                                    <MenuItem className={"menu_li_select"} value="UA">UA</MenuItem>
+                                                    {/* 우크라이나 추가 */}
+                                                    <MenuItem className={"menu_li_select"} value="AU">AU</MenuItem>
+                                                    {/* 호주 추가 */}
+                                                    <MenuItem className={"menu_li_select"} value="IT">IT</MenuItem>
+                                                    {/* 이탈리아 추가 */}
+                                                </Select>
+                                            </div>
+                                        </div>
+                                        <div className={"loginForm"} id={"id_PHONE"}>
+                                            <input
+                                                className={phoneCheckError ? "inputFromText3" : phoneCheckError2 ? "NoinputFromText2"
+                                                    : "emptyFromText2"}
+                                                placeholder={"Please enter your PHONE"}
+                                                type='text'
+                                                value={SignuserPhone}
+                                                onChange={handlePhoneChange}
+                                            />
+                                        </div>
+                                        <div className={"login_btn"} id={"id_SignUp_BTN"}>
+                                            <Button
+                                                className={"SignUpBtn"}
+                                                type='submit'
+                                                disabled={PasswordCheck !== "Available PASSWORD"
+                                                    || !IdCheckError || !emailCheckError || !NickNameCheckError || SignuserNationality == "" || !phoneCheckError
+                                                }>SignUp
+                                            </Button>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </DivStyledMenu>
+                        <aside
+                            className={`side-bar`}
+                            style={isLoading ? {display: "none"} : {}}
+                        >
+                            <section className="side-bar__icon-box">
+                                <section className="side-bar__icon-1">
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
                                 </section>
-                                <ul>
-                                    <li className="menu_li">
-                                        <a className="menu_a" onClick={home}>Home</a>
-                                    </li>
-                                    {loggedIn ? (
-                                        <>
-                                            <li className="menu_li">
-                                                <a className="menu_a" id="menu_a2" onClick={mypage}>MyPage
-                                                </a>
-                                            </li>
-                                            <li className="menu_li">
-                                                <a className="menu_a" id="menu_a2" onClick={logout}>Logout
-                                                </a>
-                                            </li>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <li className="menu_li">
-                                                <a className="menu_a" id="menu_a2" onClick={login}>Login
-                                                </a>
-                                            </li>
-                                            <li className="menu_li">
-                                                <a className="menu_a" onClick={signup}>SignUp</a>
-                                            </li>
-                                        </>
-                                    )}
-                                    {/*<li className="menu_li">*/}
-                                    {/*    <a className="menu_a" href="/user/list">사원조회</a>*/}
-                                    {/*</li>*/}
-                                    {/*<li className="menu_li">*/}
-                                    {/*    <a className="menu_a">메신저</a>*/}
-                                    {/*    <ul>*/}
-                                    {/*        <li className="menu_li_li"><a style="cursor: pointer" onClick="openRoomWindow(event)"*/}
-                                    {/*                                      className="menu_text">자유 대화방</a></li>*/}
-                                    {/*        <!--                    <li class="menu_li_li"><a style="cursor: pointer" onclick="messagePage()" class="menu_text">1:1 대화방</a></li>-->*/}
-                                    {/*    </ul>*/}
-                                    {/*</li>*/}
-                                </ul>
-                            </aside>
-                        </div>
+                            </section>
+                            <ul>
+                                <li className="menu_li">
+                                    <a className="menu_a" onClick={home}>Home</a>
+                                </li>
+                                {loggedIn ? (
+                                    <>
+                                        <li className="menu_li">
+                                            <a className="menu_a" id="menu_a2" onClick={mypage}>MyPage
+                                            </a>
+                                        </li>
+                                        <li className="menu_li">
+                                            <a className="menu_a" id="menu_a2" onClick={logout}>Logout
+                                            </a>
+                                        </li>
+                                    </>
+                                ) : (
+                                    <>
+                                        <li className="menu_li">
+                                            <a className="menu_a" id="menu_a2" onClick={login}>Login
+                                            </a>
+                                        </li>
+                                        <li className="menu_li">
+                                            <a className="menu_a" onClick={signup}>SignUp</a>
+                                        </li>
+                                    </>
+                                )}
+                                {/*<li className="menu_li">*/}
+                                {/*    <a className="menu_a" href="/user/list">사원조회</a>*/}
+                                {/*</li>*/}
+                                {/*<li className="menu_li">*/}
+                                {/*    <a className="menu_a">메신저</a>*/}
+                                {/*    <ul>*/}
+                                {/*        <li className="menu_li_li"><a style="cursor: pointer" onClick="openRoomWindow(event)"*/}
+                                {/*                                      className="menu_text">자유 대화방</a></li>*/}
+                                {/*        <!--                    <li class="menu_li_li"><a style="cursor: pointer" onclick="messagePage()" class="menu_text">1:1 대화방</a></li>-->*/}
+                                {/*    </ul>*/}
+                                {/*</li>*/}
+                            </ul>
+                        </aside>
+                    </div>
                 </Suspense>
             </div>
         );
