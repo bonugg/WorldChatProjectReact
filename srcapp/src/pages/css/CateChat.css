@@ -1,0 +1,157 @@
+.CateChatDiv{
+    width: 650px;
+    height: 650px;
+    border-radius: 5px;
+    background-color: rgba(50, 50, 50, 0.8);
+}
+.select{
+    width: 100%;
+    height: 100%;
+}
+.chat{
+    width: 100%;
+    height: 100%;
+}
+.CateChatDiv_Chat{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 430px;
+    height: 600px;
+    border-radius: 10px;
+    background-color: rgba(50, 50, 50, 0.7);
+    border: 2px solid rgba(50, 50, 50, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.CateChat_Room_create{
+    width: 100%;
+    height: 140px;
+}
+.EnterRoom{
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.EnterRoomChat{
+    width: 100%;
+    height: calc(100% - 100px);
+    padding: 10px;
+    box-sizing: border-box;
+}
+.EnterRoom_2{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.EnterRoomChat_2{
+    width: 100%;
+    height: 100%;
+}
+.EnterRoomChat_content{
+    width: 100%;
+    height: 80%;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+.EnterRoomChat_input{
+    width: 100%;
+    height: 20%;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+.EnterRoomCate{
+    width: 100px;
+    height: 100%;
+    font-size: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.EnterRoomName{
+    width: calc(100% - 100px);
+    height: 100%;
+    font-size: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.CateChat_Room_List{
+    width: 100%;
+    height: calc(100% - 140px);
+    background-color: white;
+    opacity: 0.5;
+}
+.CateChat_Room_create_2{
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+.CateChat_Room_create_3{
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 10px 16px 10px 10px;
+    box-sizing: border-box;
+}
+.CateChat_Room_category{
+    width: 100%;
+    height: 130px;
+    background-color: black;
+}
+.RoomList{
+    width: 100%;
+    height: calc(100% - 130px);
+    background-color: #343434;
+    padding: 10px 20px 20px;
+    box-sizing: border-box;
+}
+.RoomList_2{
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+    overflow-x: hidden;
+}
+.roomName_text{
+    font-size: 20px;
+}
+.roomName{
+    width: 200px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    font-size: 10px !important;
+    color: white !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    outline: none;
+    cursor: pointer;
+    border: 1px solid rgba(200, 200, 200, 0.8) !important;
+    transition: all 0.25s ease-in-out !important;
+    font-family: 'Russo One', sans-serif !important;
+    padding-left: 10px !important;
+    box-sizing: border-box;
+    margin-left: 10px;
+}
+.roomCreate{
+    width: 100px !important;
+    max-height: 35px !important;
+    font-size: 15px !important;
+    color: white !important;
+    border: 1px solid rgba(200, 200, 200, 0.4) !important;
+    font-family: 'Russo One', sans-serif !important;
+    padding-right: 17px !important;
+    box-sizing: border-box;
+}
+.roomList_item_div{
+    width: 100%;
+    height: 100px;
+    background-color: rgba(253, 253, 253, 0.2);
+    margin-top: 10px;
+    border-radius: 10px;
+}

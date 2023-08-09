@@ -2,6 +2,7 @@ const NotFound = () => {
     return (
         <div
             style={{
+                overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

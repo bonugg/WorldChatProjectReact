@@ -1,6 +1,8 @@
 import React, {useEffect, useRef, useState} from "react";
 import Profile from "../img/profile.png";
 import "./css/Home.css";
+import Button from "@mui/material/Button";
+import "./css/Mypage.css";
 import home from "./Home";
 
 
@@ -229,7 +231,7 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
                     <div className={"myPageDiv_profile"}>
                         <img
                             className={"myPageDiv_profile_img"}
-                            src={MypageuserProfileName ? "/upload/"+ MypageuserProfileName : previewImage ? previewImage :Profile}
+                            src={MypageuserProfileName ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/"+ MypageuserProfileName : previewImage ? previewImage :Profile}
                             onClick={handleClickImage}
                         />
                         <input
@@ -242,10 +244,13 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
 
                     </div>
                     <div className={"myPageDiv_profile_btn"}>
-                        <button
+                        <Button
                             className={profileButtonText == 'Change Picture' ? "myPageDiv_profile_btn2" :
                                 profileButtonText == 'Change Success' ? "myPageDiv_profile_btn3" : "myPageDiv_profile_btn4"}
-                            onClick={uploadImage}>{profileButtonText}</button>
+                            onClick={uploadImage}
+                        >
+                            {profileButtonText}
+                        </Button>
                     </div>
                 </div>
                 <div className={"myPageDiv3"}>
@@ -271,9 +276,9 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
                             <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
                                    value={MypageuserPhone}/>
                             <div>
-                                <button className={"myPageDiv_info_1_btn"} onClick={passwordChangeDiv}>Change
+                                <Button className={"myPageDiv_info_1_btn"} onClick={passwordChangeDiv}>Change
                                     Password
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -289,11 +294,11 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
                                         </textarea>
                         </div>
                         <div className={"myPageDiv_Message_btn_div"}>
-                            <button
+                            <Button
                                 className={messageButtonText == 'Change Message' ? "myPageDiv_Message_btn" : "myPageDiv_Message_btn2"}
                                 onClick={userMessageChange}>
                                 {messageButtonText}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
