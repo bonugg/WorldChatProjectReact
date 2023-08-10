@@ -7,19 +7,26 @@ import React, {useEffect, useRef} from 'react';
 
 // const addr = "localhost:3001"
 
-const ChatRoom = () => {
+const ChatRoom = ({rtcUserName}) => {
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
     let host = "";
     host = window.location.host;
-    console.log("wss://" + host + "9002" + "/signal")
+    console.log(host)
     host = host.slice(0,-4);
     console.log("wss://" + host + "9002" + "/signal")
-    // const socket = new WebSocket("wss://" + host + "9002" + "/signal");
-    const socket = new WebSocket("wss://localhost:9002/signal");
+    const socket = new WebSocket("wss://" + host + "9002" + "/signal");
+    let localUserName = "";
+    if(localStorage.getItem('userName')) {
+        const loginUserName=localStorage.getItem('userName');
+        console.log("로그인 유저 이름: " + loginUserName)
+        localUserName = loginUserName;
+    }
+    // const socket = new WebSocket('wss://' + window.location.host + '/signal');
 
     //유저 이름 임의 설정 -> 로그인 연동 후 해당 사용자의 고유값으로 변경 예정!
-    const localUserName = Math.random();
+    // const localUserName = Math.random();
+
 
     //STUN 서버 설정을 포함하는 WebRTC 연결 설정
     const peerConnectionConfig = {

@@ -154,6 +154,8 @@ const Home = () => {
 
         // rtc
         const [showRtcChat, setShowRtcChat] = useState(false); // RtcChat 상태를 boolean으로 관리
+
+        let rtcUserName = "";
         const Rtc = () => {
             setShowRtcChat(true); // RtcChat 상태를 true로 설정
         }
@@ -211,6 +213,16 @@ const Home = () => {
             };
         }, [isPasswordChangeDiv]);
 
+
+        const [dataFromChild, setDataFromChild] = useState(null);
+
+        const handleGrandchildData = (data) => {
+            console.log("자식의 자식 컴포넌트로부터 받은 데이터:", data);
+            rtcUserName = data;
+            setDataFromChild(data);
+        };
+
+
         //로그인 로직
         const handleSubmit = async (e) => {
             e.preventDefault();
@@ -228,6 +240,7 @@ const Home = () => {
                 const userName = response.headers.get('userName');
                 localStorage.setItem('Authorization', accessToken);
                 localStorage.setItem('userName', userName);
+                const socket = new WebSocket("wss://" + "192.168.0.187:" + "9002" + "/signal");
                 // 페이지 이동
                 setUsername('');
                 setPassword('');
@@ -756,10 +769,12 @@ const Home = () => {
                         </DivStyledMenu>
                         <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
                             <FreindsList
+                                onData={handleGrandchildData}
                                 FriendsList={FriendsList}
                                 FriendNationally={FriendNationally}
                                 logoutApi3={logoutApi3}
                             />
+                            {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>
                         <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"}
                                    ref={passwordChangeDivRef}>
@@ -827,7 +842,7 @@ const Home = () => {
 
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent/>} {/* RtcChat 상태가 true일 때 rtcChat 컴포넌트 렌더링 */}
+                            {showRtcChat && <ChatComponent rtcUserName = {rtcUserName}/>} {/* RtcChat 상태가 true일 때 rtcChat 컴포넌트 렌더링 */}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
