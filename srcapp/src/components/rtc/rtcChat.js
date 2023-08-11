@@ -20,6 +20,7 @@ const ChatRoom = ({rtcUserName}) => {
     if(localStorage.getItem('userName')) {
         const loginUserName=localStorage.getItem('userName');
         console.log("로그인 유저 이름: " + loginUserName)
+        console.log("요청 유저 이름: " + rtcUserName)
         localUserName = loginUserName;
     }
     // const socket = new WebSocket('wss://' + window.location.host + '/signal');

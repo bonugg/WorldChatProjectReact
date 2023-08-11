@@ -154,8 +154,9 @@ const Home = () => {
 
         // rtc
         const [showRtcChat, setShowRtcChat] = useState(false); // RtcChat 상태를 boolean으로 관리
+        const [rtcUserName, setRtcUserName] = useState(null);
 
-        let rtcUserName = "";
+        // let rtcUserName = "";
         const Rtc = () => {
             setShowRtcChat(true); // RtcChat 상태를 true로 설정
         }
@@ -216,10 +217,31 @@ const Home = () => {
 
         const [dataFromChild, setDataFromChild] = useState(null);
 
-        const handleGrandchildData = (data) => {
+        const handleGrandchildData = async (data) => {
             console.log("자식의 자식 컴포넌트로부터 받은 데이터:", data);
-            rtcUserName = data;
             setDataFromChild(data);
+            setRtcUserName(data)
+            try {
+                const response = await fetch('/webrtc/request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    },
+                    body: JSON.stringify({
+                        sender: localStorage.getItem('userName'),
+                        receiver: localStorage.getItem(data)
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Logout failed with status: ${response.status}`);
+                }
+
+                console.log("Logout successful");
+            } catch (error) {
+                console.error("Error during logout:", error);
+            }
+            setShowRtcChat(true);
         };
 
 
@@ -240,7 +262,8 @@ const Home = () => {
                 const userName = response.headers.get('userName');
                 localStorage.setItem('Authorization', accessToken);
                 localStorage.setItem('userName', userName);
-                const socket = new WebSocket("wss://" + "192.168.0.187:" + "9002" + "/signal");
+                console.log("로그인 사용자: " + userName);
+                const socket = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
                 // 페이지 이동
                 setUsername('');
                 setPassword('');
@@ -518,10 +541,28 @@ const Home = () => {
 
                 if (response.ok) {
                     localStorage.removeItem('Authorization');
-                    localStorage.removeItem('userName');
+
                     alert("Logout");
                     setLoggedIn(false);
                     setLoggedOut(true);
+                    try {
+                        const response = await fetch('/webrtc/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'text/plain'
+                            },
+                            body: localStorage.getItem('userName')
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Logout failed with status: ${response.status}`);
+                        }
+
+                        console.log("Logout successful");
+                    } catch (error) {
+                        console.error("Error during logout:", error);
+                    }
+                    localStorage.removeItem('userName');
                     home();
 
                 } else {
@@ -842,7 +883,7 @@ const Home = () => {
 
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent rtcUserName = {rtcUserName}/>} {/* RtcChat 상태가 true일 때 rtcChat 컴포넌트 렌더링 */}
+                            {showRtcChat && rtcUserName && <ChatComponent rtcUserName={rtcUserName}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
