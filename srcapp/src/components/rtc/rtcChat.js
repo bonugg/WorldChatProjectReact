@@ -86,6 +86,7 @@ const ChatRoom = () => {
     // 페이지 시작시 실행되는 메서드 -> socket 을 통해 server 와 통신한다
     socket.onmessage = function (msg) {
         let message = JSON.parse(msg.data);
+        console.log(message.type+"!111111111111111")
         switch (message.type) {
             case "offer":
                 log('Signal OFFER received');

@@ -9,9 +9,9 @@ const RandomStart = () => {
         const authorization = localStorage.getItem('Authorization');
         const username = localStorage.getItem('userName');
         if (!authorization) {
-            console.log("authorization token not found");
-            return;
+            return console.log("authorization token not found");
         }
+
         try {
             const response = await fetch("/random/room", {
                 method: 'POST',
@@ -21,26 +21,36 @@ const RandomStart = () => {
                 },
                 body: JSON.stringify({ userName: username })
             });
-            if (response.ok) {
-                const result = await response.json();
-                if (!result) {
-                    console.error(result.errorMessage);
-                    return;
-                }
-                console.log(`Created random room name: ${result.randomRoomName}`);
-                navigate(`/random/${result.randomRoomId}`, { state: { room: result } });
-                return result;
-            } else {
-                console.error(`Error: ${response.status}`)
+
+            if (!response.ok) {
+                return console.error(`Error: ${response.status}`)
             }
+
+            const result = await response.json();
+            if (!result) {
+                return console.error(result.errorMessage);
+            }
+            
+            console.log(`Created random room name: ${result.randomRoomName}`);
+            navigate(`/random/${result.randomRoomId}`, { state: { room: result } });
+            return result;
+
         } catch (error) {
             console.log(error);
             return;
         }
     }
 
+    const goHome = () => {
+        navigate("/");
+    }
+
     return (
-        <button type="submit" onClick={startRandomChat}>랜덤채팅 시작</button>
+        <>
+            <h1>랜덤채팅을 시작하시겠습니까?</h1>
+            <button type="submit" onClick={startRandomChat}>네</button>
+            <button type="submit" onClick={goHome}>아니요</button>
+        </>
     );
 };
 

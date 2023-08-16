@@ -14,7 +14,7 @@ import Philippines from "../img/flag/Philippines-flag.png";
 
 import "./css/FreindsList.css";
 
-const FreindsList = ({FriendNationally, logoutApi3, FriendsList}) => {
+const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList}) => {
     const [userList, setUserList] = useState([]);
     const [nationallyName, setNationallyName] = useState('');
     const freindsList = async (retry = true) => {
@@ -98,7 +98,7 @@ const FreindsList = ({FriendNationally, logoutApi3, FriendsList}) => {
             </div>
         </div>
     );
-};
+});
 
 
 export default FreindsList;

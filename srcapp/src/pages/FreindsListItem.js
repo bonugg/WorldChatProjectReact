@@ -1,11 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 import Button from "@mui/material/Button";
 import "./css/FreindsList.css";
 import Profile from "../img/profile.png";
 
-
-const FreindsListItem = ({user}) => {
+const FreindsListItem = React.memo(({user}) => {
     const {userId, userName, userNickName, userProfileName} = user;
     return (
         <div className={"friendsList_item_div"}>
@@ -18,7 +17,7 @@ const FreindsListItem = ({user}) => {
                     />
                 </div>
                 <div className={"friendsList_item_nickname"}>
-                    <p className={"friendsList_item_nickname_text"}>{userNickName}</p>
+                    <span className={"friendsList_item_nickname_text"}>{userNickName}</span>
                 </div>
                 <div className={"friendsList_item_btn_div"}>
                     <Button
@@ -40,6 +39,6 @@ const FreindsListItem = ({user}) => {
             </div>
         </div>
     );
-};
+});
 
 export default FreindsListItem;

@@ -59,7 +59,7 @@
     font-family: 'Russo One', sans-serif !important;
 }
 .myPageDiv_info_1_btn:hover{
-    background-color: rgba(28, 28, 28, 0.8);
+    background-color: rgba(28, 28, 28, 0.8) !important;
 }
 
 .myPageDiv_Message_btn{

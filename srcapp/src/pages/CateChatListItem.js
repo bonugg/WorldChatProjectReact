@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import "./css/CateChat.css";
 
 
-const CateChatListItem = ({room, onCateRoomAndChatDivUpdate, cateChatList, userList}) => {
+const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChatList}) => {
     const {cateId, cateName, cateUserCnt, maxUserCnt, interest} = room;
 
     const cateRoomEnter = async (retry = true) => {
@@ -29,19 +29,15 @@ const CateChatListItem = ({room, onCateRoomAndChatDivUpdate, cateChatList, userL
             if (response.ok) {
                 const data = await response.json(); // 응답본문을 JSON 객체로 변환
                 const isFull = data.isFull;
-                console.log(data.cateChatList);
-                console.log(data.userList);
-                console.log(data.cateRoom);
 
                 if (isFull) {
-                    alert("The chat room is full.");
+                    // alert("The chat room is full.");
                     onCateRoomAndChatDivUpdate(false, "");
                 } else {
                     // 이 곳에 성공적으로 입장한 경우 수행할 작업을 추가하세요.
-                    alert("SUCCESS.");
+                    // alert("SUCCESS.");
                     onCateRoomAndChatDivUpdate(true, data.cateRoom);
                     cateChatList(data.cateChatList);
-                    userList(data.userList);
                 }
             } else {
                 if (retry) {
@@ -57,11 +53,25 @@ const CateChatListItem = ({room, onCateRoomAndChatDivUpdate, cateChatList, userL
 
     return (
         <div
-            onClick={cateRoomEnter}
             className={"roomList_item_div"}>
-            {cateName}
+            <div className={"roomList_item_div_2"}>
+                <span className={"roomList_name_1"}>ROOM NAME :&nbsp;</span>
+                <span className={"roomList_name_2"}>{cateName}</span>
+            </div>
+            <div className={"roomList_item_div_3"}>
+
+            </div>
+            <div className={"roomList_item_div_4"}>
+                <Button
+                    onClick={cateRoomEnter}
+                    className={"roomList_btn"}
+                >
+                    ENTER
+                </Button>
+
+            </div>
         </div>
     );
-};
+});
 
 export default CateChatListItem;
