@@ -7,21 +7,22 @@ import React, {useEffect, useRef} from 'react';
 
 // const addr = "localhost:3001"
 
-const ChatRoom = ({rtcUserName}) => {
+const ChatRoom = ({sendUser, receiverUser}) => {
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
     let host = "";
     host = window.location.host;
     console.log(host)
-    host = host.slice(0,-4);
+    host = host.slice(0, -4);
     console.log("wss://" + host + "9002" + "/signal")
     const socket = new WebSocket("wss://" + host + "9002" + "/signal");
     let localUserName = "";
-    if(localStorage.getItem('userName')) {
-        const loginUserName=localStorage.getItem('userName');
-        console.log("로그인 유저 이름: " + loginUserName)
-        console.log("요청 유저 이름: " + rtcUserName)
-        localUserName = loginUserName;
+    // let loginUserName = "";
+    // console.log(rtcUserName+"이게 넘어온 이름")
+    if (localStorage.getItem('userName')) {
+            console.log("발신 유저 이름: " + sendUser)
+            console.log("수신 유저 이름: " + receiverUser)
+            localUserName = localStorage.getItem('userName');
     }
     // const socket = new WebSocket('wss://' + window.location.host + '/signal');
 
@@ -112,6 +113,7 @@ const ChatRoom = ({rtcUserName}) => {
 
             case "join":
                 // ajax 요청을 보내서 userList 를 다시 확인함
+                console.log("join들어옴")
                 message.data = chatListCount();
                 log('Client is starting to ' + (message.data === "true") ? 'negotiate' : 'wait for a peer');
                 log("messageDATA : " + message.data)
@@ -132,7 +134,7 @@ const ChatRoom = ({rtcUserName}) => {
         const params = {
             from: localUserName,
             type: 'findCount',
-            data: '1',//여기가 방 제목 들어갈 부분(로그인 userName+ 요청받는 userName)
+            data: sendUser+"님과 "+receiverUser+"님의 화상채팅방",//여기가 방 제목 들어갈 부분(로그인 userName+ 요청받는 userName)
             candidate: 'null',
             sdp: 'null'
         };
@@ -144,6 +146,7 @@ const ChatRoom = ({rtcUserName}) => {
 
         try {
             const response = await axios.post('/webrtc/usercount', qs.stringify(params), config);
+            console.log("방 인원수: "+response.data.toString())
             if (response.data.toString() === "true") {
                 myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
             }

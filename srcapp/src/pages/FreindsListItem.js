@@ -31,8 +31,8 @@ const FreindsListItem = ({user , onData}) => {
     //     rtcConnect();
     // }
     const Rtc = () => {
-        console.log("자식"+userNickName)
-        onData(userNickName)
+        console.log("자식"+userName)
+        onData(userName)
     }
     return (
         <div>

@@ -20,6 +20,7 @@ import FreindsList from './FreindsList';
 import PasswordChange from './PasswordChange';
 import CateChat from './CateChat';
 import ChatComponent from "../components/rtc/rtcChat";
+// import socket from "ws/lib/websocket";
 
 
 const CanvasContainer = styled.div`
@@ -155,11 +156,28 @@ const Home = () => {
         // rtc
         const [showRtcChat, setShowRtcChat] = useState(false); // RtcChat 상태를 boolean으로 관리
         const [rtcUserName, setRtcUserName] = useState(null);
-
+        const [sendUser, setSendUser] = useState(null);
+        const [receiverUser, setReceiverUser] = useState(null);
         // let rtcUserName = "";
         const Rtc = () => {
             setShowRtcChat(true); // RtcChat 상태를 true로 설정
         }
+        const [socket, setSocket] = useState(null);
+
+        // let socket;
+        useEffect(() => {
+            if (socket) {
+                socket.onmessage = function (event) {
+                    if (window.confirm(`Received message: ${event.data}`)) {
+                        setSendUser(event.data.split("님이")[0]);
+                        console.log(setSendUser + "님이 걸었음");
+                        setReceiverUser(rtcUserName);
+                        setShowRtcChat(true);
+                    }
+                };
+            }
+        }, [socket]);
+
 
         useEffect(() => {
             console.log(isPasswordChangeDiv2);
@@ -220,19 +238,22 @@ const Home = () => {
         const handleGrandchildData = async (data) => {
             console.log("자식의 자식 컴포넌트로부터 받은 데이터:", data);
             setDataFromChild(data);
-            setRtcUserName(data)
+            setReceiverUser(data)
+            setSendUser(rtcUserName)
             try {
                 const response = await fetch('/webrtc/request', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'text/plain'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         sender: localStorage.getItem('userName'),
-                        receiver: localStorage.getItem(data)
+                        receiver: data
                     })
                 });
-
+                if (response.ok) {
+                    setShowRtcChat(true);
+                }
                 if (!response.ok) {
                     throw new Error(`Logout failed with status: ${response.status}`);
                 }
@@ -241,7 +262,6 @@ const Home = () => {
             } catch (error) {
                 console.error("Error during logout:", error);
             }
-            setShowRtcChat(true);
         };
 
 
@@ -263,7 +283,9 @@ const Home = () => {
                 localStorage.setItem('Authorization', accessToken);
                 localStorage.setItem('userName', userName);
                 console.log("로그인 사용자: " + userName);
-                const socket = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
+                // const socket = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
+                setRtcUserName(userName);
+                setSocket(new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`))
                 // 페이지 이동
                 setUsername('');
                 setPassword('');
@@ -286,6 +308,7 @@ const Home = () => {
                 setLoggedOut(true);
             }
         };
+
         //회원가입 로직
         const handleSubmitSignUp = async (e) => {
             e.preventDefault();
@@ -883,7 +906,7 @@ const Home = () => {
 
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && rtcUserName && <ChatComponent rtcUserName={rtcUserName}/>}
+                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
