@@ -240,6 +240,8 @@ const Home = () => {
             setDataFromChild(data);
             setReceiverUser(data)
             setSendUser(rtcUserName)
+            console.log("보낸이: "+localStorage.getItem('userName'));
+            console.log("받는이: "+data);
             try {
                 const response = await fetch('/webrtc/request', {
                     method: 'POST',
