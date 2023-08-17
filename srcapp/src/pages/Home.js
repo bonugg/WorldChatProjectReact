@@ -21,6 +21,7 @@ import PasswordChange from './PasswordChange';
 import ChatComponent from "../components/rtc/rtcChat";
 
 import CateChatDrag from "./CateChatDrag";
+import RandomChatDrag from "./RandomChatDrag";
 
 const CanvasContainer = styled.div`
   width: 100%;
@@ -94,12 +95,19 @@ const DivStyled = styled.div`
 const Home = React.memo(() => {
         //드래그 채팅창 기능
         const [showDrag, setShowDrag] = useState(false);
+        const [randomChatDrag, setRandomChatDrag] = useState(false);
         //드래그 이벤트
         const handleShowDrag = () => {
             setShowDrag(true);
         };
+        const handleRandomShowDrag = () => {
+            setRandomChatDrag(true);
+        };
         const handleDragClose = () => {
             setShowDrag(false);
+        };
+        const handleRandomShowDragClose = () => {
+            setRandomChatDrag(false);
         };
 
         //계정 기억 상태 변수
@@ -202,11 +210,11 @@ const Home = React.memo(() => {
                 logout();
             }
         };
-    const logoutApiCate = (newValue) => {
-        if (newValue) {
-            logout();
-        }
-    };
+        const logoutApiCate = (newValue) => {
+            if (newValue) {
+                logout();
+            }
+        };
         //패스워드 수정 창 띄우고 창 밖 클릭 시 창 닫힘
         useEffect(() => {
             if (isPasswordChangeDiv) {
@@ -965,7 +973,7 @@ const Home = React.memo(() => {
                             </section>
                             <ul>
                                 <li className="menu_li"
-                                    style={{marginTop:'20px'}}
+                                    style={{marginTop: '20px'}}
                                 >
                                     <a className="menu_a" onClick={home}>Home</a>
                                 </li>
@@ -981,7 +989,7 @@ const Home = React.memo(() => {
                                         <li className="menu_li">
                                             <a className="menu_a">Chat</a>
                                             <ul className="menu_li">
-                                                <li onClick={handleShowDrag}
+                                                <li onClick={handleRandomShowDrag}
                                                     className={"menu_li_sub"}
                                                 >
                                                     Random Chat
@@ -1012,7 +1020,9 @@ const Home = React.memo(() => {
                             </ul>
                         </aside>
                         {/* 드래그 채팅창 사이드 밖 영역 */}
-                        <CateChatDrag show={showDrag}  logoutApiCate={logoutApiCate}onClose={handleDragClose} />
+                        <RandomChatDrag show={randomChatDrag} logoutApiCate={logoutApiCate} onClose={handleRandomShowDragClose}/>
+                        <CateChatDrag show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
+
                     </div>
                 </Suspense>
             </div>

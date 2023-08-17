@@ -97,9 +97,39 @@ const UserListPanel = styled.div`
 `;
 
 const Drag = React.memo(({show, onClose, logoutApiCate}) => {
+        // 위치 및 상태 설정
+        const [windowSize, setWindowSize] = useState({
+            width: window.innerWidth,
+            height: window.innerHeight,
+        });
+        useEffect(() => {
+            const handleResize = () => {
+                setWindowSize({
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                });
+
+                const newPosition = {
+                    x: (window.innerWidth / 2) - (450 / 2),  //450은 Draggable 컴포넌트의 너비
+                    y: (window.innerHeight / 2) - (600 / 2), //230은 Draggable 컴포넌트의 높이
+                };
+                setPosition(newPosition);
+            };
+
+            window.addEventListener('resize', handleResize);
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }, []);
+        const initialPosition = {
+            x: (windowSize.width / 2) - (450 / 2), // 450은 Draggable 컴포넌트의 너비
+            y: (windowSize.height / 2) - (600 / 2), // 200은 Draggable 컴포넌트의 높이
+        };
+
         const [isUserListVisible, setIsUserListVisible] = useState(false);
         const [isUserListVisible2, setIsUserListVisible2] = useState(false);
 
+        const [position, setPosition] = useState(initialPosition);
         const handleDrag = useCallback((e, data) => trackPos(data), []);
 
         const catescroll = useRef();  //특정 DOM을 가리킬 때 사용하는 Hook함수, SecondDiv에 적용
@@ -109,7 +139,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const [createRoom2, setCreatRoom2] = useState(false);
         const createRoomRef = useRef(null);
 
-        const [position, setPosition] = useState({x: -183, y: -286});
         const [isMinimized, setIsMinimized] = useState(false);
         const [isClosed, setIsClosed] = useState(false);
 
@@ -260,13 +289,12 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             if (isChatDiv) {
                 connect();
             } else {
-                setIsChatReadOnly(false);
                 setSendMessage('');
                 setMessages([]);
                 setIsUserListVisible(false);
                 setIsUserListVisible2(false);
                 disconnect();
-                if(isUserListVisible){
+                if (isUserListVisible) {
                     setIsUserListVisible2(true);
                 }
             }
@@ -307,7 +335,10 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             setIsUserListVisible2(false);
             setCreatRoom(false);
             setCreatRoom2(false);
+
             setIsClosed(true);
+            setPosition(initialPosition);
+
             setIsChatDiv(false);
             setIsChatReadOnly(false);
             setSendMessage('');
@@ -533,14 +564,9 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                             <div
                                 className="box"
                                 style={{
-                                    minHeight: isMinimized ? '45px' : '100px',
-                                    minWidth: isMinimized ? '30px' : '150px',
-                                    left: isMinimized ? '50%' : 'auto',
-                                    marginLeft: isMinimized ? '-15px' : 'auto',
-                                    bottom: isMinimized ? '30px' : 'auto',
-                                    position: isMinimized ? 'absolute' : 'static',
+                                    position: isMinimized ? 'absolute' : 'fixed',
                                     display: isMinimized ? 'none' : 'block',
-                                    top: '50%',
+                                    top: '0',
                                     cursor: 'auto',
                                     color: 'black',
                                     width: '450px',
@@ -551,6 +577,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                     padding: '1em',
                                     margin: 'auto',
                                     userSelect: 'none',
+                                    zIndex: '2',
                                     background: 'rgb(50, 50, 50,0.8)',
                                     transition: isUserListVisible ? 'border-top-left-radius 0s ease-in-out, border-bottom-left-radius 0s ease-in-out' : 'border-top-left-radius 1s ease-in-out, border-bottom-left-radius 1s ease-in-out'
                                 }}
@@ -917,14 +944,14 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                             <Button
                                 onClick={handleMinimizeClick}
                                 style={{
-                                    position: 'fixed',
+                                    position: 'absolute',
                                     left: '50%',
-                                    bottom: '30px',
+                                    bottom: '80px',
                                     transform: 'translateX(-50%)',
                                 }}
                                 className={"maximum_btn"}
                             >
-                                +
+                                C
                             </Button>
                         )}
                     </>
