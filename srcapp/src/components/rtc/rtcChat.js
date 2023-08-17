@@ -8,6 +8,7 @@ import React, {useEffect, useRef} from 'react';
 // const addr = "localhost:3001"
 
 const ChatRoom = ({sendUser, receiverUser}) => {
+    console.log("ChatRoom 실행")
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
     let host = "";
@@ -61,7 +62,7 @@ const ChatRoom = ({sendUser, receiverUser}) => {
             remoteVideo.current.srcObject = localStream;
         }
     }, [remoteVideo])
-    const localRoom = "1";
+    const localRoom = sendUser+"님과 "+receiverUser+"님의 화상채팅방";
 
     socket.onerror = function (error) {
         console.log("WebSocket Error: ", error);
@@ -169,7 +170,30 @@ const ChatRoom = ({sendUser, receiverUser}) => {
     // 소켓이 끊겼을 때 이벤트처리
     socket.onclose = function (message) {
         log('Socket has been closed');
+        alert("연결이 끊어졌습니다.")
+        exitRooms().then(r => {});
+    }
 
+    const exitRooms = async () => {
+        try {
+            const response = await fetch('/chat/delRoom', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: localRoom,
+                })
+            });
+            if (response.ok) {
+                // 여기에 home으로 이동 + 컴포넌트 내리기;
+            }
+            if (!response.ok) {
+                throw new Error(`Logout failed with status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error("Error during logout:", error);
+        }
     };
 
     // 에러 발생 시 이벤트 처리
@@ -246,7 +270,7 @@ const ChatRoom = ({sendUser, receiverUser}) => {
     function getMedia(constraints) {
         if (localStream) {
             localStream.getTracks().forEach(track => {
-                track.stop();
+                // track.stop();
             });
         }
         navigator.mediaDevices.getUserMedia(constraints)
@@ -435,10 +459,10 @@ const ChatRoom = ({sendUser, receiverUser}) => {
 
                 <div className="row justify-content-around mb-3">
                     <div className="col-lg-6 mb-3">
-                        <video id="local_video" ref={localVideo} autoPlay playsInline></video>
+                        {/*<video id="local_video" ref={localVideo} autoPlay playsInline></video>*/}
                     </div>
                     <div className="col-lg-6 mb-3">
-                        <video id="remote_video" ref={remoteVideo} autoPlay playsInline></video>
+                        {/*<video id="remote_video" ref={remoteVideo} autoPlay playsInline></video>*/}
                     </div>
                 </div>
             </div>

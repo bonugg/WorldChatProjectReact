@@ -26,7 +26,7 @@ const FreindsListItem = ({user , onData}) => {
       transform: ${props => props.visible ? 'translate(-50%, -50%) scaleY(1)' : 'translate(-50%, -50%) scaleY(0)'};
     `;
     const {userId, userName, userNickName, userProfileName} = user;
-    const [showRtcChat, setShowRtcChat] = useState(false); // RtcChat 상태를 boolean으로 관리
+    // const [showRtcChat, setShowRtcChat] = useState(false); // RtcChat 상태를 boolean으로 관리
     // const rtcTest = () =>{
     //     rtcConnect();
     // }
@@ -37,9 +37,9 @@ const FreindsListItem = ({user , onData}) => {
     
     return (
         <div>
-            <DivStyledMenu visible={Rtc}>
-                {showRtcChat && <ChatComponent/>} {/* RtcChat 상태가 true일 때 rtcChat 컴포넌트 렌더링 */}
-            </DivStyledMenu>
+            {/*<DivStyledMenu visible={Rtc}>*/}
+            {/*    {showRtcChat && <ChatComponent/>} /!* RtcChat 상태가 true일 때 rtcChat 컴포넌트 렌더링 *!/*/}
+            {/*</DivStyledMenu>*/}
             <div className={"friendsList_item_div"}>
                 <div className={"friendsList_item_div2"}>
                     <div className={"friendsList_item_img"}
