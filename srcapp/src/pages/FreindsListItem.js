@@ -34,6 +34,7 @@ const FreindsListItem = ({user , onData}) => {
         console.log("자식"+userName)
         onData(userName)
     }
+    
     return (
         <div>
             <DivStyledMenu visible={Rtc}>

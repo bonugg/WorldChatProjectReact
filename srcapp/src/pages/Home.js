@@ -745,6 +745,7 @@ const Home = () => {
 
             setSignUpDiv(false);
             setLoginDiv(false);
+            setShowRtcChat(false);
         }
         const home = () => {
             if (!isSignUpZoom && !isLoginZoom && !isMapageZoom) {
@@ -763,6 +764,7 @@ const Home = () => {
             setMyPageDiv(false);
             setSignUpDiv(false);
             setLoginDiv(false);
+            setShowRtcChat(false);
         };
 
         //로딩 전 메뉴바 숨기기
