@@ -24,7 +24,6 @@ const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi
             setNewUserPwdCheck("");
             setPasswordCheck("At least 8 characters consisting of English and numbers, including 2 special characters");
             setNewPasswordCheckSame("");
-
             setIsPassword(false);
             setIsPassword2(false);
         }
@@ -162,7 +161,6 @@ const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi
     const passwordChangeDiv = () => {
         isPasswordChangeDivClose(false); // Home.js에 이벤트 전달
     }
-
     return (
         <div className={"passwordChangeDiv"}>
             <div>

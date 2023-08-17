@@ -2,6 +2,8 @@ import { Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import "./App.css";
+import RandomStart from './pages/random/RandomStart';
+import RandomChat from './pages/random/RandomChat';
 import Friends from "./pages/danny/Friends";
 import Accept from "./pages/danny/Accept";
 import ReceivedList from "./pages/danny/ReceivedList";
@@ -30,6 +32,8 @@ const App = () => {
                 <Route path='/chatroom2' element={<Chatroom2/>}/>
                 {/*<Route path='/chatroom/:{id}' element={<ChatRoom/>}/>*/}
                 <Route path="*" element={<NotFound />} />
+                <Route path="/randomTest" element={<RandomStart />} />
+                <Route path='/random/:randomRoomId' element={<RandomChat />} />
                 {/*<Route path="/" element={<Layout />}>*/}
                 {/*    <Route path="/about" element={<About />} />*/}
                 {/*    <Route path="/profiles/:username" element={<Profile />} />*/}
