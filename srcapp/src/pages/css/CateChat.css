@@ -369,14 +369,65 @@ input[type='number'] {
 
 .inputchat {
     width: 80% !important;
-    height: 35px;
+    height: 60%;
     margin-right: 10px;
     color: white;
+    border: 1px solid rgba(128, 128, 128, 0.5) !important;
+    border-left-width: 1px !important;
+    border-bottom-left-radius: 0px !important;
+    border-top-left-radius: 0px !important;
 }
-
+.OneChat_menu_div{
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+.menu_div{
+    width: 200px;
+    height: 100px;
+    background-color: rgba(20, 20, 20, 0.8) !important;
+}
+.add_now{
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 54% !important;
+    font-size: 15px !important;
+    color: white !important;
+    border-bottom-width: 0px !important;
+    outline: none !important;
+    background-color: rgba(20, 20, 20, 0.8) !important;
+    font-family: 'Russo One', sans-serif !important;
+    border-radius: 10px !important;
+    border-top-right-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+}
+.add_now:hover .menu_div{
+    background-color: rgba(20, 20, 20, 0.8) !important;
+}
+.add {
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 54% !important;
+    font-size: 15px !important;
+    color: white !important;
+    border-right-width: 0px !important;
+    outline: none !important;
+    background-color: rgba(20, 20, 20, 0.8) !important;
+    font-family: 'Russo One', sans-serif !important;
+    border-radius: 10px !important;
+    border-top-right-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+    transition: border-bottom-left-radius 1s ease-in-out !important;
+}
+.add:hover{
+    background-color: rgba(20, 20, 20, 0.8) !important;
+}
 .btnSend {
     width: 20% !important;
-    min-height: 35px !important;
+    height: 60% !important;
     font-size: 15px !important;
     color: white !important;
     border: 1px solid rgba(200, 200, 200, 0.4) !important;
@@ -557,9 +608,10 @@ input[type='number'] {
     text-align: center !important;
     box-sizing: border-box;
     border-radius: 5px !important;
+    border: 1px solid gray;
 }
 .roomCreate:hover{
-    background-color: rgba(0, 0, 0, 0.6) !important;
+    background-color: rgba(50, 50, 50, 0.8) !important;
 }
 .userList {
     width: 80px !important;
@@ -578,7 +630,9 @@ input[type='number'] {
 .userList:hover{
     background-color: rgba(0, 0, 0, 0.6) !important;
 }
-
+.roomList_item_div2 {
+    display: none;
+}
 .roomList_item_div {
     width: 100%;
     height: 50px;

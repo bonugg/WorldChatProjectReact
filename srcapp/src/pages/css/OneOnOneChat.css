@@ -1,0 +1,117 @@
+.header{
+    width: 100%;
+    height: 30px;
+    display: flex;
+}
+.btnDiv_create{
+    width: 100px;
+    display: flex;
+    justify-content: flex-start;
+}
+.title_cate{
+    width: calc(100% - 200px);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.btnDiv{
+    width: 100px;
+    display: flex;
+    justify-content: flex-end;
+}
+.minimum{
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 10px !important;
+    border-bottom-right-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+    font-family: 'Russo One', sans-serif !important;
+}
+.minimum:hover{
+    background-color: rgba(255, 255, 255, 0.4) !important;
+}
+.close{
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    background-color: rgba(205, 92, 92, 0.8) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 10px !important;
+    border-top-left-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+    font-family: 'Russo One', sans-serif !important;
+}
+.close:hover{
+    background-color: rgba(205, 92, 92, 0.4) !important;
+}
+.maximum_btn{
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    color: black !important;
+    font-family: 'Russo One', sans-serif !important;
+    box-shadow: 0px 0px 10px 2px rgba(255, 255, 255, 0.7) !important;
+}
+.maximum_btn:hover{
+    background-color: rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0px 0px 10px 2px rgba(255, 255, 255, 0.3) !important;
+}
+.select {
+    width: 100%;
+    height: calc(100% - 30px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.random_start{
+    width: 100%;
+    height: 100%;
+}
+.random_start_2{
+    width: 100%;
+    height: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-transform: uppercase;
+    font-size: 20px;
+    color: white;
+}
+.random_start_3{
+    width: 100%;
+    height: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.random_btn{
+    background-color: rgba(0, 0, 0, 0.9) !important;
+    width: 150px !important;
+    min-height: 50px !important;
+    font-family: 'Russo One', sans-serif !important;
+    color: white !important;
+    font-size: 15px !important;
+    border: 1px solid rgba(200, 200, 200, 0.3) !important;
+    border-radius: 10px !important;
+}
+.random_btn:hover{
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    border: 1px solid rgba(200, 200, 200, 0.6) !important;
+}
+.EnterRoomChat_one {
+    width: 100%;
+    height: 100%;
+}
+.chat_one {
+    width: 100%;
+    height: calc(100% - 30px);
+    padding-top: 15px;
+    box-sizing: border-box;
+}

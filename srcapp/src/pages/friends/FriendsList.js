@@ -6,6 +6,7 @@ import FriendsListItem from "./FriendsListItem";
 const FriendsList = () => {
     const [friendsList, setFriendsList] = useState([]);
 
+
     useEffect(() => {
         const getFriendsListAxios = async () => {
             try {

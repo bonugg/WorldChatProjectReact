@@ -135,6 +135,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const catescroll = useRef();  //특정 DOM을 가리킬 때 사용하는 Hook함수, SecondDiv에 적용
 
         //방 생성 클릭 시 실해되는 상태 변수
+        const [createRoomId, setCreateRoomId] = useState('');
         const [createRoom, setCreatRoom] = useState(false);
         const [createRoom2, setCreatRoom2] = useState(false);
         const createRoomRef = useRef(null);
@@ -267,10 +268,10 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                     type: "LEAVE",
                     cateId: CateRoom.cateId,
                 }));
+                stompClient.disconnect();
                 setSendMessage('');
                 setIsChatReadOnly(false);
                 setMessages([]);
-                stompClient.disconnect();
                 setIsUserListVisible(false);
                 setIsUserListVisible2(false);
                 setStompClient(null);
@@ -287,6 +288,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
 
         useEffect(() => {
             if (isChatDiv) {
+                setCreateRoomId('');
                 connect();
             } else {
                 setSendMessage('');
@@ -485,31 +487,39 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         }
 
         const cateRoomCreate = async (retry = true) => {
-            const response = await fetch('/api/v1/cateChat/createCateRoom', {
-                method: 'POST',
-                headers: {
-                    'Authorization': localStorage.getItem('Authorization'),
-                    'userName': localStorage.getItem('userName'),
-                    'Content-Type': 'application/json', // Content-Type 추가
-                },
-                body: JSON.stringify(formValues), // 객체를 문자열로 변환
-            });
+            try {
+                const response = await fetch('/api/v1/cateChat/createCateRoom', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': localStorage.getItem('Authorization'),
+                        'userName': localStorage.getItem('userName'),
+                        'Content-Type': 'application/json', // Content-Type 추가
+                    },
+                    body: JSON.stringify(formValues), // 객체를 문자열로 변환
+                });
 
-            const accessToken = response.headers.get('Authorization');
-            if (accessToken != null) {
-                localStorage.setItem('Authorization', accessToken);
-            }
-            if (response.headers.get('refresh') != null) {
-                logoutApiCate(true);
-                return;
-            }
-            console.log(response);
-            const text = await response.text();
-            console.log(text);
-            if (text == "roomCreate") {
-                CloseCreateRoom();
-                roomListLoad(formValues.interest);
-            } else {
+                const accessToken = response.headers.get('Authorization');
+                if (accessToken != null) {
+                    localStorage.setItem('Authorization', accessToken);
+                }
+                if (response.headers.get('refresh') != null) {
+                    logoutApiCate(true);
+                    return;
+                }
+                const rs_cateRoom = await response.json(); // JSON 데이터를 추출합니다.
+                console.log(rs_cateRoom); // rs_cateRoom 객체를 출력합니다.
+
+                if (rs_cateRoom.cateId) {
+                    CloseCreateRoom();
+                    setCreateRoomId(rs_cateRoom.cateId);
+                    roomListLoad(formValues.interest);
+                } else {
+                    console.log("cateRoomCreate 재시도")
+                    if (retry) {
+                        await cateRoomCreate(false);
+                    }
+                }
+            } catch (e) {
                 if (retry) {
                     await cateRoomCreate(false);
                 }
@@ -799,6 +809,12 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                 <div className={"EnterRoomChat_input"}>
                                                     <form className={"EnterRoomChat_input_form"}
                                                           onSubmit={handleSendMessage}>
+                                                        <Button
+                                                            className={"btnSend"}
+                                                            type="submit"
+                                                            onClick={handleSendMessage}
+                                                        >+
+                                                        </Button>
                                                         <input
                                                             placeholder={!isChatReadOnly ? "Connecting, please wait" : "Please enter your message"}
                                                             type="text"
@@ -929,6 +945,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                 room={room}
                                                                 onCateRoomAndChatDivUpdate={setCateRoomAndHandleChatDivUpdate}
                                                                 cateChatList={handleCateChatList}
+                                                                shouldImmediatelyEnter={room.cateId === createRoomId}
                                                             ></CateChatListItem>
                                                         ))
                                                     )}

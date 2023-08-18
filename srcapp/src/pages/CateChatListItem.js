@@ -1,11 +1,17 @@
-import React, {useState} from 'react';
+import React, {useEffect,useState} from 'react';
 
 import Button from "@mui/material/Button";
 import "./css/CateChat.css";
 
 
-const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChatList}) => {
+const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChatList, shouldImmediatelyEnter}) => {
     const {cateId, cateName, cateUserCnt, maxUserCnt, interest} = room;
+
+    useEffect(() => {
+        if (shouldImmediatelyEnter) {
+            cateRoomEnter();
+        }
+    }, [shouldImmediatelyEnter]);
 
     const cateRoomEnter = async (retry = true) => {
         try {
@@ -51,9 +57,10 @@ const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChat
         }
     };
 
-    return (
+    return [cateRoomEnter, (
         <div
-            className={"roomList_item_div"}>
+            className={shouldImmediatelyEnter ? 'roomList_item_div2' : 'roomList_item_div'}
+        >
             <div className={"roomList_item_div_2"}>
                 <span className={"roomList_name_1"}>ROOM NAME :&nbsp;</span>
                 <span className={"roomList_name_2"}>{cateName}</span>
@@ -71,7 +78,7 @@ const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChat
 
             </div>
         </div>
-    );
+    )];
 });
 
 export default CateChatListItem;

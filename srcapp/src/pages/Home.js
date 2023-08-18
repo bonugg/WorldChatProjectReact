@@ -22,6 +22,7 @@ import ChatComponent from "../components/rtc/rtcChat";
 
 import CateChatDrag from "./CateChatDrag";
 import RandomChatDrag from "./RandomChatDrag";
+import OneOnOneChatDrag from "./OneOnOneChatDrag";
 
 const CanvasContainer = styled.div`
   width: 100%;
@@ -95,7 +96,10 @@ const DivStyled = styled.div`
 const Home = React.memo(() => {
         //드래그 채팅창 기능
         const [showDrag, setShowDrag] = useState(false);
+        const [oneOnOneUserId, setOneOnOneUserId] = useState('');
+        const [oneOnOneUserNickName, setOneOnOneUserNickName] = useState('');
         const [randomChatDrag, setRandomChatDrag] = useState(false);
+        const [oneononeChatDrag, setOneononeChatDrag] = useState(false);
         //드래그 이벤트
         const handleShowDrag = () => {
             setShowDrag(true);
@@ -103,13 +107,21 @@ const Home = React.memo(() => {
         const handleRandomShowDrag = () => {
             setRandomChatDrag(true);
         };
+        const isOneOnOneChatDiv = (isDiv, userId, userNickName) => {
+            setOneononeChatDrag(isDiv);
+            setOneOnOneUserId(userId);
+            setOneOnOneUserNickName(userNickName);
+        };
+
         const handleDragClose = () => {
             setShowDrag(false);
         };
         const handleRandomShowDragClose = () => {
             setRandomChatDrag(false);
         };
-
+        const handleOneOnOneShowDragClose = () => {
+            setOneononeChatDrag(false);
+        };
         //계정 기억 상태 변수
         const [rememberAccount, setRememberAccount] = useState(false);
 
@@ -777,6 +789,7 @@ const Home = React.memo(() => {
                                 FriendsList={FriendsList}
                                 FriendNationally={FriendNationally}
                                 logoutApi3={logoutApi3}
+                                isOneOnOneChatDiv={isOneOnOneChatDiv}
                             />
                         </DivStyledMenu2>
                         <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"}
@@ -1020,7 +1033,10 @@ const Home = React.memo(() => {
                             </ul>
                         </aside>
                         {/* 드래그 채팅창 사이드 밖 영역 */}
-                        <RandomChatDrag show={randomChatDrag} logoutApiCate={logoutApiCate} onClose={handleRandomShowDragClose}/>
+                        <RandomChatDrag show={randomChatDrag} logoutApiCate={logoutApiCate}
+                                        onClose={handleRandomShowDragClose}/>
+                        <OneOnOneChatDrag show={oneononeChatDrag} oneOnOneUserId={oneOnOneUserId} oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
+                                          onClose={handleOneOnOneShowDragClose}/>
                         <CateChatDrag show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
 
                     </div>

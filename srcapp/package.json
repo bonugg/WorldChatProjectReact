@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emoji-mart/data": "^1.1.2",
+    "@emoji-mart/react": "^1.1.1",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mediapipe/tasks-vision": "^0.10.3",
@@ -19,6 +21,8 @@
     "bootstrap": "^5.3.1",
     "browserify-zlib": "^0.2.0",
     "cors": "^2.8.5",
+    "emoji-mart": "^5.5.2",
+    "emojione": "^4.5.0",
     "http-proxy-middleware": "^2.0.6",
     "https-browserify": "^1.0.0",
     "jquery": "^3.7.0",
