@@ -20,6 +20,8 @@ import FreindsList from './FreindsList';
 import PasswordChange from './PasswordChange';
 import CateChat from './CateChat';
 import ChatComponent from "../components/rtc/rtcChat";
+import ChatVoiceComponent from "../components/rtc/rtcVoiceChat"
+import SockJS from 'sockjs-client';
 // import socket from "ws/lib/websocket";
 
 
@@ -155,24 +157,35 @@ const Home = () => {
 
         // rtc
         const [showRtcChat, setShowRtcChat] = useState(false); // RtcChat 상태를 boolean으로 관리
+        const [showRtcVoiceChat,setShowRtcVoiceChat] = useState(false);
         const [rtcUserName, setRtcUserName] = useState(null);
         const [sendUser, setSendUser] = useState(null);
         const [receiverUser, setReceiverUser] = useState(null);
         // let rtcUserName = "";
         const Rtc = () => {
             setShowRtcChat(true); // RtcChat 상태를 true로 설정
+            
         }
+
         const [socket, setSocket] = useState(null);
 
         // let socket;
         useEffect(() => {
             if (socket) {
                 socket.onmessage = function (event) {
-                    if (window.confirm(`Received message: ${event.data}`)) {
-                        setSendUser(event.data.split("님이")[0]);
+                    const receivedMessage = event.data;
+                    if (window.confirm(`Received message: ${receivedMessage}`)) {
+                        setSendUser(receivedMessage.split("님이")[0]);
                         console.log(setSendUser + "님이 걸었음");
                         setReceiverUser(rtcUserName);
-                        setShowRtcChat(true);
+                        
+                        if (receivedMessage.includes("영상통화")) {
+                            setShowRtcChat(true);
+                            setShowRtcVoiceChat(false);
+                        } else if (receivedMessage.includes("음성통화")) {
+                            setShowRtcVoiceChat(true);
+                            setShowRtcChat(false);
+                        }
                     }
                 };
             }
@@ -234,37 +247,90 @@ const Home = () => {
 
 
         const [dataFromChild, setDataFromChild] = useState(null);
+        // const [type2, setType2] = useState('');
+        // const handleGrandchildData = async (data) => {
+        //     console.log("자식의 자식 컴포넌트로부터 받은 데이터:" + data + type2);
+        //     setDataFromChild(data);
+        //     setReceiverUser(data)
+        //     setSendUser(rtcUserName)
+        //     console.log("보낸이: "+localStorage.getItem('userName'));
+        //     console.log("받는이: "+data);
 
-        const handleGrandchildData = async (data) => {
-            console.log("자식의 자식 컴포넌트로부터 받은 데이터:", data);
-            setDataFromChild(data);
-            setReceiverUser(data)
-            setSendUser(rtcUserName)
-            console.log("보낸이: "+localStorage.getItem('userName'));
-            console.log("받는이: "+data);
-            try {
-                const response = await fetch('/webrtc/request', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        sender: localStorage.getItem('userName'),
-                        receiver: data
-                    })
-                });
-                if (response.ok) {
-                    setShowRtcChat(true);
-                }
-                if (!response.ok) {
-                    throw new Error(`Logout failed with status: ${response.status}`);
-                }
+        //     try {
+        //         const response = await fetch('/webrtc/request', {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json'
+        //             },
+        //             body: JSON.stringify({
+        //                 sender: localStorage.getItem('userName'),
+        //                 receiver: data
+        //             })
+        //         });
+        //         if (response.ok) {
+        //             if (type2 === "video") {
+        //                 setShowRtcChat(true);
+        //             } else if (type2 === "voice") {
+        //                 // 음성 채팅 컴포넌트 보여주기 로직
+        //                 setShowRtcVoiceChat(true);
+        //             }
+        //         }
+        //         if (!response.ok) {
+        //             throw new Error(`Logout failed with status: ${response.status}`);
+                    
+        //         }
+        //     } catch (error) {
+        //         console.error("Error during logout:", error);
+        //     }
+        // };
 
-                console.log("Logout successful");
-            } catch (error) {
-                console.error("Error during logout:", error);
+        const [type2, setType2] = useState('');
+
+useEffect(() => {
+    if (type2) {
+        sendRequestToServer();
+    }
+}, [type2]);
+
+const sendRequestToServer = async () => {
+    try {
+        const response = await fetch('/webrtc/request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: localStorage.getItem('userName'),
+                receiver: receiverUser,
+                type:type2
+            })
+        });
+        if (response.ok) {
+            if (type2 === "video") {
+                setShowRtcChat(true);
+                setShowRtcVoiceChat(false);
+            } else if (type2 === "voice") {
+                setShowRtcVoiceChat(true);
+                setShowRtcChat(false);
             }
-        };
+        } else {
+            throw new Error(`Logout failed with status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Error during logout:", error);
+    }
+};
+
+const setChatType = (type) => {
+    setType2(type);
+};
+
+const handleGrandchildData = (data) => {
+    setDataFromChild(data);
+    setReceiverUser(data);
+    setSendUser(rtcUserName);
+};
+
 
 
         //로그인 로직
@@ -287,7 +353,30 @@ const Home = () => {
                 console.log("로그인 사용자: " + userName);
                 // const socket = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
                 setRtcUserName(userName);
-                setSocket(new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`))
+                
+                //const ws = new WebSocket(`wss://localhost:9002/test`)
+                const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
+
+                setSocket(ws)
+                // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
+                ws.onopen = (event) => {
+                    console.log("WebSocket 연결 성공:", event);
+                };
+
+                // 다른 이벤트 리스너들도 추가할 수 있습니다.
+                ws.onmessage = (event) => {
+                    console.log("서버로부터 메시지 수신:", event.data);
+                };
+
+                ws.onerror = (event) => {
+                    console.error("WebSocket 오류 발생:", event);
+                };
+
+                ws.onclose = (event) => {
+                    console.log("WebSocket 연결 종료:", event);
+                };
+
+                // setSocket(ws);
                 // 페이지 이동
                 setUsername('');
                 setPassword('');
@@ -838,6 +927,7 @@ const Home = () => {
                         <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
                             <FreindsList
                                 onData={handleGrandchildData}
+                                setChatType={setChatType}
                                 FriendsList={FriendsList}
                                 FriendNationally={FriendNationally}
                                 logoutApi3={logoutApi3}
@@ -911,6 +1001,10 @@ const Home = () => {
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
                             {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser}/>}
+                        </DivStyledMenu>
+
+                        <DivStyledMenu visible={showRtcVoiceChat}>
+                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>

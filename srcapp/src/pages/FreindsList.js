@@ -14,11 +14,12 @@ import Philippines from "../img/flag/Philippines-flag.png";
 
 import "./css/FreindsList.css";
 
-const FreindsList = ({FriendNationally, logoutApi3, FriendsList, onData}) => {
+const FreindsList = ({FriendNationally, logoutApi3, FriendsList, onData, setChatType}) => {
     // useEffect(()=>{console.log("부모"+aa)},[aa])
     const [userList, setUserList] = useState([]);
     const [nationallyName, setNationallyName] = useState('');
     const freindsList = async (retry = true) => {
+        
         try {
             const response = await fetch('/api/v1/user/friendsList', {
                 method: 'POST',
@@ -94,7 +95,7 @@ const FreindsList = ({FriendNationally, logoutApi3, FriendsList, onData}) => {
             <div className={"friendsList"}>
                 <div className={"friendsList_2"}>
                         {userList && userList.map(user => <FreindsListItem key={user.userId}
-                                                                           user={user} onData={onData}></FreindsListItem>)}
+                                                                           user={user} onData={onData} setChatType={setChatType}></FreindsListItem>)}
                 </div>
             </div>
         </div>

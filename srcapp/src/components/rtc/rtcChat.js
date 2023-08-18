@@ -7,7 +7,7 @@ import React, {useEffect, useRef} from 'react';
 
 // const addr = "localhost:3001"
 
-const ChatRoom = ({sendUser, receiverUser}) => {
+const ChatRoom = ({sendUser, receiverUser, setShowRtcChat}) => {
     console.log("ChatRoom 실행")
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
@@ -16,7 +16,8 @@ const ChatRoom = ({sendUser, receiverUser}) => {
     console.log(host)
     host = host.slice(0, -4);
     console.log("wss://" + host + "9002" + "/signal")
-    const socket = new WebSocket("wss://" + host + "9002" + "/signal");
+    // const socket = new WebSocket("wss://" + host + "9002" + "/signal");
+    const socket = new WebSocket("wss://localhost:9002/signal");
     let localUserName = "";
     // let loginUserName = "";
     // console.log(rtcUserName+"이게 넘어온 이름")
@@ -52,13 +53,14 @@ const ChatRoom = ({sendUser, receiverUser}) => {
     const localVideo = useRef(null);
     useEffect(() => {
         if (localVideo.current && localStream) {
+            alert("스트림")
             localVideo.current.srcObject = localStream;
         }
     }, [localStream]);
 
     const remoteVideo = useRef(null);
     useEffect(() => {
-        if (remoteVideo.current && localStream) {
+        if (remoteVideo.current) {
             remoteVideo.current.srcObject = localStream;
         }
     }, [remoteVideo])
@@ -70,20 +72,25 @@ const ChatRoom = ({sendUser, receiverUser}) => {
 
     // 비디오 켜기/끄기 함수
     const toggleVideo = () => {
-        if (localVideo.srcObject) {
-            const enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
-            localVideo.srcObject.getVideoTracks()[0].enabled = !enabled;
-        }
+        // if (localVideo.srcObject) {
+        //     const enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
+        //     console.log("카메라 토글1");
+        //     localVideo.srcObject.getVideoTracks()[0].enabled = !enabled;
+        // }
         if (localVideo.current.srcObject) {
             const enabled = localVideo.current.srcObject.getVideoTracks()[0].enabled;
+            console.log("카메라 토글2");
             localVideo.current.srcObject.getVideoTracks()[0].enabled = !enabled;
+            // remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+            // localVideo.srcObject.getTracks().forEach(track => track.stop());
         }
     };
 
     // 오디오 켜기/끄기 함수
     const toggleAudio = () => {
-        if (localVideo.srcObject) {
+        if (localVideo.current.srcObject) {
             const enabled = localVideo.srcObject.getAudioTracks()[0].enabled;
+            console.log("오디오 토글");
             localVideo.srcObject.getAudioTracks()[0].enabled = !enabled;
         }
     };
@@ -91,11 +98,14 @@ const ChatRoom = ({sendUser, receiverUser}) => {
     // 방 나가기 함수
     const exitRoom = () => {
         stop(); // 웹소켓 연결 종료 및 비디오/오디오 정지
+        setShowRtcChat(false);
     };
 
     // 페이지 시작시 실행되는 메서드 -> socket 을 통해 server 와 통신한다
     socket.onmessage = function (msg) {
+        console.log("peertest !!!!!!!!!!!!!!!!!!!!!!!!!");
         let message = JSON.parse(msg.data);
+        console.log("메시지 타입: " + message.type);
         switch (message.type) {
             case "offer":
                 log('Signal OFFER received');
@@ -170,11 +180,11 @@ const ChatRoom = ({sendUser, receiverUser}) => {
     // 소켓이 끊겼을 때 이벤트처리
     socket.onclose = function (message) {
         log('Socket has been closed');
-        alert("연결이 끊어졌습니다.")
-        exitRooms().then(r => {});
+        // alert("연결이 끊어졌습니다.")
+        // exitRooms().then(r => {});
     }
 
-    const exitRooms = async () => {
+    const exitRooms = async (roomName) => {
         try {
             const response = await fetch('/chat/delRoom', {
                 method: 'POST',
@@ -182,11 +192,12 @@ const ChatRoom = ({sendUser, receiverUser}) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    sender: localRoom,
+                    sender: roomName,
                 })
             });
             if (response.ok) {
                 // 여기에 home으로 이동 + 컴포넌트 내리기;
+                console.log("방 삭제 완료!");
             }
             if (!response.ok) {
                 throw new Error(`Logout failed with status: ${response.status}`);
@@ -232,14 +243,20 @@ const ChatRoom = ({sendUser, receiverUser}) => {
 
             // 비디오 정지
             if (remoteVideo.srcObject) {
+                console.log("상대 카메라 꺼짐");
                 remoteVideo.srcObject.getTracks().forEach(track => track.stop());
             }
             if (localVideo.srcObject) {
+                console.log("내 카메라 꺼짐");
                 localVideo.srcObject.getTracks().forEach(track => track.stop());
             }
 
-            remoteVideo.src = null;
-            localVideo.src = null;
+            remoteVideo.current = null;
+            localVideo.current = null;
+
+            setShowRtcChat(false);
+            alert("상대방과의 연결이 끊어졌습니다.");
+            exitRooms(localRoom).then(r => {});
 
             // myPeerConnection 초기화
             myPeerConnection.close();
@@ -270,7 +287,7 @@ const ChatRoom = ({sendUser, receiverUser}) => {
     function getMedia(constraints) {
         if (localStream) {
             localStream.getTracks().forEach(track => {
-                // track.stop();
+                track.stop();
             });
         }
         navigator.mediaDevices.getUserMedia(constraints)
@@ -459,10 +476,10 @@ const ChatRoom = ({sendUser, receiverUser}) => {
 
                 <div className="row justify-content-around mb-3">
                     <div className="col-lg-6 mb-3">
-                        {/*<video id="local_video" ref={localVideo} autoPlay playsInline></video>*/}
+                        <video id="local_video" ref={localVideo} autoPlay playsInline></video>
                     </div>
                     <div className="col-lg-6 mb-3">
-                        {/*<video id="remote_video" ref={remoteVideo} autoPlay playsInline></video>*/}
+                        <video id="remote_video" ref={remoteVideo} autoPlay playsInline></video>
                     </div>
                 </div>
             </div>

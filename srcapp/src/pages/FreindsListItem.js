@@ -7,7 +7,7 @@ import Profile from "../img/profile.png";
 import ChatComponent from "../components/rtc/rtcChat";
 import styled, {keyframes} from "styled-components";
 
-const FreindsListItem = ({user , onData}) => {
+const FreindsListItem = ({user , onData,setChatType}) => {
     const slideDown = keyframes`
       0% {
         transform: scale(0);
@@ -30,10 +30,13 @@ const FreindsListItem = ({user , onData}) => {
     // const rtcTest = () =>{
     //     rtcConnect();
     // }
-    const Rtc = () => {
+    const Rtc = (type) => {
         console.log("자식"+userName)
-        onData(userName)
+        onData(userName);
+        setChatType(type);
+
     }
+
     
     return (
         <div>
@@ -59,12 +62,12 @@ const FreindsListItem = ({user , onData}) => {
                             1:1 Chat
                         </Button>
                         <Button
-                            onClick={Rtc} className={"friendsList_item_btn2"}
+                            onClick={() => Rtc("video")} className={"friendsList_item_btn2"}
                         >
                             Video Chat
                         </Button>
                         <Button
-                            className={"friendsList_item_btn2"}
+                            onClick={() => Rtc("voice")} className={"friendsList_item_btn2"}
                         >
                             Voice Chat
                         </Button>
