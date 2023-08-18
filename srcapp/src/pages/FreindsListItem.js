@@ -4,7 +4,6 @@ import Button from "@mui/material/Button";
 import "./css/FreindsList.css";
 import Profile from "../img/profile.png";
 // import rtcConnect from "../components/rtc/rtcChat"
-import ChatComponent from "../components/rtc/rtcChat";
 import styled, {keyframes} from "styled-components";
 
 const FreindsListItem = ({user , onData}) => {

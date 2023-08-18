@@ -159,9 +159,10 @@ const Home = () => {
         const [sendUser, setSendUser] = useState(null);
         const [receiverUser, setReceiverUser] = useState(null);
         // let rtcUserName = "";
-        const Rtc = () => {
-            setShowRtcChat(true); // RtcChat 상태를 true로 설정
-        }
+        // const Rtc = () => {
+        //     console.log("Rtc실행됨");
+        //     setShowRtcChat(true); // RtcChat 상태를 true로 설정
+        // }
         const [socket, setSocket] = useState(null);
 
         // let socket;
@@ -170,8 +171,8 @@ const Home = () => {
                 socket.onmessage = function (event) {
                     if (window.confirm(`Received message: ${event.data}`)) {
                         setSendUser(event.data.split("님이")[0]);
-                        console.log(setSendUser + "님이 걸었음");
                         setReceiverUser(rtcUserName);
+                        console.log("수신자 화면에서 나옴");
                         setShowRtcChat(true);
                     }
                 };
@@ -254,6 +255,7 @@ const Home = () => {
                     })
                 });
                 if (response.ok) {
+                    console.log("발신자 화면에서 나옴");
                     setShowRtcChat(true);
                 }
                 if (!response.ok) {
@@ -285,7 +287,6 @@ const Home = () => {
                 localStorage.setItem('Authorization', accessToken);
                 localStorage.setItem('userName', userName);
                 console.log("로그인 사용자: " + userName);
-                // const socket = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
                 setRtcUserName(userName);
                 setSocket(new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`))
                 // 페이지 이동
@@ -908,7 +909,7 @@ const Home = () => {
 
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser}/>}
+                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
@@ -1044,7 +1045,7 @@ const Home = () => {
                                     <a className="menu_a" onClick={home}>Home</a>
                                 </li>
                                 <li className="menu_li">
-                                    <a className="menu_a" onClick={Rtc}>Test</a>
+                                    {/*<a className="menu_a" onClick={Rtc}>Test</a>*/}
                                 </li>
                                 {loggedIn ? (
                                     <>
