@@ -16,6 +16,8 @@
 *::-webkit-scrollbar-track {
     background-color: rgba(50, 50, 50, 0.5);
 }
+
+
 body {
     color: white;
 }
@@ -49,10 +51,10 @@ body {
 }
 
 .loading_text {
-    width: 150px;
-    position: absolute;
-    top: 15px;
-    left: 5px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     color: rgba(255, 255, 255, 0.8);
     font-size: 20px;
     font-weight: bold;
@@ -60,8 +62,6 @@ body {
 }
 
 .spinner {
-    position: relative;
-    display: inline-block;
     min-width: 150px !important;
     height: 150px !important;
     border-radius: 50%;
@@ -157,10 +157,15 @@ a {
     position: fixed; /* 스크롤을 따라오도록 지정 */
     left: 0;
     top: 10%;
-    background-color: rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(50, 50, 50, 1);
+    background-color: rgba(5, 5, 5, 0.5);
+    border: 0px solid rgba(128, 128, 128, 0.2);
+    border-top-width: 4px;
+    border-bottom-width: 4px;
     width: var(--side-bar-width);
     height: 80vh; /* 사이드바의 높이를 전체 화면 높이의 90%로 지정 */
+}
+.side-bar ul{
+    background-color: rgba(0, 0, 0, 0) !important;
 }
 
 /* 아이콘 시작 */
@@ -293,21 +298,31 @@ a {
 
 /* 모든 메뉴가 마우스 인식 시 반응 */
 .side-bar ul > li:hover > a {
-    background-color: rgba(50, 50, 50, 0.5);
+    background-color: rgba(30, 30, 30, 1);
 }
-
+.menu_li_sub{
+    height: 70px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(30, 30, 30, 1);
+    color: white;
+    transition: all 0.25s ease-in-out;
+}
+.menu_li_sub:hover{
+    background-color: rgba(50, 50, 50, 0.2);
+}
 /* 1차 메뉴의 항목이 마우스 인식 시에 2차 메뉴 등장 */
 .side-bar > ul > li:hover > ul {
     display: block;
     position: absolute;
-    background-color: rgba(28, 28, 28, 0.8);
     top: 0; /* 2차 메뉴의 상단을 1차 메뉴의 상단에 고정 */
-    left: 100%; /* 2차 메뉴를 1차 메뉴의 너비만큼 이동 */
-    width: 80%; /* 1차 메뉴의 너비를 상속 */
+    left: 86.5%; /* 2차 메뉴를 1차 메뉴의 너비만큼 이동 */
+    width: 100%; /* 1차 메뉴의 너비를 상속 */
 }
 
 .menu_li_li:hover {
-    background-color: rgba(40, 40, 40, 0.5);
+    background-color: rgba(50, 50, 50, 0.5);
 }
 
 /* 사이드바 너비의 80%만큼 왼쪽으로 이동 */
@@ -515,21 +530,21 @@ a {
 .myPageDiv_info_1_text{
     color: rgba(255, 255, 255, 0.8) !important;
     position: absolute;
-    top: -30px;
+    top: -13px;
     left: 40px;
     font-size: 10px;
 }
 .myPageDiv_info_2_text{
     color: rgba(255, 255, 255, 0.8) !important;
     position: absolute;
-    top: 40px;
+    top: 57px;
     left: 40px;
     font-size: 10px;
 }
 .myPageDiv_info_3_text{
     color: rgba(255, 255, 255, 0.8) !important;
     position: absolute;
-    top: 110px;
+    top: 127px;
     left: 40px;
     font-size: 10px;
 }
@@ -626,7 +641,7 @@ a {
     font-size: 11px;
 }
 .myPageDiv_Message_btn:hover{
-    background-color: rgba(50, 50, 50, 0.5);
+    background-color: rgba(28, 28, 28, 0.8) !important;
 }
 
 input[type=text], input[type=password] {
@@ -733,6 +748,7 @@ input[type=text]:focus, input[type=password]:focus {
 }
 .label_remmember{
     font-size: 15px;
+    color: white !important;
 }
 
 .error_text {
@@ -934,22 +950,22 @@ button[type=button]:hover {
 
 .Text_sign {
     position: absolute;
-    top: 43px;
+    top: 52px;
     left: 20px;
     font-size: 11px;
     color: rgba(255, 255, 255, 1);
 }
 .Text_sign2{
     position: absolute;
-    top: 43px;
-    left: 20px;
+    top: 53px;
+    left: 12px;
     font-size: 10px;
     color: rgba(255, 255, 255, 1);
 }
 .Text_sign_Error2{
     position: absolute;
-    top: 43px;
-    left: 20px;
+    top: 53px;
+    left: 12px;
     font-size: 10px;
     color: white;
 }
@@ -964,9 +980,9 @@ button[type=button]:hover {
 }
 .Text_sign_Error_sign{
     position: absolute;
-    top: 43px;
+    top: 52px;
     left: 20px;
-    font-size: 13px;
+    font-size: 11px;
     color: white;
     font-weight: bold;
 }
@@ -1009,6 +1025,11 @@ input:hover{
     font-size: 10px !important;
     background-color: rgba(50, 50, 50, 0.5) !important;
     color: rgba(255, 255, 255, 0.8) !important;
+}
+.menu_li_select_place{
+    font-size: 10px !important;
+    background-color: rgba(50, 50, 50, 0.5) !important;
+    color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .custom_select_wrapper::after {

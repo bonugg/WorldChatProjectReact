@@ -25,7 +25,7 @@ const Friends = () => {
         requestFrdAxios();
     },[]);
     return (
-            <button type="submit" id="requestFrdBtn" data-userid={2} onClick={requestFrd}>친구추가</button>
+            <button type="submit" id="requestFrdBtn" data-userid={602} onClick={requestFrd}>친구추가</button>
 
     );
 };

@@ -21,7 +21,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     let localUserName = "";
     // let loginUserName = "";
     // console.log(rtcUserName+"이게 넘어온 이름")
-    
+
     if (localStorage.getItem('userName')) {
         console.log("발신 유저 이름: " + sendUser)
         console.log("수신 유저 이름: " + receiverUser)
@@ -151,6 +151,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
         console.log("peertest !!!!!!!!!!!!!!!!!!!!!!!!!");
         let message = JSON.parse(msg.data);
         console.log("메시지 타입: " + message.type);
+
         switch (message.type) {
             case 'video-toggle':
                 if (remoteVideo.current.srcObject) {

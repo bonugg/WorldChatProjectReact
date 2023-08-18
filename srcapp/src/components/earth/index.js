@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect} from "react";
-import {useFrame, useLoader, useThree, extend} from "@react-three/fiber";
+import {useFrame, useLoader, useThree} from "@react-three/fiber";
 import {OrbitControls, Stars} from "@react-three/drei";
 import * as THREE from "three";
 import EarthDayMap from "../../assets/textures/8k_earth_daymap.jpg";
@@ -12,18 +12,19 @@ import CloudsMap from "../../assets/textures/cloud.jpg";
 import {TextureLoader} from "three";
 import MarsMap from "../../assets/textures/mars.jpg";
 import SunMap from "../../assets/textures/sun.jpg";
-export function Earth(props) {
-    const mainCamera = props.mainCamera;
-    const mouseLock = props.mouseLock;
-    const LoginZoom = props.LoginZoom;
-    const loggedIn = props.loggedIn;
-    const loggedOut = props.loggedOut;
-    const isMapageZoom = props.isMapageZoom;
-    const isFriendsListZoom = props.isFriendsListZoom;
-    const FriendsNationally = props.FriendsNationally;
 
-    const isLoginZoom = props.isLoginZoom;
-    const isSignUpZoom = props.isSignUpZoom;
+const Earth = React.memo( ({
+                   mainCamera,
+                   mouseLock,
+                   LoginZoom,
+                   loggedIn,
+                   loggedOut,
+                   isMapageZoom,
+                   isFriendsListZoom,
+                   FriendsNationally,
+                   isLoginZoom,
+                   isSignUpZoom,
+               }) => {
 
     const objectGroup = useRef();
     const [mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
@@ -71,6 +72,14 @@ export function Earth(props) {
     const nomarRef = useRef();
     const cloudsRefnomar = useRef();
 
+    useEffect(() => {
+        if (isCityZoom) {
+            isFriendsListZoom(true);
+            FriendsNationally(FriendsNationally2);
+        } else {
+            isFriendsListZoom(false);
+        }
+    }, [isCityZoom]);
 
     useEffect(() => {
         if (loggedIn) {
@@ -106,7 +115,7 @@ export function Earth(props) {
     const distanceWithinThresholdTime = useRef(0);
 
 
-    useFrame(({camera,clock}) => {
+    useFrame(({camera, clock}) => {
         //로그아웃 시 줌 해제
         if (loggedOut) {
             setZoomIn(false);
@@ -136,42 +145,37 @@ export function Earth(props) {
                     camera.lookAt(target);
                     let zoomInDistance = 0.41;
                     let durationThreshold = 1000; // 원하는 시간 설정 (밀리초 단위)
-                    isFriendsListZoom(false);
                     setearthR(true);
                     setZoomInLock(true);
                     setIsAtInitialPosition(false);
 
                     let currentDistance = camera.position.distanceTo(target);
-
                     if (currentDistance <= zoomInDistance) {
                         distanceWithinThresholdTime.current += deltaTime * 1000; // ms로 변환
 
                         if (distanceWithinThresholdTime.current >= durationThreshold) {
-                            isFriendsListZoom(true);
                             setIsOnMouseClickLock(false);
                             setIsCityZoom(true);
                             setearthR(true);
                             setZoomInLock(true);
                             distanceWithinThresholdTime.current = 0; // Reset
-                            FriendsNationally(FriendsNationally2);
                         }
                     } else {
-                        isFriendsListZoom(false);
                         distanceWithinThresholdTime.current = 0; // Reset
                         setIsCityZoom(false);
                     }
-                }else {
+                } else {
                     camera.position.lerp(target, 0.1);
                     camera.lookAt(new THREE.Vector3(0, 0, 3));
                 }
             }
-        }else {
+        } else {
             isFriendsListZoom(false);
-            if(isMapageZoom){
+            if (isMapageZoom) {
                 setearthR(false);
                 setZoomInLock(false);
                 setIsAtInitialPosition(true);
-            }else {
+            } else {
                 setearthR(false);
                 setZoomInLock(false);
                 if (initialCameraPosition) {
@@ -188,7 +192,7 @@ export function Earth(props) {
                             AllresetCityColors();
                         }
                         //로그아웃이 돼서 홈화면으로 돌아가는 중에 login또는 signup클릭 시 실행
-                        if(isLoginZoom || isSignUpZoom){
+                        if (isLoginZoom || isSignUpZoom) {
                             setIsAtInitialPosition(true);
                         }
                     }
@@ -406,6 +410,7 @@ export function Earth(props) {
             console.error(`City ${cityName} not found.`);
         }
     }
+
     function resetCityColors() {
         earthRef.current.children.forEach((child) => {
             if (child.geometry.type === "SphereGeometry" && child !== selectedCity) {
@@ -413,11 +418,13 @@ export function Earth(props) {
             }
         });
     }
+
     function AllresetCityColors() {
         earthRef.current.children.forEach((child) => {
-                child.material.color.set("white");
+            child.material.color.set("white");
         });
     }
+
     function onMouseMove(event) {
         if (isOnMouseDownLock) return;
         event.stopPropagation();
@@ -447,10 +454,8 @@ export function Earth(props) {
         });
 
         if (isOverCircle) {
-            console.log(isOverCircle);
             document.body.style.cursor = "pointer";
         } else {
-            console.log(isOverCircle);
             document.body.style.cursor = "default";
         }
     }
@@ -522,8 +527,6 @@ export function Earth(props) {
         const material = new THREE.MeshBasicMaterial({color: 'white'});
 
 
-
-
         const circle = new THREE.Mesh(geometry, material);
 
         const scaleFactor = 1.057; // 기존 위치에서의 바깥 위치 지정
@@ -570,4 +573,5 @@ export function Earth(props) {
         return {x, y, z}
     }
 
-}
+});
+export default Earth;

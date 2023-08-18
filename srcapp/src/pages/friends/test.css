@@ -1,0 +1,16 @@
+.chat_ul{
+    background-color: white !important;
+}
+
+.emoji-picker {
+    display: flex;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+.emoji-picker span {
+    cursor: pointer;
+    margin: 5px;
+    font-size: 24px;
+}

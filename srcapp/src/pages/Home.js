@@ -14,16 +14,18 @@ import Background from "../img/background.jpg";
 import Logo_no_text from "../img/logo_no_text.png";
 import Logo_text from "../img/logo_text.png";
 
-import {Earth} from "../components/earth/index";
+import Earth from "../components/earth/index";
 import MyPage from './MyPage';
 import FreindsList from './FreindsList';
 import PasswordChange from './PasswordChange';
-import CateChat from './CateChat';
 import ChatComponent from "../components/rtc/rtcChat";
 import ChatVoiceComponent from "../components/rtc/rtcVoiceChat"
 import SockJS from 'sockjs-client';
 // import socket from "ws/lib/websocket";
 
+import CateChatDrag from "./CateChatDrag";
+import RandomChatDrag from "./RandomChatDrag";
+import OneOnOneChatDrag from "./OneOnOneChatDrag";
 
 const CanvasContainer = styled.div`
   width: 100%;
@@ -94,7 +96,35 @@ const DivStyled = styled.div`
 `;
 
 
-const Home = () => {
+const Home = React.memo(() => {
+        //드래그 채팅창 기능
+        const [showDrag, setShowDrag] = useState(false);
+        const [oneOnOneUserId, setOneOnOneUserId] = useState('');
+        const [oneOnOneUserNickName, setOneOnOneUserNickName] = useState('');
+        const [randomChatDrag, setRandomChatDrag] = useState(false);
+        const [oneononeChatDrag, setOneononeChatDrag] = useState(false);
+        //드래그 이벤트
+        const handleShowDrag = () => {
+            setShowDrag(true);
+        };
+        const handleRandomShowDrag = () => {
+            setRandomChatDrag(true);
+        };
+        const isOneOnOneChatDiv = (isDiv, userId, userNickName) => {
+            setOneononeChatDrag(isDiv);
+            setOneOnOneUserId(userId);
+            setOneOnOneUserNickName(userNickName);
+        };
+
+        const handleDragClose = () => {
+            setShowDrag(false);
+        };
+        const handleRandomShowDragClose = () => {
+            setRandomChatDrag(false);
+        };
+        const handleOneOnOneShowDragClose = () => {
+            setOneononeChatDrag(false);
+        };
         //계정 기억 상태 변수
         const [rememberAccount, setRememberAccount] = useState(false);
 
@@ -119,7 +149,6 @@ const Home = () => {
         const [LoginDiv, setLoginDiv] = useState(false);
         const [SignUpDiv, setSignUpDiv] = useState(false);
         const [MyPageDiv, setMyPageDiv] = useState(false);
-
         //로그인
         const [loggedIn, setLoggedIn] = useState(false); //로그인 상태확인
         const [username, setUsername] = useState('');
@@ -200,9 +229,6 @@ const Home = () => {
         }, [socket]);
 
 
-        useEffect(() => {
-            console.log(isPasswordChangeDiv2);
-        }, [isPasswordChangeDiv2]);
         const onPasswordChange = (newValue) => {
             setIsPasswordChangeDiv(newValue);
             setIsPasswordChangeDiv2(true);
@@ -238,20 +264,29 @@ const Home = () => {
                 logout();
             }
         };
+        const logoutApiCate = (newValue) => {
+            if (newValue) {
+                logout();
+            }
+        };
         //패스워드 수정 창 띄우고 창 밖 클릭 시 창 닫힘
         useEffect(() => {
-            const handleOutsideClick = (event) => {
-                if (passwordChangeDivRef.current && !passwordChangeDivRef.current.contains(event.target)) {
-                    setIsPasswordChangeDiv(false);
-                }
-            };
             if (isPasswordChangeDiv) {
-                document.addEventListener("click", handleOutsideClick);
+                const onClick = (event) => {
+                    handleOutsideClick(event);
+                }
+                setTimeout(() => document.addEventListener("click", onClick), 0);
+
+                return () => {
+                    document.removeEventListener("click", onClick);
+                };
             }
-            return () => {
-                document.removeEventListener("click", handleOutsideClick);
-            };
         }, [isPasswordChangeDiv]);
+        const handleOutsideClick = (event) => {
+            if (passwordChangeDivRef.current && !passwordChangeDivRef.current.contains(event.target)) {
+                setIsPasswordChangeDiv(false);
+            }
+        };
 
         // 아래는 석이 거
         
@@ -874,12 +909,7 @@ const handleGrandchildData = (data) => {
             return (
                 <>
                     <div className={"loading"}>
-                        <div className={"loading_2"}>
-                            <p className={"loading_text"}>Loading ...</p>
-                            <div className="spinner">
-                                <div className="spinner-text"></div>
-                            </div>
-                        </div>
+                        <div className="spinner"></div>
                     </div>
                 </>
             );
@@ -934,6 +964,7 @@ const handleGrandchildData = (data) => {
                                 FriendsList={FriendsList}
                                 FriendNationally={FriendNationally}
                                 logoutApi3={logoutApi3}
+                                isOneOnOneChatDiv={isOneOnOneChatDiv}
                             />
                             {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>
@@ -946,11 +977,6 @@ const handleGrandchildData = (data) => {
                             >
                             </PasswordChange>
                         </DivStyled>
-                        {/*<DivStyledMenu visible={"visible"}>*/}
-                        {/*    <CateChat*/}
-                        {/*    >*/}
-                        {/*    </CateChat>*/}
-                        {/*</DivStyledMenu>*/}
                         <DivStyledMenu visible={LoginDiv ? "visible" : ""}>
                             {/* Content inside the loginDiv */}
                             <div className={"loginDiv"}>
@@ -1139,7 +1165,9 @@ const handleGrandchildData = (data) => {
                                 </section>
                             </section>
                             <ul>
-                                <li className="menu_li">
+                                <li className="menu_li"
+                                    style={{marginTop: '20px'}}
+                                >
                                     <a className="menu_a" onClick={home}>Home</a>
                                 </li>
                                 <li className="menu_li">
@@ -1150,6 +1178,21 @@ const handleGrandchildData = (data) => {
                                         <li className="menu_li">
                                             <a className="menu_a" id="menu_a2" onClick={mypage}>MyPage
                                             </a>
+                                        </li>
+                                        <li className="menu_li">
+                                            <a className="menu_a">Chat</a>
+                                            <ul className="menu_li">
+                                                <li onClick={handleRandomShowDrag}
+                                                    className={"menu_li_sub"}
+                                                >
+                                                    Random Chat
+                                                </li>
+                                                <li onClick={handleShowDrag}
+                                                    className={"menu_li_sub"}
+                                                >
+                                                    Category Chat
+                                                </li>
+                                            </ul>
                                         </li>
                                         <li className="menu_li">
                                             <a className="menu_a" id="menu_a2" onClick={logout}>Logout
@@ -1167,24 +1210,20 @@ const handleGrandchildData = (data) => {
                                         </li>
                                     </>
                                 )}
-                                {/*<li className="menu_li">*/}
-                                {/*    <a className="menu_a" href="/user/list">사원조회</a>*/}
-                                {/*</li>*/}
-                                {/*<li className="menu_li">*/}
-                                {/*    <a className="menu_a">메신저</a>*/}
-                                {/*    <ul>*/}
-                                {/*        <li className="menu_li_li"><a style="cursor: pointer" onClick="openRoomWindow(event)"*/}
-                                {/*                                      className="menu_text">자유 대화방</a></li>*/}
-                                {/*        <!--                    <li class="menu_li_li"><a style="cursor: pointer" onclick="messagePage()" class="menu_text">1:1 대화방</a></li>-->*/}
-                                {/*    </ul>*/}
-                                {/*</li>*/}
                             </ul>
                         </aside>
+                        {/* 드래그 채팅창 사이드 밖 영역 */}
+                        <RandomChatDrag show={randomChatDrag} logoutApiCate={logoutApiCate}
+                                        onClose={handleRandomShowDragClose}/>
+                        <OneOnOneChatDrag show={oneononeChatDrag} oneOnOneUserId={oneOnOneUserId} oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
+                                          onClose={handleOneOnOneShowDragClose}/>
+                        <CateChatDrag show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
+
                     </div>
                 </Suspense>
             </div>
         );
-    }
+    })
 ;
 
 export default Home;

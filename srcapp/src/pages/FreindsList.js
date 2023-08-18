@@ -14,10 +14,11 @@ import Philippines from "../img/flag/Philippines-flag.png";
 
 import "./css/FreindsList.css";
 
-const FreindsList = ({FriendNationally, logoutApi3, FriendsList, onData, setChatType}) => {
-    // useEffect(()=>{console.log("부모"+aa)},[aa])
+
+const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType}) => {
     const [userList, setUserList] = useState([]);
     const [nationallyName, setNationallyName] = useState('');
+    const [isChatDiv, setIsChatDiv] = useState(false);
     const freindsList = async (retry = true) => {
         
         try {
@@ -82,6 +83,10 @@ const FreindsList = ({FriendNationally, logoutApi3, FriendsList, onData, setChat
         return flagImage[nationality] || null;
     };
 
+    const friendsChatDivOn = (isDiv, userId, userNickName) => {
+        isOneOnOneChatDiv(isDiv, userId, userNickName);
+    };
+
     return (
         <div className={"friendsListDiv"}>
             <div className={"nationally"}>
@@ -95,12 +100,13 @@ const FreindsList = ({FriendNationally, logoutApi3, FriendsList, onData, setChat
             <div className={"friendsList"}>
                 <div className={"friendsList_2"}>
                         {userList && userList.map(user => <FreindsListItem key={user.userId}
-                                                                           user={user} onData={onData} setChatType={setChatType}></FreindsListItem>)}
+                                                        user={user} onData={onData} setChatType={setChatType}  friendsChatDiv={friendsChatDivOn}></FreindsListItem>)}
+                                                                           
                 </div>
             </div>
         </div>
     );
-};
+});
 
 
 export default FreindsList;

@@ -6,7 +6,7 @@ import "./css/Mypage.css";
 import home from "./Home";
 
 
-const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
+const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
         //마이페이지
         const [MypageuserName, setMypageuserName] = useState('');
         const [MypageuserNickName, setMypageuserNickName] = useState('');
@@ -18,8 +18,6 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
         const [MypageuserProfileOriginName, setMypageuserProfileOriginName] = useState("");
         const [messageButtonText, setMessageButtonText] = useState("Change Message");
         const [profileButtonText, setProfileButtonText] = useState("Change Picture");
-
-        const [isPasswordChangeDiv, setisPasswordChangeDiv] = useState(false);
 
         const userInfo = async (retry = true) => {
             setPreviewImage(null);
@@ -75,7 +73,7 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
 
 //패스워드 수정 버튼 클릭 시 동작
         const passwordChangeDiv = () => {
-            setisPasswordChangeDiv(true);
+
             onPasswordChange(true); // Home.js에 이벤트 전달
         }
 
@@ -304,7 +302,7 @@ const MyPage = ({onPasswordChange, MyPageDiv, logoutApi}) => {
                 </div>
             </div>
         );
-    }
+    })
 ;
 
 

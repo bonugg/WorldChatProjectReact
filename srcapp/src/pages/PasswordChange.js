@@ -5,7 +5,7 @@ import "./css/Home.css";
 import "./css/PasswordChange.css";
 
 
-const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi2}) => {
+const PasswordChange = React.memo(({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi2}) => {
     //패스워드 변경
     const [userPwd, setUserPwd] = useState('');
     const [NewUserPwd, setNewUserPwd] = useState('');
@@ -220,7 +220,7 @@ const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi
             {/* Your content here */}
         </div>
     );
-};
+});
 
 
 export default PasswordChange;
