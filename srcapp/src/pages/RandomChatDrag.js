@@ -139,7 +139,7 @@ const [messages, setMessages] = useState([]);
 const [sendMessage, setSendMessage] = useState('');
 const {randomRoomId} = useParams();
 const [room, setRoom] = useState({});
-
+const [reconnectionDelay, setReconnectionDelay] = useState(10000);  // 10초
 const client = useRef({});
 
 //현재 스크롤바의 위치를 담는 상태 변수
