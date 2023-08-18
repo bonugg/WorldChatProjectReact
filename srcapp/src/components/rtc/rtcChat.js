@@ -7,7 +7,8 @@ import React, {useEffect, useRef} from 'react';
 
 // const addr = "localhost:3001"
 
-const ChatRoom = ({sendUser, receiverUser, setShowRtcChat}) => {
+const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
+    console.log(type2+"asd");
     console.log("ChatRoom 실행")
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
@@ -20,11 +21,13 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat}) => {
     let localUserName = "";
     // let loginUserName = "";
     // console.log(rtcUserName+"이게 넘어온 이름")
+    
     if (localStorage.getItem('userName')) {
         console.log("발신 유저 이름: " + sendUser)
         console.log("수신 유저 이름: " + receiverUser)
         localUserName = localStorage.getItem('userName');
     }
+
     socket.onclose = function(event) {
         if (event.wasClean) {
             console.log(`Closed cleanly, code=${event.code}, reason=${event.reason}`);
@@ -135,6 +138,10 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat}) => {
 
     // 방 나가기 함수
     const exitRoom = () => {
+        setType2('');
+        console.log("exit"+type2);
+
+
         stop(); // 웹소켓 연결 종료 및 비디오/오디오 정지
         setShowRtcChat(false);
     };
@@ -269,6 +276,9 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat}) => {
             type: 'leave',
             data: localRoom
         });
+
+        console.log(localUserName+"exit")
+        console.log(localRoom+"exit");
 
         if (myPeerConnection) {
             log('Close the RTCPeerConnection');

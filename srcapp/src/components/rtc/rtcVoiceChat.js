@@ -1,12 +1,55 @@
 import React from 'react'
 import { useRef,useEffect,useState } from 'react';
 
-const RtcVoiceChat = ({sendUser, receiverUser}) => {
-    const [isTalking, setIsTalking] = useState(false); 
+const RtcVoiceChat = ({sendUser, receiverUser,setShowRtcVoiceChat}) => {
+    const [isTalking, setIsTalking] = useState(false);
+    const [socket, setSocket] = useState(null);
     const LocalAudioRef = useRef(null);
     const RemoteAudioRef = useRef(null)
 
+    let localUserName = "";
+    const localRoom = sendUser + "님과 " + receiverUser + "님의 화상채팅방";
+    
+
     useEffect(() => {
+
+        let host = "";
+        host = window.location.host;
+        console.log(host)
+        host = host.slice(0, -4);
+        const newSocket = new WebSocket("wss://" + host + "9002" + "/voice");
+
+        
+        // console.log(rtcUserName+"이게 넘어온 이름")
+        if (localStorage.getItem('userName')) {
+            console.log("발신 유저 이름: " + sendUser)
+            console.log("수신 유저 이름: " + receiverUser)
+            localUserName = localStorage.getItem('userName');
+           
+            }
+
+        setSocket(newSocket);
+
+        
+
+        newSocket.onopen = (event) => {
+            console.log("WebSocket 연결 성공:", event);
+        };
+    
+        // 다른 이벤트 리스너들도 추가할 수 있습니다.
+        newSocket.onmessage = (event) => {
+            console.log("서버로부터 메시지 수신:", event.data);
+        };
+    
+        newSocket.onerror = (event) => {
+            console.error("WebSocket 오류 발생:", event);
+        };
+    
+        newSocket.onclose = (event) => {
+            console.log("WebSocket 연결 종료:", event);
+        };
+
+
         navigator.mediaDevices.getUserMedia({ audio: true })
           .then(stream => {
             LocalAudioRef.current.srcObject = stream;
@@ -47,45 +90,39 @@ const RtcVoiceChat = ({sendUser, receiverUser}) => {
                 javascriptNode.disconnect();
                 analyser.disconnect();
                 microphone.disconnect();
+                socket.close();
             };
           })
           .catch(error => console.error('Error accessing audio stream:', error));
-    }, []);
+    }, [sendUser, receiverUser]);
 
-    let host = "";
-    host = window.location.host;
-    console.log(host)
-    host = host.slice(0, -4);
-    const socket = new WebSocket("wss://" + host + "9002" + "/voice");
-    let localUserName = "";
-    // let loginUserName = "";
-    // console.log(rtcUserName+"이게 넘어온 이름")
-    if (localStorage.getItem('userName')) {
-            console.log("발신 유저 이름: " + sendUser)
-            console.log("수신 유저 이름: " + receiverUser)
-            localUserName = localStorage.getItem('userName');
+ 
+    
+
+const exitRoom = () => {
+    stop();
+    setShowRtcVoiceChat(false);
+}
+
+function sendToServer(msg) {
+    let msgJSON = JSON.stringify(msg);
+    socket.send(msgJSON);
+}
+
+function stop() {
+    
+    sendToServer({
+        from: localUserName,
+        type: 'leave',
+        data: localRoom
+    });
+if (socket != null) {
+            socket.close();
     }
+}
 
-    socket.onopen = (event) => {
-        console.log("WebSocket 연결 성공:", event);
-    };
 
-    // 다른 이벤트 리스너들도 추가할 수 있습니다.
-    socket.onmessage = (event) => {
-        console.log("서버로부터 메시지 수신:", event.data);
-    };
 
-    socket.onerror = (event) => {
-        console.error("WebSocket 오류 발생:", event);
-    };
-
-    socket.onclose = (event) => {
-        console.log("WebSocket 연결 종료:", event);
-    };
-
-    const exitRoom = () => {
-        socket.close();
-    }
 
 
 
@@ -93,7 +130,7 @@ const RtcVoiceChat = ({sendUser, receiverUser}) => {
     <div className="rtcVoiceChat">
     <div className="users">
       <div style={isTalking ? { color: 'green' } : null} className="sendUser">{sendUser}</div>
-      <div className="receiverUser">{receiverUser}</div>
+      <div style={isTalking ? { color: 'green' } : null} className="receiverUser">{receiverUser}</div>
       <button onClick={exitRoom}>Exit Room</button>
     </div>
     <audio ref={LocalAudioRef} controls></audio>

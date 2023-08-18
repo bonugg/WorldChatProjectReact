@@ -30,9 +30,10 @@ const FreindsListItem = ({user , onData,setChatType}) => {
     //     rtcConnect();
     // }
     const Rtc = (type) => {
-        console.log("자식"+userName)
+        console.log("이름"+userName);
         onData(userName);
         setChatType(type);
+        console.log("타입"+type);
 
     }
 

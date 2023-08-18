@@ -289,8 +289,9 @@ const Home = () => {
 useEffect(() => {
     if (type2) {
         sendRequestToServer();
+        console.log('유즈이펙트' + type2);
     }
-}, [type2]);
+}, [type2]); 
 
 const sendRequestToServer = async () => {
     try {
@@ -306,7 +307,9 @@ const sendRequestToServer = async () => {
             })
         });
         if (response.ok) {
+            console.log(type2+"타입ㅂㅂㅂㅂㅂㅂㅂㅂ");
             if (type2 === "video") {
+                console.log("비디오테스트");
                 setShowRtcChat(true);
                 setShowRtcVoiceChat(false);
             } else if (type2 === "voice") {
@@ -326,6 +329,7 @@ const setChatType = (type) => {
 };
 
 const handleGrandchildData = (data) => {
+    console.log(data+"1232132121");
     setDataFromChild(data);
     setReceiverUser(data);
     setSendUser(rtcUserName);
@@ -999,11 +1003,11 @@ const handleGrandchildData = (data) => {
 
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat}/>}
+                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat} type2={type2} setType2={setType2}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={showRtcVoiceChat}>
-                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser}/>}
+                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcVoiceChat={setShowRtcVoiceChat}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
