@@ -63,7 +63,6 @@ const MenuPanel = styled.div`
   width: ${props => props.visible ? '200px' : '0px'}; // 기존 속성
   max-height: 70%;
   height: ${props => props.visible ? '200px' : '0px'}; // 기존 속성
-  border: ${props => props.visible ? '1px solid white' : '0px'}; // 기존 속성
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   border-top-left-radius: 0px;
