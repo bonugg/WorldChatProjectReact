@@ -10,7 +10,7 @@ import data from '@emoji-mart/data'
 
 const ChatRoom4 = () => {
     const {roomId} = useParams();
-    const userName = `${localStorage.getItem('userName')}`
+    //const userName = `${localStorage.getItem('userName')}`
     const client = useRef({});
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
@@ -18,6 +18,14 @@ const ChatRoom4 = () => {
     const [selectedFiles, setSelectedFiles] = useState([]);
 
     const [translate, setTranslate] = useState(false);
+    const [targetLang, setTargetLang] = useState('en');
+
+    const languages = [
+        {code: 'en', label: 'English'},
+        {code: 'ko', label: 'Korean'},
+        {code: 'ja', label: 'Japanese'},
+        // 추가로 필요한 언어들을 여기에 추가
+    ];
 
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -46,19 +54,22 @@ const ChatRoom4 = () => {
 
     const connect = () => {
         client.current = new StompJs.Client({
-            webSocketFactory: () => new SockJS("/wss"),
+            webSocketFactory: () => new SockJS("/friendchat"),
             debug: (frame) => {
-                console.log("렌더링 하자마자해줘...")
-                console.log("debug");
                 console.log(frame);
             },
             onConnect:() => {
                 getChatMessageFromDB();
-                client.current.subscribe(`/topic/${roomId}`, ({body}) => {
-                    // console.log("=========================================================");
-                    // console.log(body);
-                    setMessages((messages) => [...messages, JSON.parse(body)]);
+                client.current.subscribe(`/frdSub/${roomId}`, async ({body}) => {
+                    const receivedMessage = JSON.parse(body);
+                    if (translate) {
+                        receivedMessage.message = await detectLanguageAndTranslate(receivedMessage.message);
+                    }
+                    setMessages((messages) => [...messages, receivedMessage]);
                 });
+            },
+            connectHeaders: {
+                Authorization: `${localStorage.getItem('Authorization')}`
             },
             onStompError: (frame) => {
                 console.error("에러러어어어ㅓ엉")
@@ -76,14 +87,14 @@ const ChatRoom4 = () => {
         setMessage(e.target.value);
     };
 
+
     const sendMessage = async (e) => {
         e.preventDefault();
 
         let finalMessage = message;
-
         if (translate) {
-            const translatedMessage = await getTranslation(message);
-            finalMessage += ` (translated: ${translatedMessage})`; // 원본 메시지와 번역된 메시지를 합칩니다.
+            const translatedText = await detectLanguageAndTranslate(message);
+            finalMessage += ` (translated: ${translatedText})`;
         }
 
         publish(finalMessage);
@@ -95,10 +106,10 @@ const ChatRoom4 = () => {
             return;
         }
         client.current.publish({
-            destination: "/app/wss",
+            destination: "/frdPub/friendchat",
             body: JSON.stringify({
                 "roomId": roomId,
-                "sender": userName,
+                // "sender": userName,
                 "message": msg,
             })
         });
@@ -128,15 +139,14 @@ const ChatRoom4 = () => {
                     const data = response.data;
                     const chatMessage = {
                         "roomId": roomId,
-                        "sender": userName,
+                        // "sender": userName,
                         "message": "파일을 보냈습니다.",
                         "s3DataUrl": data.s3DataUrl,
                         "fileName": file.name,
                         "fileDir": data.fileDir
                     };
-
                     client.current.publish({
-                        destination: "/app/wss",
+                        destination: "/frdPub/friendchat",
                         body: JSON.stringify(chatMessage)
                     });
                 })
@@ -166,24 +176,55 @@ const ChatRoom4 = () => {
             });
     };
 
-    const getTranslation = async (textToTranslate) => {
+    const detectLanguageAndTranslate = async (text) => {
         try {
-            const response = await axios.post('/translate', {
-                text: textToTranslate,
-                frdChatRoomId: roomId
+            // 언어 감지 API 호출
+            const detectRes = await axios.post('/language/detect', {
+                text: text
             }, {
                 headers: {
                     Authorization: `${localStorage.getItem('Authorization')}`
                 }
             });
-            console.log("이거는 번역response")
-            console.log(response)
-            return response.data.message.result.translatedText; // API 응답에 따라 경로를 조정해야 할 수 있습니다.
 
+            console.log(detectRes);
+
+            // 감지된 언어를 기반으로 번역 API 호출
+            const detectedLang = detectRes.data; // API 응답 형식에 따라 조정 필요
+            const translateRes = await axios.post('/language/translate', {
+                text: text,
+                sourceLang: detectedLang,
+                targetLang: targetLang // 사용자가 선택한 언어로 설정
+            }, {
+                headers: {
+                    Authorization: `${localStorage.getItem('Authorization')}`
+                }
+                });
+            return translateRes.data.translatedText; // API 응답 형식에 따라 조정 필요
         } catch (error) {
-            console.error("Error during translation:", error);
+            console.error("Error during language detection and translation:", error);
+            return text; // 원본 텍스트 반환
         }
     }
+
+    // const getTranslation = async (textToTranslate) => {
+    //     try {
+    //         const response = await axios.post('/language/translate', {
+    //             text: textToTranslate,
+    //             frdChatRoomId: roomId
+    //         }, {
+    //             headers: {
+    //                 Authorization: `${localStorage.getItem('Authorization')}`
+    //             }
+    //         });
+    //         console.log("이거는 번역response")
+    //         console.log(response)
+    //         return response.data.message.result.translatedText; // API 응답에 따라 경로를 조정해야 할 수 있습니다.
+    //
+    //     } catch (error) {
+    //         console.error("Error during translation:", error);
+    //     }
+    // }
 
     const toggleEmojiPicker = () => {
         setShowEmojiPicker(!showEmojiPicker);
@@ -223,6 +264,16 @@ const ChatRoom4 = () => {
                     ))
                 }
 
+            </div>
+            <div className="language-selection">
+                <label>Translate to:</label>
+                <select value={targetLang} onChange={(e) => setTargetLang(e.target.value)}>
+                    {languages.map(lang => (
+                        <option key={lang.code} value={lang.code}>
+                            {lang.label}
+                        </option>
+                    ))}
+                </select>
             </div>
             <form onSubmit={sendMessage}>
                 <input type={"text"} value={message} onChange={onChangeMessage}/>
