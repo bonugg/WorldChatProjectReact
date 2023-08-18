@@ -162,11 +162,10 @@ const Home = () => {
         const [sendUser, setSendUser] = useState(null);
         const [receiverUser, setReceiverUser] = useState(null);
         // let rtcUserName = "";
-        const Rtc = () => {
-            setShowRtcChat(true); // RtcChat 상태를 true로 설정
-            
-        }
-
+        // const Rtc = () => {
+        //     console.log("Rtc실행됨");
+        //     setShowRtcChat(true); // RtcChat 상태를 true로 설정
+        // }
         const [socket, setSocket] = useState(null);
 
         // let socket;
@@ -186,6 +185,15 @@ const Home = () => {
                             setShowRtcVoiceChat(true);
                             setShowRtcChat(false);
                         }
+
+                        //아래는 석이 됬 됐 
+
+                    // if (window.confirm(`Received message: ${event.data}`)) {
+                    //     setSendUser(event.data.split("님이")[0]);
+                    //     setReceiverUser(rtcUserName);
+                    //     console.log("수신자 화면에서 나옴");
+                    //     setShowRtcChat(true);
+
                     }
                 };
             }
@@ -245,17 +253,17 @@ const Home = () => {
             };
         }, [isPasswordChangeDiv]);
 
-
-        const [dataFromChild, setDataFromChild] = useState(null);
+        // 아래는 석이 거
+        
         // const [type2, setType2] = useState('');
+
         // const handleGrandchildData = async (data) => {
-        //     console.log("자식의 자식 컴포넌트로부터 받은 데이터:" + data + type2);
+        //     console.log("자식의 자식 컴포넌트로부터 받은 데이터:", data);
         //     setDataFromChild(data);
         //     setReceiverUser(data)
         //     setSendUser(rtcUserName)
         //     console.log("보낸이: "+localStorage.getItem('userName'));
         //     console.log("받는이: "+data);
-
         //     try {
         //         const response = await fetch('/webrtc/request', {
         //             method: 'POST',
@@ -268,22 +276,14 @@ const Home = () => {
         //             })
         //         });
         //         if (response.ok) {
-        //             if (type2 === "video") {
-        //                 setShowRtcChat(true);
-        //             } else if (type2 === "voice") {
-        //                 // 음성 채팅 컴포넌트 보여주기 로직
-        //                 setShowRtcVoiceChat(true);
-        //             }
+        //             console.log("발신자 화면에서 나옴");
+        //             setShowRtcChat(true);
         //         }
         //         if (!response.ok) {
         //             throw new Error(`Logout failed with status: ${response.status}`);
-                    
         //         }
-        //     } catch (error) {
-        //         console.error("Error during logout:", error);
-        //     }
-        // };
 
+        const [dataFromChild, setDataFromChild] = useState(null);
         const [type2, setType2] = useState('');
 
 useEffect(() => {
@@ -351,7 +351,6 @@ const handleGrandchildData = (data) => {
                 localStorage.setItem('Authorization', accessToken);
                 localStorage.setItem('userName', userName);
                 console.log("로그인 사용자: " + userName);
-                // const socket = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
                 setRtcUserName(userName);
                 
                 //const ws = new WebSocket(`wss://localhost:9002/test`)
@@ -1000,7 +999,7 @@ const handleGrandchildData = (data) => {
 
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser}/>}
+                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={showRtcVoiceChat}>
@@ -1140,7 +1139,7 @@ const handleGrandchildData = (data) => {
                                     <a className="menu_a" onClick={home}>Home</a>
                                 </li>
                                 <li className="menu_li">
-                                    <a className="menu_a" onClick={Rtc}>Test</a>
+                                    {/*<a className="menu_a" onClick={Rtc}>Test</a>*/}
                                 </li>
                                 {loggedIn ? (
                                     <>
