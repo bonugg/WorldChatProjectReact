@@ -113,6 +113,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         //파일 담는 상태 변수
         const [selectedFiles, setSelectedFiles] = useState([]);
 
+//--------------드래그 창 보임/숨김-----------------------
         useEffect(() => {
             console.log(show + " show")
             if (!show) {
@@ -121,6 +122,8 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                 setIsClosed(false);
             }
         }, [show]);
+//--------------드래그 창 보임/숨김-----------------------
+
 //--------------메뉴 오픈-----------------------
         const handleMenuOpen = () => {
             setMenuDiv((prevIsUserListVisible) => !prevIsUserListVisible);

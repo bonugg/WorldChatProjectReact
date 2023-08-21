@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import axios from "axios";
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import {
@@ -9,9 +10,19 @@ import {
     Typography,
     Grid,
     Paper,
+    Select
 } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
+import { Fab } from '@mui/material';
 import SendIcon from "@mui/icons-material/Send";
 
+const options = [
+    { id: 0, lan: "ko" },
+    { id: 1, lan: "en" },
+    { id: 2, lan: "ja" },
+    { id: 3, lan: "zh-CN" },
+    { id: 4, lan: "vi" }
+]
 
 const RandomChat = () => {
     const navigate = useNavigate();
@@ -19,6 +30,7 @@ const RandomChat = () => {
     const [message, setmessage] = useState("");
     const [messages, setMessages] = useState([]);
     const location = useLocation();
+    const [files, setFiles] = useState([]);
     const room = location.state.room; //채팅방 정보
     const client = useRef({});
 
@@ -84,6 +96,35 @@ const RandomChat = () => {
         client.current.send(`/randomPub/randomChat/${randomRoomId}/enter`, {}, JSON.stringify(joinMessage));
     }
 
+    const uploadFiles = async () => {
+        if (files.length === 0) {
+            console.log("파일을 선택해주세요.");
+            return;
+        }
+
+        const formData = createFormData(files, randomRoomId);
+        const config = { headers: { "Content-Type": "multipart/form-data" } };
+
+        try {
+            const response = await axios.post("/randomFile/upload", formData, config);
+            console.log("업로드된 파일들:", response.data);
+        } catch (error) {
+            console.log("파일 업로드 실패:", error);
+        }
+    };
+
+    const createFormData = (files, roomId) => {
+        const formData = new FormData();
+
+        for (let file of files) {
+            formData.append("file", file);
+        }
+
+        formData.append("roomId", roomId);
+        return formData;
+    };
+
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -93,6 +134,7 @@ const RandomChat = () => {
         } else {
             return;
         }
+        uploadFiles();
     };
 
     const handleChange = (event) => {
@@ -121,6 +163,15 @@ const RandomChat = () => {
         }
     };
 
+    //받아온 파일 데이터 보관
+    const handleFileChange = (e) => {
+        setFiles(Array.from(e.target.files));
+    }
+
+    const handleUploadClick = (e) => {
+        document.getElementById("fileInput").click();
+    }
+
     return (
         <Box
             sx={{
@@ -137,7 +188,26 @@ const RandomChat = () => {
             </Box>
             <Box sx={{ p: 2, backgroundColor: "#414141" }}>
                 <Grid container spacing={2}>
-                    <Grid item xs={10}>
+                    <Grid item xs={1}>
+                        <form>
+                            <input
+                                type="file"
+                                id="fileInput"
+                                multiple
+                                style={{ display: "none" }}
+                                onChange={handleFileChange}
+                            />
+                            <Fab color="primary" size="small" aria-label="add" onClick={handleUploadClick}>
+                                <AddIcon />
+                            </Fab>
+                        </form>
+                    </Grid>
+                    <Grid item xs={1}>
+                        <form>
+                            <Select name="language" options={options} initValue={options[0]} />
+                        </form>
+                    </Grid>
+                    <Grid item xs={8}>
                         <TextField
                             size="small"
                             fullWidth
@@ -148,7 +218,7 @@ const RandomChat = () => {
                             onChange={handleChange}
                         />
                     </Grid>
-                    <Grid item xs={2}>
+                    <Grid item xs={1}>
                         <Button
                             fullWidth
                             color="primary"
@@ -158,6 +228,8 @@ const RandomChat = () => {
                         >
                             Send
                         </Button>
+                    </Grid>
+                    <Grid item xs={1}>
                         <Button
                             fullWidth
                             color="primary"
@@ -176,6 +248,25 @@ const RandomChat = () => {
 const Message = ({ message }) => {
     const me = message.sender === localStorage.getItem('userName');
 
+    //파일 다운로드 처리 함수
+    const handleFileDownload = async (fileName, fileDir) => {
+        try {
+            const response = await axios.get(`/randomFile/download/${fileName}`, {
+                params: { fileDir },
+                responseType: 'blob',
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            console.error("파일 다운로드 실패:", error);
+        }
+    };
+
     return (
         <Box
             sx={{
@@ -191,6 +282,11 @@ const Message = ({ message }) => {
                     alignItems: "center",
                 }}
             >
+                {message.fileName && (
+                    <Button variant="contained" color="primary" onClick={() => handleFileDownload(message.fileName, message.fileDir)}>
+                        Download File
+                    </Button>
+                )}
                 <Paper
                     variant="outlined"
                     sx={{
