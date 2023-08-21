@@ -103,278 +103,294 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         width: window.innerWidth,
         height: window.innerHeight,
     });
-        useEffect(() => {
-            const handleResize = () => {
-                setWindowSize({
-                    width: window.innerWidth,
-                    height: window.innerHeight,
-                });
-
-                const newPosition = {
-                    x: (window.innerWidth / 2) - (450 / 2),  //450은 Draggable 컴포넌트의 너비
-                    y: (window.innerHeight / 2) - (230 / 2), //230은 Draggable 컴포넌트의 높이
-                };
-                setPosition(newPosition);
-            };
-
-            window.addEventListener('resize', handleResize);
-            return () => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }, []);
-const initialPosition = {
-    x: (windowSize.width / 2) - (450 / 2), // 450은 Draggable 컴포넌트의 너비
-    y: (windowSize.height / 2) - (230 / 2), // 200은 Draggable 컴포넌트의 높이
-};
-const [position, setPosition] = useState(initialPosition);
-const handleDrag = useCallback((e, data) => trackPos(data), []);
-const [isMinimized, setIsMinimized] = useState(false);
-const [isClosed, setIsClosed] = useState(false);
-const [isChatDiv, setIsChatDiv] = useState(false);
-
-//랜덤 채팅 입장 후
-//인풋창 비활성화 상태 변수
-const [isChatReadOnly, setIsChatReadOnly] = useState(false);
-const [messages, setMessages] = useState([]);
-const [sendMessage, setSendMessage] = useState('');
-const {randomRoomId} = useParams();
-const [room, setRoom] = useState({});
-const [reconnectionDelay, setReconnectionDelay] = useState(10000);  // 10초
-const client = useRef({});
-
-//현재 스크롤바의 위치를 담는 상태 변수
-const [scroll, setScroll] = useState('');
-const [isScroll, setIsScroll] = useState('');
-const [previousScrollbarState, setPreviousScrollbarState] = useState(false);
-
-useEffect(() => {
-    console.log(show + " show")
-    if (!show) {
-        setIsClosed(false);
-    }
-}, [show]);
-
-useEffect(() => {
-    const scrollElement = document.querySelector('.EnterRoomChat_content_2');
-
-    if (scrollElement) {
-        const hasScrollbar = scrollElement.scrollHeight > scrollElement.clientHeight;
-
-        if (!previousScrollbarState && hasScrollbar) {
-            scrollElement.scrollTop = scrollElement.scrollHeight;
-        } else if (isScroll) {
-
-            scrollElement.scrollTop = scrollElement.scrollHeight;
-        } else if (!isScroll) {
-
-        }
-
-        // 스크롤바 상태 업데이트
-        setPreviousScrollbarState(hasScrollbar);
-    }
-}, [messages]);
-
-
-const connect = () => {
-    //endpoint 소켓 생성
-    setIsChatReadOnly(false);
-    const socket = new SockJS("/random");
-    //Stomp client 초기화
-    const stompClient = Stomp.over(socket);
-    client.current = stompClient;
-    const headers = {
-        "Authorization": localStorage.getItem('Authorization'),
-        "userName": localStorage.getItem('userName'),
-    }
-    stompClient.connect(headers,
-        () => onConnected(),
-        (error) => onError(error)
-    );
-};
-const disconnect = () => {
-    if (client.current && typeof client.current.disconnect === "function") {
-        client.current.disconnect(() => {
-            setMessages([]);
-            setIsChatReadOnly(false);
-            console.log("websocket disconnected");
-            setIsChatDiv(false);
-        });
-    }
-};
-const onConnected = () => {
-    setIsChatReadOnly(true);
-    console.log("Connected to Websocket Server");
-    client.current.userName = localStorage.getItem("userName");
-    //발송, 수신할 구독 경로 정의
-    client.current.subscribe(`/randomSub/randomChat/${room.randomRoomId}`, (message) => onReceived(message));
-    joinEvent();
-}
-const onError = (error) => {
-    console.log('WebSocket 에러: ', error);
-}
-
-function onReceived(payload) {
-    let payloadData = JSON.parse(payload.body);
-    setMessages((prev) => [...prev, payloadData]);
-}
-
-function joinEvent() {
-    const joinMessage = {
-        type: "ENTER",
-        sender: client.current.userName,
-        randomRoomId: room.randomRoomId,
-    };
-    client.current.send(`/randomPub/randomChat/${randomRoomId}/enter`, {}, JSON.stringify(joinMessage));
-}
-
-const sendChatMessage = (msgText) => {
-    const now = new Date();
-    const hour = now.getHours();
-    const minute = now.getMinutes();
-    const second = now.getSeconds();
-
-    if (client.current) {
-        const messageData = {
-            type: "CHAT",
-            content: msgText,
-            time: `${hour}:${minute}:${second}`,
-            randomRoomId: room.randomRoomId,
-            sender: client.current.userName,
-        };
-        console.log("Sending message: ", JSON.stringify(messageData));
-        client.current.send(`/randomPub/randomChat/${room.randomRoomId}`, {}, JSON.stringify(messageData));
-    }
-};
-
-useEffect(() => {
-    if (isChatDiv) {
-        console.log("랜덤 채팅방 정보");
-        console.log(room);
-        connect();
-    } else {
-        disconnect();
-    }
-
-    //socket 연결 해제
-    return () => disconnect();
-}, [isChatDiv]);
-
-const trackPos = (data) => {
-    setPosition({x: data.x, y: data.y});
-};
-
-const handleMinimizeClick = () => {
-    setIsMinimized(!isMinimized);
-};
-
-const handleCloseClick = () => {
-    setIsChatDiv(false);
-    setIsClosed(true);
-    setPosition(initialPosition);
-    if (isChatDiv) {
-        disconnect();
-    }
-    if (onClose) {
-        onClose();
-    }
-};
-
-if (!show || isClosed) {
-    return null;
-}
-
-//랜덤챗 코드
-const startRandomChat = async (e) => {
-    e.preventDefault();
-    const authorization = localStorage.getItem('Authorization');
-    const userName = localStorage.getItem('userName');
-    if (!authorization) {
-        return console.log("authorization token not found");
-    }
-    const startRandomC = async (retry = true) => {
-        try {
-            const response = await fetch("/random/room", {
-                method: 'POST',
-                headers: {
-                    'Authorization': localStorage.getItem('Authorization'),
-                    'userName': localStorage.getItem('userName'),
-                },
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight,
             });
 
-            const accessToken = response.headers.get('Authorization');
-            if (accessToken != null) {
-                localStorage.setItem('Authorization', accessToken);
+            const newPosition = {
+                x: (window.innerWidth / 2) - (450 / 2),  //450은 Draggable 컴포넌트의 너비
+                y: (window.innerHeight / 2) - (230 / 2), //230은 Draggable 컴포넌트의 높이
+            };
+            setPosition(newPosition);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+    const initialPosition = {
+        x: (windowSize.width / 2) - (450 / 2), // 450은 Draggable 컴포넌트의 너비
+        y: (windowSize.height / 2) - (230 / 2), // 200은 Draggable 컴포넌트의 높이
+    };
+    const [position, setPosition] = useState(initialPosition);
+    const handleDrag = useCallback((e, data) => trackPos(data), []);
+    const [isMinimized, setIsMinimized] = useState(false);
+    const [isClosed, setIsClosed] = useState(false);
+    const [isChatDiv, setIsChatDiv] = useState(false);
+
+    //랜덤 채팅 입장 후
+    //인풋창 비활성화 상태 변수
+    const [isChatReadOnly, setIsChatReadOnly] = useState(false);
+    const [messages, setMessages] = useState([]);
+    const [sendMessage, setSendMessage] = useState('');
+    const {randomRoomId} = useParams();
+    const [room, setRoom] = useState({});
+
+    // 웹소켓 연결 실패 시 재연결 여부와 시간
+    const [reconnectionDelay, setReconnectionDelay] = useState(10000);  // 10초
+    // 재연결 시도 횟수 상태 변수
+    const [reconnectionAttempts, setReconnectionAttempts] = useState(0);
+
+
+    const client = useRef({});
+
+    //현재 스크롤바의 위치를 담는 상태 변수
+    const [scroll, setScroll] = useState('');
+    const [isScroll, setIsScroll] = useState('');
+    const [previousScrollbarState, setPreviousScrollbarState] = useState(false);
+
+    useEffect(() => {
+        console.log(show + " show")
+        if (!show) {
+            setIsClosed(false);
+        }
+    }, [show]);
+
+    // 연결 재시도 함수와 타이머 등록
+    useEffect(() => {
+        const reconnect = () => {
+            if (client.current && client.current.connected === false && reconnectionAttempts < 3) {
+                console.log("재연결 시도");
+                connect();
+                setReconnectionAttempts(prevAttempts => prevAttempts + 1);
             }
-            if (response.headers.get('refresh') != null) {
-                //로그아웃 처리
-                alert("로그아웃 startRandomC");
+        };
+        
+        if (isChatDiv) {
+          const reconnectTimer = setTimeout(reconnect, reconnectionDelay);
+          return () => {
+            clearTimeout(reconnectTimer);
+          };
+        }
+    }, [client, isChatDiv, reconnectionDelay]);
+
+    useEffect(() => {
+        const scrollElement = document.querySelector('.EnterRoomChat_content_2');
+
+        if (scrollElement) {
+            const hasScrollbar = scrollElement.scrollHeight > scrollElement.clientHeight;
+
+            if (!previousScrollbarState && hasScrollbar) {
+                scrollElement.scrollTop = scrollElement.scrollHeight;
+            } else if (isScroll) {
+
+                scrollElement.scrollTop = scrollElement.scrollHeight;
+            } else if (!isScroll) {
+
+            }
+
+            // 스크롤바 상태 업데이트
+            setPreviousScrollbarState(hasScrollbar);
+        }
+    }, [messages]);
+
+    const connect = () => {
+        setIsChatReadOnly(false);
+        const socket = new SockJS("/random");
+        const stompClient = Stomp.over(socket);
+        client.current = stompClient;
+        const headers = {
+            "Authorization": localStorage.getItem('Authorization'),
+            "userName": localStorage.getItem('userName'),
+        }
+        stompClient.connect(headers,
+            () => onConnected(),
+            (error) => onError(error)
+        );
+    };
+    const disconnect = () => {
+        if (client.current && typeof client.current.disconnect === "function") {
+            client.current.disconnect(() => {
+                setMessages([]);
+                setIsChatReadOnly(false);
+                console.log("websocket disconnected");
+                setIsChatDiv(false);
+            });
+        }
+    };
+    const onConnected = () => {
+        setIsChatReadOnly(true);
+        console.log("Connected to Websocket Server");
+        setReconnectionAttempts(0); // 웹소켓 연결에 성공하면 재연결 시도 횟수를 초기화
+        client.current.userName = localStorage.getItem("userName");
+        client.current.subscribe(`/randomSub/randomChat/${room.randomRoomId}`, (message) => onReceived(message));
+        joinEvent();
+    }
+    const onError = (error) => {
+        console.log('WebSocket 에러: ', error);
+    }
+
+    function onReceived(payload) {
+        let payloadData = JSON.parse(payload.body);
+        setMessages((prev) => [...prev, payloadData]);
+    }
+
+    function joinEvent() {
+        const joinMessage = {
+            type: "ENTER",
+            sender: client.current.userName,
+            randomRoomId: room.randomRoomId,
+        };
+        client.current.send(`/randomPub/randomChat/${randomRoomId}/enter`, {}, JSON.stringify(joinMessage));
+    }
+
+    const sendChatMessage = (msgText) => {
+        const now = new Date();
+        const hour = now.getHours();
+        const minute = now.getMinutes();
+        const second = now.getSeconds();
+
+        if (client.current) {
+            const messageData = {
+                type: "CHAT",
+                content: msgText,
+                time: `${hour}:${minute}:${second}`,
+                randomRoomId: room.randomRoomId,
+                sender: client.current.userName,
+            };
+            console.log("Sending message: ", JSON.stringify(messageData));
+            client.current.send(`/randomPub/randomChat/${room.randomRoomId}`, {}, JSON.stringify(messageData));
+        }
+    };
+
+    useEffect(() => {
+        if (isChatDiv) {
+            console.log("랜덤 채팅방 정보");
+            console.log(room);
+            connect();
+        } else {
+            disconnect();
+        }
+
+        //socket 연결 해제
+        return () => disconnect();
+    }, [isChatDiv]);
+
+    const trackPos = (data) => {
+        setPosition({x: data.x, y: data.y});
+    };
+
+    const handleMinimizeClick = () => {
+        setIsMinimized(!isMinimized);
+    };
+
+    const handleCloseClick = () => {
+        setIsChatDiv(false);
+        setIsClosed(true);
+        setPosition(initialPosition);
+        if (isChatDiv) {
+            disconnect();
+        }
+        if (onClose) {
+            onClose();
+        }
+    };
+
+    if (!show || isClosed) {
+        return null;
+    }
+
+    //랜덤챗 코드
+    const startRandomChat = async (e) => {
+        e.preventDefault();
+        const authorization = localStorage.getItem('Authorization');
+        const userName = localStorage.getItem('userName');
+        if (!authorization) {
+            return console.log("authorization token not found");
+        }
+        const startRandomC = async (retry = true) => {
+            try {
+                const response = await fetch("/random/room", {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': localStorage.getItem('Authorization'),
+                        'userName': localStorage.getItem('userName'),
+                    },
+                });
+
+                const accessToken = response.headers.get('Authorization');
+                if (accessToken != null) {
+                    localStorage.setItem('Authorization', accessToken);
+                }
+                if (response.headers.get('refresh') != null) {
+                    //로그아웃 처리
+                    alert("로그아웃 startRandomC");
+                    return;
+                }
+
+                if (!response.ok) {
+                    if (retry) {
+                        await startRandomC(false);
+                    }
+                    return console.error(`Error: ${response.status}`)
+                }
+
+                const result = await response.json();
+                if (!result) {
+                    if (retry) {
+                        await startRandomC(false);
+                    }
+                    return console.error(result.errorMessage);
+                }
+
+                console.log(`Created random room name: ${result.randomRoomName}`);
+                setRoom(result);
+                setIsChatDiv(true);
+                return result;
+
+            } catch (error) {
+                console.log(error);
+                if (retry) {
+                    await startRandomC(false);
+                }
                 return;
             }
+        };
+        startRandomC();
+    }
+    const exitChatDiv = () => {
+        setIsChatDiv(false);
+    };
 
-            if (!response.ok) {
-                if (retry) {
-                    await startRandomC(false);
-                }
-                return console.error(`Error: ${response.status}`)
+    const handleSendMessage = (event) => {
+        event.preventDefault();
+        if (sendMessage.trim() !== '') {
+            const scrollElement = document.querySelector('.EnterRoomChat_content_2');
+            if (isScrollbarAtBottom(scrollElement)) {
+                setIsScroll(true);
+            } else {
+                setIsScroll(false);
             }
 
-            const result = await response.json();
-            if (!result) {
-                if (retry) {
-                    await startRandomC(false);
-                }
-                return console.error(result.errorMessage);
-            }
-
-            console.log(`Created random room name: ${result.randomRoomName}`);
-            setRoom(result);
-            setIsChatDiv(true);
-            return result;
-            // navigate(`/random/${result.randomRoomId}`, {state: {room: result}});
-
-        } catch (error) {
-            console.log(error);
-            if (retry) {
-                await startRandomC(false);
-            }
+            sendChatMessage(sendMessage);
+            setSendMessage('');
+        } else {
             return;
         }
     };
-    startRandomC();
-}
-const exitChatDiv = () => {
-    setIsChatDiv(false);
-};
 
+    const isScrollbarAtBottom = (element) => {
+        return scroll + element.clientHeight === element.scrollHeight;
+    };
 
-const handleSendMessage = (event) => {
-    event.preventDefault();
-    if (sendMessage.trim() !== '') {
-        const scrollElement = document.querySelector('.EnterRoomChat_content_2');
-        if (isScrollbarAtBottom(scrollElement)) {
-            setIsScroll(true);
-        } else {
-            setIsScroll(false);
-        }
-
-        sendChatMessage(sendMessage);
-        // 메시지 전송 후 인풋 창을 비움
-        setSendMessage('');
-    } else {
-        return;
-    }
-};
-
-
-const isScrollbarAtBottom = (element) => {
-    // 현재 스크롤 위치 + 클라이언트 높이가 스크롤 영역의 전체 높이와 동일한지 확인
-    return scroll + element.clientHeight === element.scrollHeight;
-};
-//현재스크롤바 위치 구하기
-const handleScroll = (event) => {
-    const element = event.target;
-    setScroll(element.scrollTop);
-};
+    const handleScroll = (event) => {
+        const element = event.target;
+        setScroll(element.scrollTop);
+    };
 
 return (
     <div className="Drag">
