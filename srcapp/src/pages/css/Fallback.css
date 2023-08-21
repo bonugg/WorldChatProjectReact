@@ -6,23 +6,6 @@
     height: 100vh;
 }
 
-.spinner {
-    border: 5px solid rgba(0, 0, 0, 0.1);
-<<<<<<< HEAD
-<<<<<<< HEAD
-    border-left-color: #ff4b4b;
-=======
-    border-left-color: white;
->>>>>>> c8417bdee793d1a4f9b3c64ed0b60299474e91df
-=======
-    border-left-color: white;
->>>>>>> afde306eb6545d3261ca3022f622a0a25f97e033
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s ease-in-out infinite;
-}
-
 .loading-text {
     margin-top: 20px;
     font-size: 18px;

@@ -329,6 +329,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const handleMinimizeClick = () => {
             setCreatRoom(false);
             setCreatRoom2(false);
+            setIsUserListVisible2(false);
             setIsMinimized(!isMinimized);
         };
 
