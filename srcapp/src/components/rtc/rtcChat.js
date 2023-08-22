@@ -59,7 +59,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
 // 미디어 제약 사항 설정
     const mediaConstraints = {
         audio: true,
-        video: true
+        video: { width: 640, height: 480, frameRate: 24 }
     };
     let localStream;
     let localVideoTracks;
@@ -200,7 +200,8 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
             type: 'findCount',
             data: sendUser + "님과 " + receiverUser + "님의 화상채팅방",//여기가 방 제목 들어갈 부분(로그인 userName+ 요청받는 userName)
             candidate: 'null',
-            sdp: 'null'
+            sdp: 'null',
+            chatType: 'video'
         };
         const config = {
             headers: {

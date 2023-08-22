@@ -328,6 +328,41 @@ useEffect(() => {
     }
 }, [type2]); 
 
+
+useEffect(() => {
+    const userName = localStorage.getItem('userName');
+
+    if (userName) {
+        //const ws = new WebSocket(`wss://localhost:9002/test`)
+        const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
+
+        ws.onopen = (event) => {
+            console.log("WebSocket 연결 성공:", event);
+        };
+
+        ws.onmessage = (event) => {
+            console.log("서버로부터 메시지 수신:", event.data);
+        };
+
+        ws.onerror = (event) => {
+            console.error("WebSocket 오류 발생:", event);
+        };
+
+        ws.onclose = (event) => {
+            console.log("WebSocket 연결 종료:", event);
+        };
+
+        setSocket(ws);
+    }
+}, []);  // 이 배열이 비어 있으므로 이 useEffect는 컴포넌트가 마운트될 때만 실행됩니다.
+
+
+
+
+
+
+
+
 const sendRequestToServer = async () => {
     try {
         const response = await fetch('/webrtc/request', {
@@ -341,6 +376,7 @@ const sendRequestToServer = async () => {
                 type:type2
             })
         });
+
         if (response.ok) {
             console.log(type2+"타입ㅂㅂㅂㅂㅂㅂㅂㅂ");
             if (type2 === "video") {
@@ -392,6 +428,7 @@ const handleGrandchildData = (data) => {
                 console.log("로그인 사용자: " + userName);
                 setRtcUserName(userName);
                 
+                if(username){
                 //const ws = new WebSocket(`wss://localhost:9002/test`)
                 const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
 
@@ -413,6 +450,7 @@ const handleGrandchildData = (data) => {
                 ws.onclose = (event) => {
                     console.log("WebSocket 연결 종료:", event);
                 };
+            }
 
                 // setSocket(ws);
                 // 페이지 이동

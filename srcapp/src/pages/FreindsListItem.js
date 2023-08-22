@@ -35,8 +35,7 @@ const FreindsListItem = React.memo(({user, friendsChatDiv,onData,setChatType}) =
         console.log("이름"+userName);
         onData(userName);
         setChatType(type);
-        console.log("타입"+type);
-
+       
     }
 
         return (
@@ -60,12 +59,14 @@ const FreindsListItem = React.memo(({user, friendsChatDiv,onData,setChatType}) =
                         1:1 Chat
                     </Button>
                     <Button
-                        onClick={Rtc("video")} className={"friendsList_item_btn2"}
+                    onClick={() => Rtc("video")} 
+                         className={"friendsList_item_btn2"}
                     >
                         Video Chat
                     </Button>
                     <Button
-                        onClick={Rtc("voice")} className={"friendsList_item_btn2"}
+                       onClick={() => Rtc("voice")}  
+                       className={"friendsList_item_btn2"}
                     >
                         Voice Chat
                     </Button>
