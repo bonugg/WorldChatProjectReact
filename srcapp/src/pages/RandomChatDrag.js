@@ -93,10 +93,13 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         const [isChatReadOnly, setIsChatReadOnly] = useState(false);
         const [messages, setMessages] = useState([]);
         const [sendMessage, setSendMessage] = useState('');
+        //랜덤채팅 시작 시 텍스트
+        const [randomStartText, setRandomStartText] = useState('start a random chat');
         const {randomRoomId} = useParams();
         const [room, setRoom] = useState({});
 
         const client = useRef({});
+        const LoginUserNickName = useRef({});
 
         //현재 스크롤바의 위치를 담는 상태 변수
         const [scroll, setScroll] = useState('');
@@ -111,7 +114,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         //인풋창 파일 및 텍스트 타입 전환
         const [inputChange, setInputChange] = useState(false);
         //파일 담는 상태 변수
-        const [selectedFiles, setSelectedFiles] = useState([]);
+        const [files, setFiles] = useState([]);
 
 //--------------드래그 창 보임/숨김-----------------------
         useEffect(() => {
@@ -170,11 +173,11 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         };
         const disconnect = () => {
             if (client.current && typeof client.current.disconnect === "function") {
+                leaveEvent();
                 client.current.disconnect(() => {
                     setMessages([]);
                     setIsChatReadOnly(false);
                     console.log("websocket disconnected");
-                    setIsChatDiv(false);
                 });
             }
         };
@@ -192,16 +195,37 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
 
         function onReceived(payload) {
             let payloadData = JSON.parse(payload.body);
+            if(payloadData.type == "LEAVE"){
+                if(payloadData.sender != LoginUserNickName.current){
+                    setRandomStartText("A stranger has left");
+                }else {
+                    setRandomStartText("start a random chat");
+                }
+                setIsChatDiv(false);
+            }
             setMessages((prev) => [...prev, payloadData]);
         }
 
         function joinEvent() {
+            const headers = {
+                Authorization: localStorage.getItem("Authorization"),
+            };
             const joinMessage = {
                 type: "ENTER",
-                sender: client.current.userName,
                 randomRoomId: room.randomRoomId,
             };
-            client.current.send(`/randomPub/randomChat/${randomRoomId}/enter`, {}, JSON.stringify(joinMessage));
+            client.current.send(`/randomPub/randomChat/${randomRoomId}/enter`, headers, JSON.stringify(joinMessage));
+        }
+
+        function leaveEvent() {
+            const headers = {
+                Authorization: localStorage.getItem("Authorization"),
+            };
+            const leaveMessage = {
+                type: "LEAVE",
+                randomRoomId: room.randomRoomId,
+            };
+            client.current.send(`/randomPub/randomChat/${randomRoomId}/leave`, headers, JSON.stringify(leaveMessage));
         }
 
         const sendChatMessage = (msgText) => {
@@ -211,15 +235,17 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
             const second = now.getSeconds();
 
             if (client.current) {
+                const headers = {
+                    Authorization: localStorage.getItem("Authorization"),
+                };
                 const messageData = {
                     type: "CHAT",
                     content: msgText,
                     time: `${hour}:${minute}:${second}`,
                     randomRoomId: room.randomRoomId,
-                    sender: client.current.userName,
                 };
                 console.log("Sending message: ", JSON.stringify(messageData));
-                client.current.send(`/randomPub/randomChat/${room.randomRoomId}`, {}, JSON.stringify(messageData));
+                client.current.send(`/randomPub/randomChat/${room.randomRoomId}`, headers, JSON.stringify(messageData));
             }
         };
 
@@ -227,13 +253,13 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
             if (isChatDiv) {
                 console.log("랜덤 채팅방 정보");
                 console.log(room);
+                setMenuDiv(false);
+                setMenuDiv2(false);
+                setSendMessage('');
                 connect();
             } else {
                 disconnect();
             }
-
-            //socket 연결 해제
-            return () => disconnect();
         }, [isChatDiv]);
 
         const trackPos = (data) => {
@@ -254,6 +280,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                 disconnect();
             }
             if (onClose) {
+                setRandomStartText("start a random chat");
                 onClose();
             }
         };
@@ -307,8 +334,10 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                         return console.error(result.errorMessage);
                     }
 
-                    console.log(`Created random room name: ${result.randomRoomName}`);
-                    setRoom(result);
+                    console.log(`Created random room name: ${result}`);
+                    console.log(`Created random room name: ${result.randomRoomDTO}`);
+                    setRoom(result.randomRoomDTO);
+                    LoginUserNickName.current = result.userNickName;
                     setIsChatDiv(true);
                     return result;
                     // navigate(`/random/${result.randomRoomId}`, {state: {room: result}});
@@ -324,6 +353,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
             startRandomC();
         }
         const exitChatDiv = () => {
+            setRandomStartText("start a random chat");
             setIsChatDiv(false);
         };
 
@@ -379,7 +409,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
 //--------------파일 버튼 클릭 시 동작----------------------
 //--------------파일 버튼 클릭 후 파일 첨부 시에 파일 명 인풋창에 표시----------------------
         const handleFileChange = (e) => {
-            setSelectedFiles(e.target.files);
+            setFiles(e.target.files);
 
             // 파일 이름 및 경로를 저장하는 로직을 추가
             const files = e.target.files;
@@ -389,64 +419,85 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
             }
         };
 //--------------파일 버튼 클릭 후 파일 첨부 시에 파일 명 인풋창에 표시----------------------
+//--------------파일 폼 데이터----------------------
+        const createFormData = (filess, roomIdd) => {
+            const formData = new FormData();
+
+            formData.append("file", filess);
+
+            formData.append("roomId", roomIdd);
+            return formData;
+        };
+//--------------파일 폼 데이터----------------------
 //--------------업로드 파일----------------------
-        const uploadFiles = () => {
-            if (!selectedFiles || selectedFiles.length === 0) return;
+        const uploadFiles = async () => {
+            if (files.length === 0) {
+                console.log("파일을 선택해주세요.");
+                return;
+            }
 
-            // 각 파일을 순회하며 업로드합니다.
-            for (let i = 0; i < selectedFiles.length; i++) {
-                const file = selectedFiles[i];
+            try {
+                // 각 파일을 순회하며 업로드합니다.
+                console.log("1");
+                for (let i = 0; i < files.length; i++) {
+                    console.log("2");
+                    const file = files[i];
+                    console.log(file);
+                    const formData = createFormData(file, room.randomRoomId);
+                    const config = {headers: {"Content-Type": "multipart/form-data"}};
 
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("roomId", '1');
+                    axios.post("/randomFile/upload", formData, config)
+                        .then((response) => {
+                            const data = response.data;
+                            console.log(data[0]);
+                            console.log(data.randomFileName);
+                            console.log(data.randomFileOrigin);
+                            const now = new Date();
+                            const hour = now.getHours();
+                            const minute = now.getMinutes();
+                            const second = now.getSeconds();
 
-                axios.post('/chatroom/upload', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                })
-                    .then((response) => {
-                        const data = response.data;
-                        const chatMessage = {
-                            "roomId": '1',
-                            "message": "File upload",
-                            "s3DataUrl": data.s3DataUrl,
-                            "fileName": file.name,
-                            "fileDir": data.fileDir
-                        };
-                        // 여기서 stompClient.send를 사용하여 메시지를 전송합니다.
-                        client.send(
-                            "/frdPub/friendchat",
-                            {},
-                            JSON.stringify(chatMessage)
-                        );
-                    })
-                    .catch((error) => {
-                        alert(error);
-                    });
+                            const chatMessage = {
+                                type: "CHAT",
+                                content: "File upload",
+                                time: `${hour}:${minute}:${second}`,
+                                randomRoomId: room.randomRoomId,
+                                sender: client.current.userName,
+                                fileName: data[0].randomFileName,
+                                fileOrigin: data[0].randomFileOrigin,
+                            };
+                            // 여기서 stompClient.send를 사용하여 메시지를 전송합니다.
+                            client.current.send(`/randomPub/randomChat/${room.randomRoomId}`, {}, JSON.stringify(chatMessage));
+                        })
+                        .catch((error) => {
+                            alert(error);
+                        });
+
+                    setSendMessage("");
+                }
+
+            } catch (error) {
+                console.log("파일 업로드 실패:", error);
             }
         };
 //--------------업로드 파일----------------------
 //--------------다운로드 파일----------------------
-        const downloadFile = (name, dir) => {
-            const url = `/download/${name}`;
-
-            axios({
-                method: 'get',
-                url: url,
-                params: {"fileDir": dir},
-                responseType: 'blob'
-            })
-                .then((response) => {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(new Blob([response.data]));
-                    link.download = name;
-                    link.click();
-                })
-                .catch((error) => {
-                    console.error("Download error", error);
+        const downloadFile = async (fileName, fileDir) => {
+            try {
+                const response = await axios.get(`/randomFile/download/${fileName}`, {
+                    params: { fileDir },
+                    responseType: 'blob',
                 });
+
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', fileName);
+                document.body.appendChild(link);
+                link.click();
+            } catch (error) {
+                console.error("파일 다운로드 실패:", error);
+            }
         };
 //--------------다운로드 파일----------------------
         return (
@@ -523,7 +574,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                                 <div className={"EnterRoomChat_content"}>
                                                     <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
                                                         {messages.map((message, index) => {
-                                                            const isMyMessage = message.sender === localStorage.getItem('userName');
+                                                            const isMyMessage = message.sender === LoginUserNickName.current;
                                                             return (
                                                                 <MessageStyled
                                                                     key={index}
@@ -544,6 +595,31 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                 <span
                                                                                     className="userName">{message.sender}</span>
                                                                             </div>
+                                                                            {message.fileName && (
+                                                                                <div className={"down_div"}>
+                                                                                    {message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i)
+                                                                                        ? <img src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/"+ message.fileName}
+                                                                                               alt="uploaded"
+                                                                                               className={"message_img"}/>
+                                                                                        : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i)
+                                                                                            ? <video src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/"+ message.fileName}
+                                                                                                     controls
+                                                                                                     className={"message_img"}/> // 동영상 렌더링
+                                                                                            : <div className={"message_other"}>
+                                                                                            <span
+                                                                                                className={"message_other_text"}>
+                                                                                                     {message.fileOrigin}
+                                                                                            </span>
+                                                                                            </div> // 파일 이름 렌더링
+                                                                                    }
+                                                                                    <Button
+                                                                                        onClick={() => downloadFile(message.fileOrigin, message.fileName)}
+                                                                                        className={message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn" : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i) ? "downBtn" : "downBtn2"}
+                                                                                    >
+                                                                                        D
+                                                                                    </Button> {/* 다운로드 버튼 */}
+                                                                                </div>
+                                                                            )}
                                                                             <span
                                                                                 className="content_user">{message.content}</span>
                                                                             <span
@@ -556,8 +632,33 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                 {/*     src={message.userProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + message.userProfile : Profile}*/}
                                                                                 {/*/>*/}
                                                                                 <span
-                                                                                    className="userName">{message.sender}</span>
+                                                                                    className="userName">Stranger</span>
                                                                             </div>
+                                                                            {message.fileName && (
+                                                                                <div className={"down_div"}>
+                                                                                    {message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i)
+                                                                                        ? <img src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/"+ message.fileName}
+                                                                                               alt="uploaded"
+                                                                                               className={"message_img2"}/>
+                                                                                        : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i)
+                                                                                            ? <video src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/"+ message.fileName}
+                                                                                                     controls
+                                                                                                     className={"message_img2"}/> // 동영상 렌더링
+                                                                                            : <div className={"message_other2"}>
+                                                                                            <span
+                                                                                                className={"message_other_text2"}>
+                                                                                                     {message.fileOrigin}
+                                                                                            </span>
+                                                                                            </div> // 파일 이름 렌더링
+                                                                                    }
+                                                                                    <Button
+                                                                                        onClick={() => downloadFile(message.fileOrigin, message.fileName)}
+                                                                                        className={message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn_other" : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i) ? "downBtn_other" : "downBtn_other2"}
+                                                                                    >
+                                                                                        D
+                                                                                    </Button> {/* 다운로드 버튼 */}
+                                                                                </div>
+                                                                            )}
                                                                             <span
                                                                                 className="content_other">{message.content}</span>
                                                                             <span
@@ -648,7 +749,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                     <div className={"select"}>
                                         <div className={"random_start"}>
                                             <div className={"random_start_2"}>
-                                                start a random chat
+                                                {randomStartText}
                                             </div>
                                             <div className={"random_start_3"}>
                                                 <Button

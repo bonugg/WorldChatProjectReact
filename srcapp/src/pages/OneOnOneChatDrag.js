@@ -297,6 +297,8 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
                 })
                     .then((response) => {
                         const data = response.data;
+                        console.log(data);
+                        console.log("---");
                         const chatMessage = {
                             "roomId": roomIdRef.current,
                             "message": "File upload",
@@ -314,6 +316,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
                     .catch((error) => {
                         alert(error);
                     });
+                setSendMessage("");
             }
         };
 //--------------업로드 파일----------------------
@@ -583,7 +586,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
                                                                                     : message.fileName.match(/\.(mp4|webm|ogg)$/i)
                                                                                         ? <video src={message.s3DataUrl}
                                                                                                  controls
-                                                                                                 className={"message_video"}/> // 동영상 렌더링
+                                                                                                 className={"message_img"}/> // 동영상 렌더링
                                                                                         : <div className={"message_other"}>
                                                                                             <span
                                                                                                 className={"message_other_text"}>
@@ -613,6 +616,31 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
                                                                             <span
                                                                                 className="userName">{message.sender}</span>
                                                                         </div>
+                                                                        {message.s3DataUrl && (
+                                                                            <div className={"down_div"}>
+                                                                                {message.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
+                                                                                    ? <img src={message.s3DataUrl}
+                                                                                           alt="uploaded"
+                                                                                           className={"message_img2"}/>
+                                                                                    : message.fileName.match(/\.(mp4|webm|ogg)$/i)
+                                                                                        ? <video src={message.s3DataUrl}
+                                                                                                 controls
+                                                                                                 className={"message_img2"}/> // 동영상 렌더링
+                                                                                        : <div className={"message_other2"}>
+                                                                                            <span
+                                                                                                className={"message_other_text2"}>
+                                                                                                     {message.fileName}
+                                                                                            </span>
+                                                                                        </div> // 파일 이름 렌더링
+                                                                                }
+                                                                                <Button
+                                                                                    onClick={() => downloadFile(message.fileName, message.fileDir)}
+                                                                                    className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn_other" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn_other" : "downBtn_other2"}
+                                                                                >
+                                                                                    D
+                                                                                </Button> {/* 다운로드 버튼 */}
+                                                                            </div>
+                                                                        )}
                                                                         <span
                                                                             className="content_other">{message.message}</span>
                                                                         <span

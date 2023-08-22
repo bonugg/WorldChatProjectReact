@@ -12,8 +12,28 @@ import Profile from "../img/profile.png"
 import "./css/CateChat.css";
 import CateChatListItem from './CateChatListItem';
 import styled, {keyframes} from "styled-components";
+import axios from "axios";
 
 const MessageStyled = styled.p`
+`;
+const slideDownMenu = keyframes`
+  0% {
+    width: 0;
+    height: 0px;
+  }
+  100% {
+    width: 130px;
+    height: 70px;
+  }
+`;
+const slideUpMenu = keyframes`
+  0% {
+    width: 130px;
+    height: 70px
+  }
+  100% {
+    width: 0px;
+  }
 `;
 const slideDownUserList = keyframes`
   0% {
@@ -47,6 +67,22 @@ const slideUp = keyframes`
     transform: scale(0);
   }
 `;
+const MenuPanel = styled.div`
+  visibility: ${props => props.visible === "visible" ? 'visible' : props.visible === "" ? "" : "hidden"};
+  animation: ${props => props.visible === "visible" ? slideDownMenu : props.visible === "" ? slideUpMenu : "hidden"} 0.25s ease-in-out;
+  position: absolute;
+  top: 95%;
+  left: 10px; // 수정된 부분
+  z-index: 1;
+  width: ${props => props.visible ? '130px' : '0px'}; // 기존 속성
+  height: ${props => props.visible ? '70px' : '0px'}; // 기존 속성
+  overflow-y: hidden;
+  overflow-x: hidden;
+  transition: all 0.25s ease-in-out;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.5);
+`;
+
 const DivStyled = styled.div`
   visibility: ${props => props.visible === "visible" ? 'visible' : props.visible === "" ? "" : "hidden"};
   animation: ${props => props.visible === "visible" ? slideDown : props.visible === "" ? slideUp : 'hidden'} 0.25s ease-in-out;
@@ -173,6 +209,15 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             interest: ' ',
         });
 
+        //메뉴창 비활성화 상태 변수
+        const [menuDiv, setMenuDiv] = useState(false);
+        const [menuDiv2, setMenuDiv2] = useState(false);
+        //인풋창 파일 및 텍스트 타입 전환
+        const [inputChange, setInputChange] = useState(false);
+        //파일 버튼 클릭 시 인풋 파일로 값 전달
+        const inputFileRef = useRef(null);
+        const [selectedFiles, setSelectedFiles] = useState([]);
+
         const toggleUserListPanel = () => {
             setIsUserListVisible((prevIsUserListVisible) => !prevIsUserListVisible);
             setIsUserListVisible2(true);
@@ -269,11 +314,14 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                     cateId: CateRoom.cateId,
                 }));
                 stompClient.disconnect();
+
+                setMenuDiv(false);
+                setMenuDiv2(false);
                 setSendMessage('');
-                setIsChatReadOnly(false);
                 setMessages([]);
                 setIsUserListVisible(false);
                 setIsUserListVisible2(false);
+                setIsChatReadOnly(false);
                 setStompClient(null);
             }
             console.log('Disconnected');
@@ -291,10 +339,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                 setCreateRoomId('');
                 connect();
             } else {
-                setSendMessage('');
-                setMessages([]);
-                setIsUserListVisible(false);
-                setIsUserListVisible2(false);
                 disconnect();
                 if (isUserListVisible) {
                     setIsUserListVisible2(true);
@@ -327,6 +371,8 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         };
 
         const handleMinimizeClick = () => {
+            setMenuDiv(false);
+            setMenuDiv2(false);
             setCreatRoom(false);
             setCreatRoom2(false);
             setIsUserListVisible2(false);
@@ -334,6 +380,8 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         };
 
         const handleCloseClick = () => {
+            setMenuDiv(false);
+            setMenuDiv2(false);
             setIsUserListVisible(false);
             setIsUserListVisible2(false);
             setCreatRoom(false);
@@ -408,20 +456,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             setIsChatDiv(false);
         };
 
-
-        // useEffect(() => {
-        //     // isChatDiv가 true가 될 때 접속하고 false가 될 때 끊습니다.
-        //     if (!CateChatDiv) {
-        //         setIsChatDiv(false);
-        //     }
-        // }, [CateChatDiv]);
-        //
-        // useEffect(() => {
-        //     if (CateChatDiv) {
-        //         roomListLoad();
-        //     }
-        // }, [CateChatDiv]);
-
         // 카테고리 룸 등록 후 div 업데이트 합니다
         const setCateRoomAndHandleChatDivUpdate = (chatDivUpdateValue, cateRoomValue) => {
             setCateRoom(cateRoomValue)
@@ -438,16 +472,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const handleSubmit = (event) => {
             event.preventDefault();
             cateRoomCreate();
-            // if (validateForm()) {
-            //     // 여기서 formValues를 서버에 전송하거나 처리
-            //     cateRoomCreate();
-            // }
         };
-
-        // const validateForm = () => {
-        //     // 여기에서 유효성 검사를 수행하고, 결과에 따라 true 또는 false를 반환
-        //     return true;
-        // };
 
         const roomListLoad = async (category, retry = true) => {
             if (category === undefined) {
@@ -567,6 +592,108 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             });
         };
 
+//--------------파일 버튼 클릭 시 동작----------------------
+        const handleFileButtonClick = () => {
+            setSendMessage("");
+            setInputChange(true);
+            inputFileRef.current.click();
+        };
+//--------------파일 버튼 클릭 시 동작----------------------
+//--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환----------------------
+        const handleInputChange = (e) => {
+            setSendMessage('');
+            setInputChange(false);
+        };
+//--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환----------------------
+//--------------텍스트 채팅 시 입력 메시지 보여주기----------------------
+        const handleMessageChange = (e) => {
+            setSendMessage(e.target.value);
+
+        };
+//--------------텍스트 채팅 시 입력 메시지 보여주기----------------------
+//--------------파일 버튼 클릭 후 파일 첨부 시에 파일 명 인풋창에 표시----------------------
+        const handleFileChange = (e) => {
+            setSelectedFiles(e.target.files);
+
+            // 파일 이름 및 경로를 저장하는 로직을 추가
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                const fileNames = Array.from(files).map(file => file.name).join(', ');
+                setSendMessage(fileNames);
+            }
+        };
+//--------------파일 버튼 클릭 후 파일 첨부 시에 파일 명 인풋창에 표시----------------------
+//--------------메뉴 오픈-----------------------
+        const handleMenuOpen = () => {
+            setMenuDiv((prevIsUserListVisible) => !prevIsUserListVisible);
+            setMenuDiv2(true);
+        };
+//--------------메뉴 오픈-----------------------
+//--------------업로드 파일----------------------
+        const uploadFiles = () => {
+            if (!selectedFiles || selectedFiles.length === 0) return;
+
+            // 각 파일을 순회하며 업로드합니다.
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("roomId", CateRoom.cateId);
+
+                axios.post('/cateChat/upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
+                    .then((response) => {
+                        const data = response.data;
+                        console.log(data);
+                        console.log("---");
+                        const chatMessage = {
+                            type: "CHAT",
+                            cateId: CateRoom.cateId,
+                            cateChatContent: "File upload",
+                            "s3DataUrl": data.s3DataUrl,
+                            "fileName": file.name,
+                            "fileDir": data.fileDir
+                        };
+                        stompClient.send(
+                            `/catePub/categoryChat/${CateRoom.cateId}/sendMessage`,
+                            {},
+                            JSON.stringify(chatMessage)
+                        );
+                    })
+                    .catch((error) => {
+                        alert(error);
+                    });
+                setSendMessage("");
+            }
+        };
+//--------------업로드 파일----------------------
+//--------------다운로드 파일----------------------
+        const downloadFile = (name, dir) => {
+            console.log(name);
+            console.log(dir);
+            const url = `/catechat/download/${name}`;
+
+            axios({
+                method: 'get',
+                url: url,
+                params: {"fileDir": dir},
+                responseType: 'blob'
+            })
+                .then((response) => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(new Blob([response.data]));
+                    link.download = name;
+                    link.click();
+                })
+                .catch((error) => {
+                    console.error("Download error", error);
+                });
+        };
+//--------------다운로드 파일----------------------
         return (
             <div className="Drag">
                 {!isClosed && (
@@ -762,6 +889,9 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                     <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
                                                         {messages.map((message, index) => {
                                                             const isMyMessage = message.sender === UserNickName;
+                                                            console.log(message.s3DataUrl)
+                                                            console.log(message.fileName)
+                                                            console.log(message.fileDir)
                                                             return (
                                                                 <MessageStyled
                                                                     key={index}
@@ -782,6 +912,31 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                 <span
                                                                                     className="userName">{message.sender}</span>
                                                                             </div>
+                                                                            {message.s3DataUrl && (
+                                                                                <div className={"down_div"}>
+                                                                                    {message.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
+                                                                                        ? <img src={message.s3DataUrl}
+                                                                                               alt="uploaded"
+                                                                                               className={"message_img"}/>
+                                                                                        : message.fileName.match(/\.(mp4|webm|ogg)$/i)
+                                                                                            ? <video src={message.s3DataUrl}
+                                                                                                     controls
+                                                                                                     className={"message_img"}/> // 동영상 렌더링
+                                                                                            : <div className={"message_other"}>
+                                                                                            <span
+                                                                                                className={"message_other_text"}>
+                                                                                                     {message.fileName}
+                                                                                            </span>
+                                                                                            </div> // 파일 이름 렌더링
+                                                                                    }
+                                                                                    <Button
+                                                                                        onClick={() => downloadFile(message.fileName, message.fileDir)}
+                                                                                        className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn" : "downBtn2"}
+                                                                                    >
+                                                                                        D
+                                                                                    </Button> {/* 다운로드 버튼 */}
+                                                                                </div>
+                                                                            )}
                                                                             <span
                                                                                 className="content_user">{message.cateChatContent}</span>
                                                                             <span
@@ -796,6 +951,31 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                 <span
                                                                                     className="userName">{message.sender}</span>
                                                                             </div>
+                                                                            {message.s3DataUrl && (
+                                                                                <div className={"down_div"}>
+                                                                                    {message.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
+                                                                                        ? <img src={message.s3DataUrl}
+                                                                                               alt="uploaded"
+                                                                                               className={"message_img2"}/>
+                                                                                        : message.fileName.match(/\.(mp4|webm|ogg)$/i)
+                                                                                            ? <video src={message.s3DataUrl}
+                                                                                                     controls
+                                                                                                     className={"message_img2"}/> // 동영상 렌더링
+                                                                                            : <div className={"message_other2"}>
+                                                                                            <span
+                                                                                                className={"message_other_text2"}>
+                                                                                                     {message.fileName}
+                                                                                            </span>
+                                                                                            </div> // 파일 이름 렌더링
+                                                                                    }
+                                                                                    <Button
+                                                                                        onClick={() => downloadFile(message.fileName, message.fileDir)}
+                                                                                        className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn_other" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn_other" : "downBtn_other2"}
+                                                                                    >
+                                                                                        D
+                                                                                    </Button> {/* 다운로드 버튼 */}
+                                                                                </div>
+                                                                            )}
                                                                             <span
                                                                                 className="content_other">{message.cateChatContent}</span>
                                                                             <span
@@ -807,30 +987,76 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                         })}
                                                     </div>
                                                 </div>
-                                                <div className={"EnterRoomChat_input"}>
-                                                    <form className={"EnterRoomChat_input_form"}
+                                                <div className={"EnterRoomChat_input_one"}>
+                                                    <form className={"EnterRoomChat_input_form_one"}
                                                           onSubmit={handleSendMessage}>
-                                                        <Button
-                                                            className={"btnSend"}
-                                                            type="submit"
-                                                            onClick={handleSendMessage}
-                                                        >+
-                                                        </Button>
-                                                        <input
-                                                            placeholder={!isChatReadOnly ? "Connecting, please wait" : "Please enter your message"}
-                                                            type="text"
-                                                            className={"inputchat"}
-                                                            required
-                                                            value={sendMessage}
-                                                            readOnly={!isChatReadOnly} // isChatDiv가 false일 때 readOnly를 true로 변경
-                                                            onChange={(e) => setSendMessage(e.target.value)}
-                                                        />
-                                                        <Button
-                                                            className={"btnSend"}
-                                                            type="submit"
-                                                            onClick={handleSendMessage}
-                                                        >SEND
-                                                        </Button>
+                                                        <MenuPanel
+                                                            visible={menuDiv ? "visible" : menuDiv2 ? "" : "hidden"}
+                                                        >
+                                                            <div className={"menu_div"}>
+                                                                <div className={"file"}>
+                                                                    <Button
+                                                                        className={"menu_btn"}
+                                                                        type="button"
+                                                                        onClick={handleFileButtonClick}
+                                                                    >FILE
+                                                                    </Button>
+                                                                </div>
+                                                                <div className={"trans"}>
+                                                                    <Button
+                                                                        className={"menu_btn"}
+                                                                        type="button"
+                                                                        style={{fontSize: '11px'}}
+                                                                    >TRANS
+                                                                    </Button>
+                                                                </div>
+
+                                                            </div>
+                                                        </MenuPanel>
+                                                        <div className={"input_menu"}>
+                                                            <input
+                                                                placeholder={!isChatReadOnly ? "Connecting, please wait" : "Please enter your message"}
+                                                                type="text"
+                                                                className={inputChange ? "inputchat_one2" : "inputchat_one"}
+                                                                required
+                                                                value={sendMessage}
+                                                                onClick={handleInputChange}
+                                                                readOnly={!isChatReadOnly} // isChatDiv가 false일 때 readOnly를 true로 변경
+                                                                onChange={handleMessageChange}
+                                                            />
+                                                            <input
+                                                                type="file"
+                                                                id="file"
+                                                                ref={inputFileRef}
+                                                                onChange={handleFileChange}
+                                                                multiple
+                                                                style={{display: 'none'}}
+                                                            />
+                                                            <Button
+                                                                className={menuDiv ? "add_now" : "add"}
+                                                                type="button"
+                                                                onClick={handleMenuOpen}
+                                                            >{menuDiv ? "-" : "+"}
+                                                            </Button>
+                                                        </div>
+
+                                                        {inputChange ? (
+                                                            <Button
+                                                                className={"btnSend2"}
+                                                                type="button"
+                                                                onClick={uploadFiles}
+                                                            >UPLOAD
+                                                            </Button>
+                                                        ) : (
+                                                            <Button
+                                                                className={"btnSend"}
+                                                                type="submit"
+                                                                onClick={handleSendMessage}
+                                                            >SEND
+                                                            </Button>
+                                                        )}
+
+
                                                     </form>
                                                 </div>
                                             </div>
