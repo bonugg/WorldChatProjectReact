@@ -10,24 +10,45 @@ import data from '@emoji-mart/data'
 
 const ChatRoom4 = () => {
     const {roomId} = useParams();
-    //const userName = `${localStorage.getItem('userName')}`
     const client = useRef({});
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [chatHistory, setChatHistory] = useState([]);
     const [selectedFiles, setSelectedFiles] = useState([]);
-
-    const [translate, setTranslate] = useState(false);
-    const [targetLang, setTargetLang] = useState('en');
-
-    const languages = [
-        {code: 'en', label: 'English'},
-        {code: 'ko', label: 'Korean'},
-        {code: 'ja', label: 'Japanese'},
-        // 추가로 필요한 언어들을 여기에 추가
-    ];
-
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+
+    const userName = localStorage.getItem("userName");
+
+
+    const [shouldDetectLanguage, setShouldDetectLanguage] = useState(false);
+    const shouldDetectLanguageRef = useRef(shouldDetectLanguage);
+    const [selectedLanguage, setSelectedLanguage] = useState("en");
+    const selectedLanguageRef = useRef(selectedLanguage);
+    const languages = {
+        "en": "English",
+        "ko": "Korean(한국어)",
+        "ja": "Japanese(日本語)",
+        "zh-CN": "Chinese Simplified(简体中文)",
+        "zh-TW": "Chinese Traditional(中國傳統語言)",
+        "vi": "Vietnamese(Tiếng Việt)",
+        "id": "Indonesian(bahasa Indonésia)",
+        "th": "Thai(ภาษาไทย)",
+        "de": "German(das Deutsche)",
+        "ru": "Russian(Русский язык)",
+        "es": "Spanish(español)",
+        "it": "Italian(Italia)",
+        "fr": "French(Français)"
+
+    };
+
+    useEffect(() => {
+        shouldDetectLanguageRef.current = shouldDetectLanguage;
+    }, [shouldDetectLanguage]);
+
+    useEffect(() => {
+        selectedLanguageRef.current = selectedLanguage;
+    }, [selectedLanguage]);
 
     useEffect(() => {
         connect();
@@ -61,9 +82,16 @@ const ChatRoom4 = () => {
             onConnect:() => {
                 getChatMessageFromDB();
                 client.current.subscribe(`/frdSub/${roomId}`, async ({body}) => {
+                    console.log("Received a message", body);
+
+                    console.log("Message received. Should detect language:", shouldDetectLanguageRef.current);  // 이 부분 추가
+
                     const receivedMessage = JSON.parse(body);
-                    if (translate) {
-                        receivedMessage.message = await detectLanguageAndTranslate(receivedMessage.message);
+                    if (receivedMessage.sender !== "qwe" && shouldDetectLanguageRef.current) {
+                        const translatedText = await detectAndTranslate(receivedMessage.message);
+                        if (translatedText) {
+                            receivedMessage.translatedMessage = translatedText;
+                        }
                     }
                     setMessages((messages) => [...messages, receivedMessage]);
                 });
@@ -87,17 +115,9 @@ const ChatRoom4 = () => {
         setMessage(e.target.value);
     };
 
-
-    const sendMessage = async (e) => {
+    const sendMessage = (e) => {
         e.preventDefault();
-
-        let finalMessage = message;
-        if (translate) {
-            const translatedText = await detectLanguageAndTranslate(message);
-            finalMessage += ` (translated: ${translatedText})`;
-        }
-
-        publish(finalMessage);
+        publish(message);
         setMessage("");
     };
 
@@ -109,7 +129,6 @@ const ChatRoom4 = () => {
             destination: "/frdPub/friendchat",
             body: JSON.stringify({
                 "roomId": roomId,
-                // "sender": userName,
                 "message": msg,
             })
         });
@@ -139,7 +158,6 @@ const ChatRoom4 = () => {
                     const data = response.data;
                     const chatMessage = {
                         "roomId": roomId,
-                        // "sender": userName,
                         "message": "파일을 보냈습니다.",
                         "s3DataUrl": data.s3DataUrl,
                         "fileName": file.name,
@@ -176,56 +194,6 @@ const ChatRoom4 = () => {
             });
     };
 
-    const detectLanguageAndTranslate = async (text) => {
-        try {
-            // 언어 감지 API 호출
-            const detectRes = await axios.post('/language/detect', {
-                text: text
-            }, {
-                headers: {
-                    Authorization: `${localStorage.getItem('Authorization')}`
-                }
-            });
-
-            console.log(detectRes);
-
-            // 감지된 언어를 기반으로 번역 API 호출
-            const detectedLang = detectRes.data; // API 응답 형식에 따라 조정 필요
-            const translateRes = await axios.post('/language/translate', {
-                text: text,
-                sourceLang: detectedLang,
-                targetLang: targetLang // 사용자가 선택한 언어로 설정
-            }, {
-                headers: {
-                    Authorization: `${localStorage.getItem('Authorization')}`
-                }
-                });
-            return translateRes.data.translatedText; // API 응답 형식에 따라 조정 필요
-        } catch (error) {
-            console.error("Error during language detection and translation:", error);
-            return text; // 원본 텍스트 반환
-        }
-    }
-
-    // const getTranslation = async (textToTranslate) => {
-    //     try {
-    //         const response = await axios.post('/language/translate', {
-    //             text: textToTranslate,
-    //             frdChatRoomId: roomId
-    //         }, {
-    //             headers: {
-    //                 Authorization: `${localStorage.getItem('Authorization')}`
-    //             }
-    //         });
-    //         console.log("이거는 번역response")
-    //         console.log(response)
-    //         return response.data.message.result.translatedText; // API 응답에 따라 경로를 조정해야 할 수 있습니다.
-    //
-    //     } catch (error) {
-    //         console.error("Error during translation:", error);
-    //     }
-    // }
-
     const toggleEmojiPicker = () => {
         setShowEmojiPicker(!showEmojiPicker);
     }
@@ -234,6 +202,93 @@ const ChatRoom4 = () => {
         let emoji = e.native;
         setMessage(prevMessage => prevMessage + emoji);
     }
+
+
+
+    const detectAndTranslate = async (text) => {
+
+        console.log(text);
+        console.log("선택된 언어 제발요");
+        console.log(selectedLanguage);
+        const targetLanguage = selectedLanguageRef.current;
+        console.log(targetLanguage);
+
+        try {
+            const detectResponse = await axios.post("/language/detect", { query: text }, {
+                headers: {
+                    Authorization: `${localStorage.getItem('Authorization')}`
+                }
+            });
+
+            console.log(detectResponse);
+            console.log(detectResponse.data);
+
+            console.log("여기에 문제가 있을거같긴해 나도. 이게 제일 못미더워");
+
+            if (detectResponse.data && detectResponse.data.langCode) {
+                const detectedLanguage = detectResponse.data.langCode;
+
+                const translateResponse = await axios.post("/language/translate", {
+                    text: text,
+                    sourceLanguage: detectedLanguage,
+                    targetLanguage: targetLanguage
+                }, {
+                    headers: {
+                        Authorization: `${localStorage.getItem('Authorization')}`
+                    }
+                });
+
+                console.log("번역해주세여~~~~");
+                console.log(translateResponse);
+                console.log(translateResponse.data.message.result.translatedText)
+
+                if (translateResponse.data && translateResponse.data.message.result.translatedText) {
+                    return translateResponse.data.message.result.translatedText;
+                } else {
+                    console.error("Error translating text");
+                    return null;
+                }
+
+            } else {
+                console.error("Error detecting language");
+                return null;
+            }
+
+        } catch (error) {
+            console.error("Error in detectAndTranslate:", error);
+            return null;
+        }
+    };
+
+    const detectLanguage = async (text) => {
+
+        console.log(text);
+
+        try {
+            const response = await axios.post("/language/detect", { query: text }, {
+                headers: {
+                    Authorization: `${localStorage.getItem('Authorization')}`
+                }
+            });
+            console.log(response);
+            console.log(response.data)
+            console.log("여기에 문제가 있을거같긴해 나도. 이게 제일 못미더워")
+            if (response.data && response.data.langCode) {
+                return response.data.langCode;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error("Error detecting language:", error);
+            return null;
+        }
+    }
+
+    const handleLanguageChange = (e) => {
+        setSelectedLanguage(e.target.value);
+        console.log("언어선택 했어요. 진짜로 했어요");
+        console.log(e.target.value);
+    };
 
     return (
         <div>
@@ -248,7 +303,7 @@ const ChatRoom4 = () => {
                         <div key={index}>
                             <div>{item.createdAt}</div>
                             <div>{item.sender}</div>
-                            <div>{item.message}</div>
+                            <div>{item.translatedMessage ? `(번역) ${item.translatedMessage}` : item.message}</div>
                             {item.s3DataUrl && (
                                 <div>
                                     {item.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
@@ -263,17 +318,27 @@ const ChatRoom4 = () => {
                         </div>
                     ))
                 }
-
             </div>
-            <div className="language-selection">
-                <label>Translate to:</label>
-                <select value={targetLang} onChange={(e) => setTargetLang(e.target.value)}>
-                    {languages.map(lang => (
-                        <option key={lang.code} value={lang.code}>
-                            {lang.label}
-                        </option>
+            <div>
+                <label>Select Language for Translation:</label>
+                <select value={selectedLanguage} onChange={handleLanguageChange}>
+                    {Object.entries(languages).map(([code, name]) => (
+                        <option key={code} value={code}>{name}</option>
                     ))}
                 </select>
+            </div>
+            <div>
+                <label>
+                    <input
+                        type="checkbox"
+                        checked={shouldDetectLanguage}
+                        onChange={() => {
+                            setShouldDetectLanguage(prev => !prev);
+                            console.log("Checkbox clicked. Should detect language:", !shouldDetectLanguage);
+                        }}
+                    />
+                    언어 감지하기
+                </label>
             </div>
             <form onSubmit={sendMessage}>
                 <input type={"text"} value={message} onChange={onChangeMessage}/>
@@ -281,7 +346,6 @@ const ChatRoom4 = () => {
                 {showEmojiPicker && (
                     <Picker data={data} onEmojiSelect={addEmoji} />
                 )}
-                <input type="checkbox" onChange={() => setTranslate(!translate)} />
                 <button type="submit">보내기</button>
                 <input type="file" id="file" onChange={handleFileChange} multiple/>
                 <button type="button" onClick={uploadFiles}>파일 업로드</button>
