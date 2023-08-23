@@ -197,7 +197,7 @@
 }
 
 .menu_div {
-    width: 130px;
+    width: 330px;
     height: 70px;
     display: flex;
     justify-content: center;
@@ -218,17 +218,54 @@
     background-color: rgba(255, 255, 255, 0.7) !important;
     font-family: 'Russo One', sans-serif !important;
     color: black !important;
-    border: 1px solid black !important;
+    border: 1px solid rgba(0, 0, 0, 0.5) !important;
     border-radius: 10px !important;
 }
 
 .menu_btn:hover {
     background-color: rgba(255, 255, 255, 0.4) !important;
+    border: 1px solid rgba(0, 0, 0, 1) !important;
+
 }
 
 .trans {
-    width: 50px;
+    width: 250px;
     height: 50px;
+}
+.trans_check{
+    height: 25px;
+}
+.trans_select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 10px !important;
+    position: relative;
+    width: 100% !important;
+    height: 50px !important;
+    padding-left: 5px !important;
+    padding-right: 20px;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(0, 0, 0, 0.5) !important;
+    outline: none;
+    font-size: 15px !important;
+    color: black !important;
+    font-family: 'Russo One', sans-serif !important;
+    transition: all 0.25s ease-in-out !important;
+}
+.trans_select * {
+    border: 0px !important;
+}
+.trans_select:hover {
+    background-color: rgba(255, 255, 255, 0.4) !important;
+    border: 1px solid black !important;
+}
+.trans_li_select{
+    font-size: 12px !important;
+    font-weight: bold !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .add_now {

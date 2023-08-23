@@ -26,13 +26,13 @@ const slideDownUserList = keyframes`
     height: 0px;
   }
   100% {
-    width: 130px;
+    width: 330px;
     height: 70px;
   }
 `;
 const slideUpUserList = keyframes`
   0% {
-    width: 130px;
+    width: 330px;
     height: 70px
   }
   100% {
@@ -47,7 +47,7 @@ const MenuPanel = styled.div`
   top: 95%;
   left: 10px; // 수정된 부분
   z-index: 1;
-  width: ${props => props.visible ? '130px' : '0px'}; // 기존 속성
+  width: ${props => props.visible ? '330px' : '0px'}; // 기존 속성
   height: ${props => props.visible ? '70px' : '0px'}; // 기존 속성
   overflow-y: hidden;
   overflow-x: hidden;
@@ -56,7 +56,7 @@ const MenuPanel = styled.div`
   background: rgba(255, 255, 255, 0.5);
 `;
 
-const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId, oneOnOneUserNickName}) => {
+const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId, oneOnOneUserNickName}) => {
         // 위치 및 상태 설정
         const [windowSize, setWindowSize] = useState({
             width: window.innerWidth,
@@ -119,16 +119,52 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
 
         //현재 스크롤바의 위치를 담는 상태 변수
         const [scroll, setScroll] = useState('');
+        const scrollRef = useRef(scroll);
         const [isScroll, setIsScroll] = useState('');
+        const isScrollRef = useRef(isScroll);
         const [previousScrollbarState, setPreviousScrollbarState] = useState(false);
+        const previousScrollbarStateRef = useRef(previousScrollbarState);
 
         const roomIdRef = useRef(null); // roomId 참조 변수 생성
-        const userNickNameRef = useRef(null); // roomId 참조 변수 생성
-        const userProfileRef = useRef(null); // roomId 참조 변수 생성
-        const userProfileOtherRef = useRef(null); // roomId 참조 변수 생성
+        const userNickNameRef = useRef(null)
+        const userProfileRef = useRef(null);
+        const userProfileOtherRef = useRef(null);
         // stompClient를 useState로 관리
         const [stompClient, setStompClient] = useState(null);
 
+        //번역 상태 변수
+        const [selectedLanguage, setSelectedLanguage] = useState(" ");
+        const selectedLanguageRef = useRef(selectedLanguage);
+        const languages = {
+            "en": "English",
+            "ko": "Korean (한국어)",
+            "ja": "Japanese (日本語)",
+            "zh-CN": "Chinese Simplified (简体中文)",
+            "zh-TW": "Chinese Traditional (中國傳統語言)",
+            "vi": "Vietnamese (Tiếng Việt)",
+            "id": "Indonesian (bahasa Indonésia)",
+            "th": "Thai (ภาษาไทย)",
+            "de": "German (das Deutsche)",
+            "ru": "Russian (Русский язык)",
+            "es": "Spanish (español)",
+            "it": "Italian (Italia)",
+            "fr": "French (Français)"
+
+        };
+
+        useEffect(() => {
+            selectedLanguageRef.current = selectedLanguage;
+        }, [selectedLanguage]);
+
+        useEffect(() => {
+            scrollRef.current = scroll;
+        }, [scroll]);
+        useEffect(() => {
+            previousScrollbarStateRef.current = previousScrollbarState;
+        }, [previousScrollbarState]);
+        useEffect(() => {
+            isScrollRef.current = isScroll;
+        }, [isScroll]);
 
         const getChatMessageFromDB = async () => {
             try {
@@ -196,16 +232,20 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
             };
             const socket = new SockJS(`/friendchat`);
             const client = Stomp.over(socket);
-            console.log("12223")
             const onConnect = (frame) => {
                 setIsChatReadOnly(true);
-                console.log("room11111: " + roomIdRef.current)
-                console.log("Connected: " + frame);
                 getChatMessageFromDB();
-                console.log("room22222: " + roomIdRef.current)
-                client.subscribe("/frdSub/" + roomIdRef.current, (messageOutput) => {
-                    const responseData = JSON.parse(messageOutput.body);
-                    console.log(responseData);
+                client.subscribe("/frdSub/" + roomIdRef.current, async (messageOutput) => {
+                    const responseData = JSON.parse(messageOutput.body);// 이 부분 추가
+
+                    if (responseData.sender !== userNickNameRef.current && selectedLanguageRef.current != " ") {
+                        console.log(responseData);
+                        const translatedText = await detectAndTranslate(responseData.message);
+                        if (translatedText) {
+                            responseData.translatedMessage = translatedText;
+                        }
+                    }
+
                     showMessageOutput(responseData);
                 });
 
@@ -229,6 +269,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
                     Authorization: localStorage.getItem("Authorization"),
                 };
                 stompClient.disconnect();
+                setSelectedLanguage(" ");
                 setSendMessage('');
                 setIsChatReadOnly(false);
                 setMessages([]);
@@ -250,6 +291,69 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
         //         })
         //     });
         // };
+
+//--------------번역----------------------
+        const detectAndTranslate = async (text) => {
+
+            console.log(text);
+            console.log("선택된 언어 제발요");
+            console.log(selectedLanguage);
+            const targetLanguage = selectedLanguageRef.current;
+            console.log(targetLanguage);
+
+            try {
+                const detectResponse = await axios.post("/language/detect", {query: text}, {
+                    headers: {
+                        Authorization: `${localStorage.getItem('Authorization')}`
+                    }
+                });
+
+                console.log(detectResponse);
+                console.log(detectResponse.data);
+
+                console.log("여기에 문제가 있을거같긴해 나도. 이게 제일 못미더워");
+
+                if (detectResponse.data && detectResponse.data.langCode) {
+                    const detectedLanguage = detectResponse.data.langCode;
+
+                    const translateResponse = await axios.post("/language/translate", {
+                        text: text,
+                        sourceLanguage: detectedLanguage,
+                        targetLanguage: targetLanguage
+                    }, {
+                        headers: {
+                            Authorization: `${localStorage.getItem('Authorization')}`
+                        }
+                    });
+
+                    console.log("번역해주세여~~~~");
+                    console.log(translateResponse);
+                    console.log(translateResponse.data.message.result.translatedText)
+
+                    if (translateResponse.data && translateResponse.data.message.result.translatedText) {
+                        return translateResponse.data.message.result.translatedText;
+                    } else {
+                        console.error("Error translating text");
+                        return null;
+                    }
+
+                } else {
+                    console.error("Error detecting language");
+                    return null;
+                }
+
+            } catch (error) {
+                console.error("Error in detectAndTranslate:", error);
+                return null;
+            }
+        };
+
+        const handleLanguageChange = (e) => {
+            setSelectedLanguage(e.target.value);
+            console.log("언어선택 했어요. 진짜로 했어요");
+            console.log(e.target.value);
+        };
+//--------------번역----------------------
 
 //--------------파일 버튼 클릭 후 파일 첨부 시에 파일 명 인풋창에 표시----------------------
         const handleFileChange = (e) => {
@@ -409,13 +513,11 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
             if (scrollElement) {
                 const hasScrollbar = scrollElement.scrollHeight > scrollElement.clientHeight;
 
-                if (!previousScrollbarState && hasScrollbar) {
+                if (!previousScrollbarStateRef.current && hasScrollbar) {
                     scrollElement.scrollTop = scrollElement.scrollHeight;
-                } else if (isScroll) {
-
+                } else if (isScrollRef.current) {
                     scrollElement.scrollTop = scrollElement.scrollHeight;
-                } else if (!isScroll) {
-
+                } else if (!isScrollRef.current) {
                 }
 
                 // 스크롤바 상태 업데이트
@@ -461,7 +563,6 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
 //--------------채팅창 닫기 -----------------------
 
 
-
 //--------------메뉴 오픈-----------------------
         const handleMenuOpen = () => {
             setMenuDiv((prevIsUserListVisible) => !prevIsUserListVisible);
@@ -501,7 +602,9 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
 //--------------스크롤 바 -----------------------
         const isScrollbarAtBottom = (element) => {
             // 현재 스크롤 위치 + 클라이언트 높이가 스크롤 영역의 전체 높이와 동일한지 확인
-            return scroll + element.clientHeight === element.scrollHeight;
+            const scrollThreshold = 199; // 스크롤 바가 바닥에 있는 것으로 판단할 수 있는 임계 값
+            return element.scrollHeight - element.scrollTop - element.clientHeight <= scrollThreshold;
+
         };
         //현재스크롤바 위치 구하기
         const handleScroll = (event) => {
@@ -641,6 +744,14 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
                                                                                 </Button> {/* 다운로드 버튼 */}
                                                                             </div>
                                                                         )}
+                                                                        {message.translatedMessage ?
+                                                                            <span
+                                                                                className="content_other_trans"
+                                                                            >(translate) {message.translatedMessage}</span>
+                                                                            :
+                                                                            <>
+                                                                            </>
+                                                                        }
                                                                         <span
                                                                             className="content_other">{message.message}</span>
                                                                         <span
@@ -668,14 +779,17 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
                                                                 </Button>
                                                             </div>
                                                             <div className={"trans"}>
-                                                                <Button
-                                                                    className={"menu_btn"}
-                                                                    type="button"
-                                                                    style={{fontSize: '11px'}}
-                                                                >TRANS
-                                                                </Button>
+                                                                <Select className={"trans_select"}
+                                                                        onChange={handleLanguageChange}
+                                                                        value={selectedLanguage}
+                                                                >
+                                                                    <MenuItem className={"trans_li_select"} value={" "}>Not translated</MenuItem>
+                                                                    {Object.entries(languages).map(([code, name]) => (
+                                                                        <MenuItem className={"trans_li_select"} key={code}
+                                                                                  value={code}>{name}</MenuItem>
+                                                                    ))}
+                                                                </Select>
                                                             </div>
-
                                                         </div>
                                                     </MenuPanel>
                                                     <div className={"input_menu"}>
@@ -753,4 +867,4 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId
     })
 ;
 
-export default RandomChatDrag;
+export default OneOnOneChatDrag;

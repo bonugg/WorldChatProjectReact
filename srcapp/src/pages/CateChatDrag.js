@@ -22,13 +22,13 @@ const slideDownMenu = keyframes`
     height: 0px;
   }
   100% {
-    width: 130px;
+    width: 330px;
     height: 70px;
   }
 `;
 const slideUpMenu = keyframes`
   0% {
-    width: 130px;
+    width: 330px;
     height: 70px
   }
   100% {
@@ -74,7 +74,7 @@ const MenuPanel = styled.div`
   top: 95%;
   left: 10px; // 수정된 부분
   z-index: 1;
-  width: ${props => props.visible ? '130px' : '0px'}; // 기존 속성
+  width: ${props => props.visible ? '330px' : '0px'}; // 기존 속성
   height: ${props => props.visible ? '70px' : '0px'}; // 기존 속성
   overflow-y: hidden;
   overflow-x: hidden;
@@ -179,7 +179,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const [isMinimized, setIsMinimized] = useState(false);
         const [isClosed, setIsClosed] = useState(false);
 
-        const [UserNickName, setUserNickName] = useState('');
+        const userNickNameRef = useRef(null);
 
         const [roomList, setRoomList] = useState([]);
         const [CateName, setCateName] = useState('Select Category');
@@ -200,8 +200,11 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
 
         //현재 스크롤바의 위치를 담는 상태 변수
         const [scroll, setScroll] = useState('');
+        const scrollRef = useRef(scroll);
         const [isScroll, setIsScroll] = useState('');
+        const isScrollRef = useRef(isScroll);
         const [previousScrollbarState, setPreviousScrollbarState] = useState(false);
+        const previousScrollbarStateRef = useRef(previousScrollbarState);
 
         const [formValues, setFormValues] = useState({
             cateName: '',
@@ -217,6 +220,40 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         //파일 버튼 클릭 시 인풋 파일로 값 전달
         const inputFileRef = useRef(null);
         const [selectedFiles, setSelectedFiles] = useState([]);
+
+        //번역 상태 변수
+        const [selectedLanguage, setSelectedLanguage] = useState(" ");
+        const selectedLanguageRef = useRef(selectedLanguage);
+        const languages = {
+            "en": "English",
+            "ko": "Korean (한국어)",
+            "ja": "Japanese (日本語)",
+            "zh-CN": "Chinese Simplified (简体中文)",
+            "zh-TW": "Chinese Traditional (中國傳統語言)",
+            "vi": "Vietnamese (Tiếng Việt)",
+            "id": "Indonesian (bahasa Indonésia)",
+            "th": "Thai (ภาษาไทย)",
+            "de": "German (das Deutsche)",
+            "ru": "Russian (Русский язык)",
+            "es": "Spanish (español)",
+            "it": "Italian (Italia)",
+            "fr": "French (Français)"
+
+        };
+
+        useEffect(() => {
+            selectedLanguageRef.current = selectedLanguage;
+        }, [selectedLanguage]);
+
+        useEffect(() => {
+            scrollRef.current = scroll;
+        }, [scroll]);
+        useEffect(() => {
+            previousScrollbarStateRef.current = previousScrollbarState;
+        }, [previousScrollbarState]);
+        useEffect(() => {
+            isScrollRef.current = isScroll;
+        }, [isScroll]);
 
         const toggleUserListPanel = () => {
             setIsUserListVisible((prevIsUserListVisible) => !prevIsUserListVisible);
@@ -247,8 +284,8 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                     if (response.ok) {
                         const responseBody = await response.text();
                         const responseBodyObject = JSON.parse(responseBody);
-                        const userNickName = responseBodyObject.user.userNickName;
-                        setUserNickName(userNickName);
+                        userNickNameRef.current = responseBodyObject.user.userNickName;
+
                     } else {
                         if (retry) {
                             await tokenCheck(false);
@@ -273,9 +310,18 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                 setIsChatReadOnly(true);
                 console.log("Connected: " + frame);
 
-                client.subscribe("/cateSub/" + CateRoom.cateId, (messageOutput) => {
+                client.subscribe("/cateSub/" + CateRoom.cateId, async(messageOutput) => {
                     const responseData = JSON.parse(messageOutput.body);
                     console.log(responseData);
+
+                    if (responseData.sender !== userNickNameRef.current && selectedLanguageRef.current != " ") {
+                        console.log(responseData);
+                        const translatedText = await detectAndTranslate(responseData.cateChatContent);
+                        if (translatedText) {
+                            responseData.translatedMessage = translatedText;
+                        }
+                    }
+
                     if (responseData.hasOwnProperty('cateUserList')) {
                         // responseData에 cateUserList가 있는 경우
                         showMessageOutput(responseData.cateChatDTO);
@@ -315,6 +361,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                 }));
                 stompClient.disconnect();
 
+                setSelectedLanguage(" ");
                 setMenuDiv(false);
                 setMenuDiv2(false);
                 setSendMessage('');
@@ -326,6 +373,69 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             }
             console.log('Disconnected');
         };
+
+        //--------------번역----------------------
+        const detectAndTranslate = async (text) => {
+
+            console.log(text);
+            console.log("선택된 언어 제발요");
+            console.log(selectedLanguage);
+            const targetLanguage = selectedLanguageRef.current;
+            console.log(targetLanguage);
+
+            try {
+                const detectResponse = await axios.post("/language/detect", {query: text}, {
+                    headers: {
+                        Authorization: `${localStorage.getItem('Authorization')}`
+                    }
+                });
+
+                console.log(detectResponse);
+                console.log(detectResponse.data);
+
+                console.log("여기에 문제가 있을거같긴해 나도. 이게 제일 못미더워");
+
+                if (detectResponse.data && detectResponse.data.langCode) {
+                    const detectedLanguage = detectResponse.data.langCode;
+
+                    const translateResponse = await axios.post("/language/translate", {
+                        text: text,
+                        sourceLanguage: detectedLanguage,
+                        targetLanguage: targetLanguage
+                    }, {
+                        headers: {
+                            Authorization: `${localStorage.getItem('Authorization')}`
+                        }
+                    });
+
+                    console.log("번역해주세여~~~~");
+                    console.log(translateResponse);
+                    console.log(translateResponse.data.message.result.translatedText)
+
+                    if (translateResponse.data && translateResponse.data.message.result.translatedText) {
+                        return translateResponse.data.message.result.translatedText;
+                    } else {
+                        console.error("Error translating text");
+                        return null;
+                    }
+
+                } else {
+                    console.error("Error detecting language");
+                    return null;
+                }
+
+            } catch (error) {
+                console.error("Error in detectAndTranslate:", error);
+                return null;
+            }
+        };
+
+        const handleLanguageChange = (e) => {
+            setSelectedLanguage(e.target.value);
+            console.log("언어선택 했어요. 진짜로 했어요");
+            console.log(e.target.value);
+        };
+//--------------번역----------------------
 
         useEffect(() => {
             if (!show) {
@@ -352,15 +462,12 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             if (scrollElement) {
                 const hasScrollbar = scrollElement.scrollHeight > scrollElement.clientHeight;
 
-                if (!previousScrollbarState && hasScrollbar) {
+                if (!previousScrollbarStateRef.current && hasScrollbar) {
                     scrollElement.scrollTop = scrollElement.scrollHeight;
-                } else if (isScroll) {
-
+                } else if (isScrollRef.current) {
                     scrollElement.scrollTop = scrollElement.scrollHeight;
-                } else if (!isScroll) {
-
+                } else if (!isScrollRef.current) {
                 }
-
                 // 스크롤바 상태 업데이트
                 setPreviousScrollbarState(hasScrollbar);
             }
@@ -386,16 +493,16 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             setIsUserListVisible2(false);
             setCreatRoom(false);
             setCreatRoom2(false);
-
-            setIsClosed(true);
-            setPosition(initialPosition);
-
             setIsChatDiv(false);
             setIsChatReadOnly(false);
             setSendMessage('');
             setMessages([]);
             setRoomList([]);
             setCateName("Select Category");
+            setIsClosed(true);
+            setPosition(initialPosition);
+
+
             disconnect();
             if (onClose) {
                 onClose();
@@ -443,7 +550,9 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         };
         const isScrollbarAtBottom = (element) => {
             // 현재 스크롤 위치 + 클라이언트 높이가 스크롤 영역의 전체 높이와 동일한지 확인
-            return scroll + element.clientHeight === element.scrollHeight;
+            const scrollThreshold = 199; // 스크롤 바가 바닥에 있는 것으로 판단할 수 있는 임계 값
+            return element.scrollHeight - element.scrollTop - element.clientHeight <= scrollThreshold;
+
         };
         //현재스크롤바 위치 구하기
         const handleScroll = (event) => {
@@ -452,7 +561,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         };
 
 
-        const exitChatDiv = () => {
+        const exitChatDiv = (interest) => {
             setIsChatDiv(false);
         };
 
@@ -874,13 +983,13 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                     </span>
                                                 </div>
                                                 <div className={"EnterRoomClose"}>
-                                                    <Button
-                                                        className={"Close_btn"}
-                                                        onClick={exitChatDiv}
-                                                    >
-                                                        Back
-                                                    </Button>
-                                                </div>
+                                                <Button
+                                                    className={"Close_btn"}
+                                                    onClick={() => exitChatDiv(CateRoom.interest)}
+                                                >
+                                                    Back
+                                                </Button>
+                                            </div>
                                             </div>
                                         </div>
                                         <div className={"EnterRoomChat"}>
@@ -888,7 +997,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                 <div className={"EnterRoomChat_content"}>
                                                     <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
                                                         {messages.map((message, index) => {
-                                                            const isMyMessage = message.sender === UserNickName;
+                                                            const isMyMessage = message.sender === userNickNameRef.current;
                                                             console.log(message.s3DataUrl)
                                                             console.log(message.fileName)
                                                             console.log(message.fileDir)
@@ -976,6 +1085,14 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                     </Button> {/* 다운로드 버튼 */}
                                                                                 </div>
                                                                             )}
+                                                                            {message.translatedMessage ?
+                                                                                <span
+                                                                                    className="content_other_trans"
+                                                                                >(translate) {message.translatedMessage}</span>
+                                                                                :
+                                                                                <>
+                                                                                </>
+                                                                            }
                                                                             <span
                                                                                 className="content_other">{message.cateChatContent}</span>
                                                                             <span
@@ -1003,14 +1120,17 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                     </Button>
                                                                 </div>
                                                                 <div className={"trans"}>
-                                                                    <Button
-                                                                        className={"menu_btn"}
-                                                                        type="button"
-                                                                        style={{fontSize: '11px'}}
-                                                                    >TRANS
-                                                                    </Button>
+                                                                    <Select className={"trans_select"}
+                                                                            onChange={handleLanguageChange}
+                                                                            value={selectedLanguage}
+                                                                    >
+                                                                        <MenuItem className={"trans_li_select"} value={" "}>Not translated</MenuItem>
+                                                                        {Object.entries(languages).map(([code, name]) => (
+                                                                            <MenuItem className={"trans_li_select"} key={code}
+                                                                                      value={code}>{name}</MenuItem>
+                                                                        ))}
+                                                                    </Select>
                                                                 </div>
-
                                                             </div>
                                                         </MenuPanel>
                                                         <div className={"input_menu"}>
@@ -1171,7 +1291,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                 key={room.cateId}
                                                                 room={room}
                                                                 onCateRoomAndChatDivUpdate={setCateRoomAndHandleChatDivUpdate}
-                                                                cateChatList={handleCateChatList}
+                                                                userCnt={handleCateChatList}
                                                                 shouldImmediatelyEnter={room.cateId === createRoomId}
                                                             ></CateChatListItem>
                                                         ))

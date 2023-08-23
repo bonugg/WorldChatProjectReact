@@ -718,7 +718,21 @@ input[type='number'] {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+.content_other_trans{
+    font-size: 14px;
+    text-align: left;
+    padding-left: 11px;
+    padding-right: 11px;
+    box-sizing: border-box;
+    color: rgba(108, 28, 28, 0.88);
 
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    margin-bottom: 5px;
+}
 .content_other {
     font-size: 14px;
     text-align: left;
