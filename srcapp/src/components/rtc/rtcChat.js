@@ -61,6 +61,10 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
         audio: true,
         video: { width: 640, height: 480, frameRate: 24 }
     };
+    const mediaDisconnection = {
+        audio: false,
+        video: false
+    };
     let localStream;
     let localVideoTracks;
     let myPeerConnection;
@@ -319,6 +323,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
             if (socket != null) {
                 socket.close();
             }
+            getMedia(mediaDisconnection);
         }
     }
 

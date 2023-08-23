@@ -3,139 +3,220 @@ import { useRef,useEffect,useState } from 'react';
 import axios from "axios";
 import qs from "qs";
 
-const RtcVoiceChat = ({sendUser, receiverUser,setShowRtcVoiceChat}) => {
-    const [isTalking, setIsTalking] = useState(false);
+const RtcVoiceChat = ({sendUser, receiverUser,setShowRtcVoiceChat,type2,setType2}) => {
+    const [localIsTalking, setLocalIsTalking] = useState(false);
+    const [remoteIsTalking, setRemoteIsTalking] = useState(false);
     const [socket, setSocket] = useState(null);
+
+
     const LocalAudioRef = useRef(null);
     const RemoteAudioRef = useRef(null)
 
+    console.log(sendUser,receiverUser);
+
+    let myPeerConnection;
+    let localStream;
     let localUserName = "";
     const localRoom = sendUser + "님과 " + receiverUser + "님의 음성채팅방";
     
-    let cleanupAudioResources = () => {
-        // 기본적으로 아무 작업도 수행하지 않는 함수로 초기화
-    };
+    const cleanupAudioResources = () => {
+        if (LocalAudioRef.current && LocalAudioRef.current.srcObject) {
+            const tracks = LocalAudioRef.current.srcObject.getTracks();
+            tracks.forEach(track => track.stop());
+        }
+
+        
+        // if (RemoteAudioRef.current && RemoteAudioRef.current.srcObject) {
+        //     const remoteTracks = RemoteAudioRef.current.srcObject.getTracks();
+        //     remoteTracks.forEach(track => track.stop());
+        // }
+
+
+        console.log("오디오 종료됨@@@@@@@@@@@")
+        // 필요한 다른 정리 작업들을 여기에 추가하세요.
+    }
 
     let host = "";
         host = window.location.host;
-        console.log(host)
         host = host.slice(0, -4);
         const newSocket = new WebSocket("wss://" + host + "9002" + "/voice");
+
 
     useEffect(() => {
 
         
 
-        
         // console.log(rtcUserName+"이게 넘어온 이름")
         if (localStorage.getItem('userName')) {
             console.log("발신 유저 이름: " + sendUser)
             console.log("수신 유저 이름: " + receiverUser)
             localUserName = localStorage.getItem('userName');
-           
-            }
+        }
 
         setSocket(newSocket);
-
-        
 
         newSocket.onopen = (event) => {
             console.log("WebSocket 연결 성공:", event);
         };
     
         // 다른 이벤트 리스너들도 추가할 수 있습니다.
-        newSocket.onmessage = (event) => {
-            console.log("서버로부터 메시지 수신:", event.data);
-        };
     
         newSocket.onerror = (event) => {
             console.error("WebSocket 오류 발생:", event);
         };
-    
-        newSocket.onclose = (event) => {
-            console.log("WebSocket 연결 종료:", event);
-        };
-
-
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(stream => {
-            LocalAudioRef.current.srcObject = stream;
-
-            // 2. 오디오 스트림에서 볼륨 감지하는 기능 추가
-            let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            let analyser = audioContext.createAnalyser();
-            let microphone = audioContext.createMediaStreamSource(stream);
-            let javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-
-            analyser.smoothingTimeConstant = 0.8;
-            analyser.fftSize = 1024;
-
-            microphone.connect(analyser);
-            analyser.connect(javascriptNode);
-            javascriptNode.connect(audioContext.destination);
-
-            javascriptNode.onaudioprocess = () => {
-                var array = new Uint8Array(analyser.frequencyBinCount);
-                analyser.getByteFrequencyData(array);
-                var values = 0;
-
-                var length = array.length;
-                for (var i = 0; i < length; i++) {
-                    values += array[i];
-                }
-
-                var average = values / length;
-
-                if (average > 20) { // 임계값을 조정하여 적절한 민감도로 설정하십시오.
-                    setIsTalking(true);
-                } else {
-                    setIsTalking(false);
-                }
-            };
-            cleanupAudioResources = () => {
-                if (LocalAudioRef.current && LocalAudioRef.current.srcObject) {
-                    const tracks = LocalAudioRef.current.srcObject.getTracks();
-                    tracks.forEach(track => track.stop());
-                }
-                if(javascriptNode) {
-                    javascriptNode.disconnect();
-                }
-                if(analyser) {
-                    analyser.disconnect();
-                }
-                if(microphone) {
-                    microphone.disconnect();
-                }
-                if(audioContext) {
-                    audioContext.close();  // 오디오 컨텍스트 종료
-                }
-            };
-        })
-        .catch(error => console.error('Error accessing audio stream:', error));
 
         return () => {
             
-            cleanupAudioResources();
-            if (socket && socket.readyState === WebSocket.OPEN) {
-                socket.close();
-            }
+            // cleanupAudioResources();
+            // //if (newSocket && newSocket.readyState === WebSocket.OPEN) {
+            //     newSocket.close();
+            //}
         };
 
-}, [sendUser, receiverUser]);
+}, []);
 
 
-const exitRoom = () => {
-    stop();
-    setShowRtcVoiceChat(false);
-}
+
+newSocket.onmessage = function (msg) {
+    console.log("peertest !!!!!!!!!!!!!!!!!!!!!!!!!");
+    let message = JSON.parse(msg.data);
+    console.log("메시지 타입: " + message.type);
+
+    switch (message.type) {
+        // case 'Audio-toggle':
+        //     if (remoteAudio.current.srcObject) {
+        //         remoteAudio.current.srcObject.getAudioTracks()[0].enabled = message.enabled;
+        //     }
+        //     break;
+
+        case "offer":
+            log('Signal OFFER received');
+            handleOfferMessage(message);
+            break;
+
+        case "answer":
+            log('Signal ANSWER received');
+            handleAnswerMessage(message);
+            break;
+
+        case "ice":
+            log('Signal ICE Candidate received');
+            handleNewICECandidateMessage(message);
+            break;
+
+        case "join":
+            // ajax 요청을 보내서 userList 를 다시 확인함
+            console.log("join들어옴")
+            message.data = chatListCount();
+            log('Client is starting to ' + (message.data === "true") ? 'negotiate' : 'wait for a peer');
+            log("messageDATA : " + message.data)
+            handlePeerConnection(message);
+            break;
+
+        case "leave":
+            console.log("실행되면 안됨");
+            stop();
+            break;
+
+        default:
+            handleErrorMessage('Wrong type message received from server');
+    }
+};
+
+// // isTalking 상태 변경과 관련된 useEffect
+// useEffect(() => {
+//     navigator.mediaDevices.getUserMedia({ audio: true })
+//         .then(stream => {
+//             //LocalAudioRef.current.srcObject = stream;
+
+//             let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+//             let analyser = audioContext.createAnalyser();
+//             let microphone = audioContext.createMediaStreamSource(stream);
+//             let javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+//             analyser.smoothingTimeConstant = 0.8;
+//             analyser.fftSize = 1024;
+
+//             microphone.connect(analyser);
+//             analyser.connect(javascriptNode);
+//             javascriptNode.connect(audioContext.destination);
+
+//             javascriptNode.onaudioprocess = () => {
+//                 var array = new Uint8Array(analyser.frequencyBinCount);
+//                 analyser.getByteFrequencyData(array);
+//                 var values = 0;
+
+//                 var length = array.length;
+//                 for (var i = 0; i < length; i++) {
+//                     values += array[i];
+//                 }
+
+//                 var average = values / length;
+
+//                 if (average > 20) { // 임계값을 조정하여 적절한 민감도로 설정하십시오.
+//                     setLocalIsTalking(true);
+//                 } else {
+//                     setLocalIsTalking(false);
+//                 }
+//             };
+            
+//             return () => {
+//                 if(javascriptNode) {
+//                     javascriptNode.disconnect();
+//                 }
+//                 if(analyser) {
+//                     analyser.disconnect();
+//                 }
+//                 if(microphone) {
+//                     microphone.disconnect();
+//                 }
+//                 if(audioContext) {
+//                     audioContext.close();  // 오디오 컨텍스트 종료
+//                 }
+//             };
+//         })
+//         .catch(error => console.error('Error accessing audio stream:', error));
+// }, []); // 이 useEffect는 컴포넌트가 마운트될 때 한 번만 실행됩니다.
+
+
+
+//let remoteAudio = useRef(null);
+
+// useEffect(() => {
+    
+//     socket.onopen = function () {
+//         log('WebSocket connection opened to Room: #' + localRoom);
+//         sendToServer({
+//             from: localUserName,
+//             type: 'join',
+//             data: localRoom
+//         });
+//     };
+
+//     // 소켓이 끊겼을 때 이벤트처리
+//     socket.onclose = function (message) {
+//         log('Socket has been closed');
+//         // alert("연결이 끊어졌습니다.")
+//         // exitRooms().then(r => {});
+//     }
+//     socket.onerror = function (message) {
+//         handleErrorMessage("Error: " + message);
+//     };
+// }, [socket])
+
+
 
 function sendToServer(msg) {
     let msgJSON = JSON.stringify(msg);
-    if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(msgJSON);
-    }
+    socket.send(msgJSON);
 }
- 
+
+const exitRoom = () => {
+    setType2('');
+    console.log("exit 타입" + setType2);
+    stop();
+    setShowRtcVoiceChat(false);
+}
 
 function stop() {
     
@@ -146,19 +227,17 @@ function stop() {
     });
 
     cleanupAudioResources();
-
-if (socket != null) {
-            socket.close();
-    }
+    socket.close();
 }
 
 //-----------------여기부터 이제 추가될 화상채팅에서 끌어온 로직
+
 
 async function chatListCount() {
     const params = {
         from: localUserName,
         type: 'findCount',
-        data: sendUser + "님과 " + receiverUser + "님의 화상채팅방",//여기가 방 제목 들어갈 부분(로그인 userName+ 요청받는 userName)
+        data: sendUser + "님과 " + receiverUser + "님의 음성채팅방",//여기가 방 제목 들어갈 부분(로그인 userName+ 요청받는 userName)
         candidate: 'null',
         sdp: 'null',
         chatType: 'voice'
@@ -181,48 +260,6 @@ async function chatListCount() {
     }
 }
 
-newSocket.onmessage = function (msg) {
-    let message = JSON.parse(msg.data);
-    console.log("메시지 타입: " + message.type);
-
-    switch (message.type) {
-        // video-toggle 제거
-
-        case "offer":
-            log('Signal OFFER received');
-            handleOfferMessage(message);
-            break;
-
-        case "answer":
-            log('Signal ANSWER received');
-            handleAnswerMessage(message);
-            break;
-
-        case "ice":
-            log('Signal ICE Candidate received');
-            handleNewICECandidateMessage(message);
-            break;
-
-        case "join":
-            console.log("join들어옴")
-            message.data = chatListCount();
-            log('Client is starting to ' + (message.data === "true") ? 'negotiate' : 'wait for a peer');
-            handlePeerConnection(message);
-            break;
-
-        case "leave":
-            console.log("leave 메시지 수신");
-            stop();
-            break;
-
-        default:
-            handleErrorMessage('Wrong type message received from server');
-    }
-};
-
-
-let myPeerConnection;
-let localStream;
 
 function handleNegotiationNeededEvent() {
     myPeerConnection.createOffer().then(function (offer) {
@@ -341,15 +378,18 @@ function handleTrackEvent(event) {
 
     // 웹 페이지의 오디오 요소에 연결합니다. 
     // 여기서 'remoteAudio'는 오디오 요소의 id입니다.
-    const remoteAudio = document.getElementById('remoteAudio');
+    if (RemoteAudioRef.current) {
+        RemoteAudioRef.current.srcObject = remoteStream;
+    }
 
     // 오디오 요소의 srcObject로 미디어 스트림을 설정하여 소리를 들려줍니다.
-    remoteAudio.srcObject = remoteStream;
 }
 
 
 function handlePeerConnection(message) {
     log('Setting up the RTCPeerConnection for voice chat.');
+
+    console.log('handleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
 
     if (!myPeerConnection) {
         log('Creating new RTCPeerConnection.');
@@ -381,20 +421,15 @@ function handlePeerConnection(message) {
 
 
 
-
-
-
-
-
   return (
     <div className="rtcVoiceChat">
     <div className="users">
-      <div style={isTalking ? { color: 'green' } : null} className="sendUser">{sendUser}</div>
-      <div style={isTalking ? { color: 'green' } : null} className="receiverUser">{receiverUser}</div>
+      <div style={localIsTalking ? { color: 'green' } : null} className="sendUser">{sendUser}</div>
+      <div style={remoteIsTalking ? { color: 'red' } : null} className="receiverUser">{receiverUser}</div>
       <button onClick={exitRoom}>Exit Room</button>
     </div>
-    <audio ref={LocalAudioRef} controls></audio>
-    <audio ref={RemoteAudioRef} controls></audio>
+    
+    <audio ref={RemoteAudioRef} autoPlay></audio>
   </div>
   )
 }
