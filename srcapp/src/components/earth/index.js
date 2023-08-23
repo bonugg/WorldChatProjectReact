@@ -13,18 +13,18 @@ import {TextureLoader} from "three";
 import MarsMap from "../../assets/textures/mars.jpg";
 import SunMap from "../../assets/textures/sun.jpg";
 
-const Earth = React.memo( ({
-                   mainCamera,
-                   mouseLock,
-                   LoginZoom,
-                   loggedIn,
-                   loggedOut,
-                   isMapageZoom,
-                   isFriendsListZoom,
-                   FriendsNationally,
-                   isLoginZoom,
-                   isSignUpZoom,
-               }) => {
+const Earth = React.memo(({
+                              mainCamera,
+                              mouseLock,
+                              LoginZoom,
+                              loggedIn,
+                              loggedOut,
+                              isMapageZoom,
+                              isFriendsListZoom,
+                              FriendsNationally,
+                              isLoginZoom,
+                              isSignUpZoom,
+                          }) => {
 
     const objectGroup = useRef();
     const [mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
@@ -425,13 +425,26 @@ const Earth = React.memo( ({
         });
     }
 
+    window.addEventListener('resize', () => {
+        updateMouseCoordinates();
+        onMouseMove();
+    });
+
+    function updateMouseCoordinates() {
+        const aspect = window.innerWidth / window.innerHeight;
+        camera.aspect = aspect;
+        camera.updateProjectionMatrix();
+
+        raycaster.setSize(window.innerWidth, window.innerHeight);
+    }
+
     function onMouseMove(event) {
         if (isOnMouseDownLock) return;
         event.stopPropagation();
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        raycaster.setFromCamera(mouse, camera);
+        raycaster.setFromCamera(mouse, camera); // 이 라인을 추가하세요
         const intersects = raycaster.intersectObjects(earthRef.current.children, true);
 
         let isOverCircle = false;

@@ -228,7 +228,6 @@ const Home = React.memo(() => {
             }
         }, [socket]);
 
-
         const onPasswordChange = (newValue) => {
             setIsPasswordChangeDiv(newValue);
             setIsPasswordChangeDiv2(true);
@@ -331,10 +330,12 @@ useEffect(() => {
 
 useEffect(() => {
     const userName = localStorage.getItem('userName');
-
     if (userName) {
         //const ws = new WebSocket(`wss://localhost:9002/test`)
+
         const ws = new WebSocket(`wss://192.168.0.48:9002/test?userName=${userName}`);
+        console.log("새로고침" + userName);
+        setRtcUserName(userName);
 
         ws.onopen = (event) => {
             console.log("WebSocket 연결 성공:", event);

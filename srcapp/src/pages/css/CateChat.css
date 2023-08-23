@@ -17,7 +17,7 @@
 }
 .userList_title{
     width: 200px;
-    height: 50px;
+    height: 450px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -317,16 +317,17 @@ input[type='number'] {
 .EnterRoomChat_2 {
     width: 100%;
     height: 100%;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
 }
 
 .EnterRoomChat_content {
     width: 100%;
-    height: 83%;
+    height: 86%;
 }
 .EnterRoomChat_content_3 {
     width: 100%;
     height: 20%;
-    background-color: rgba(255, 255, 255, 0.15);
     display: flex;
     flex-direction: column;
     padding: 10px 10px 0px;
@@ -338,7 +339,6 @@ input[type='number'] {
 .EnterRoomChat_content_2 {
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.15);
     display: flex;
     flex-direction: column;
     padding: 10px 10px 0px;
@@ -350,18 +350,18 @@ input[type='number'] {
 
 .EnterRoomChat_input {
     width: 100%;
-    height: 17%;
+    height: 14%;
 }
 
 .EnterRoomChat_input_form {
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.15);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-end;
     padding-left: 10px;
     padding-right: 10px;
+    padding-bottom: 10px;
     box-sizing: border-box;
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
@@ -373,9 +373,7 @@ input[type='number'] {
     margin-right: 10px;
     color: white;
     border: 1px solid rgba(128, 128, 128, 0.5) !important;
-    border-left-width: 1px !important;
-    border-bottom-left-radius: 0px !important;
-    border-top-left-radius: 0px !important;
+    border-radius: 10px !important;
 }
 .OneChat_menu_div{
     height: 100%;
@@ -383,47 +381,6 @@ input[type='number'] {
     justify-content: center;
     align-items: center;
     position: relative;
-}
-.menu_div{
-    width: 200px;
-    height: 100px;
-    background-color: rgba(20, 20, 20, 0.8) !important;
-}
-.add_now{
-    width: 50px !important;
-    min-width: 50px !important;
-    height: 54% !important;
-    font-size: 15px !important;
-    color: white !important;
-    border-bottom-width: 0px !important;
-    outline: none !important;
-    background-color: rgba(20, 20, 20, 0.8) !important;
-    font-family: 'Russo One', sans-serif !important;
-    border-radius: 10px !important;
-    border-top-right-radius: 0px !important;
-    border-bottom-right-radius: 0px !important;
-    border-bottom-left-radius: 0px !important;
-}
-.add_now:hover .menu_div{
-    background-color: rgba(20, 20, 20, 0.8) !important;
-}
-.add {
-    width: 50px !important;
-    min-width: 50px !important;
-    height: 54% !important;
-    font-size: 15px !important;
-    color: white !important;
-    border-right-width: 0px !important;
-    outline: none !important;
-    background-color: rgba(20, 20, 20, 0.8) !important;
-    font-family: 'Russo One', sans-serif !important;
-    border-radius: 10px !important;
-    border-top-right-radius: 0px !important;
-    border-bottom-right-radius: 0px !important;
-    transition: border-bottom-left-radius 1s ease-in-out !important;
-}
-.add:hover{
-    background-color: rgba(20, 20, 20, 0.8) !important;
 }
 .btnSend {
     width: 20% !important;
@@ -668,6 +625,14 @@ input[type='number'] {
     justify-content: center;
     align-items: center;
 }
+.roomList_item_div_3_full{
+    color: indianred;
+    width: 18%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .roomList_item_div_4{
     width: 20%;
     height: 100%;
@@ -761,7 +726,21 @@ input[type='number'] {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+.content_other_trans{
+    font-size: 14px;
+    text-align: left;
+    padding-left: 11px;
+    padding-right: 11px;
+    box-sizing: border-box;
+    color: rgba(108, 28, 28, 0.88);
 
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    margin-bottom: 5px;
+}
 .content_other {
     font-size: 14px;
     text-align: left;
@@ -890,3 +869,4 @@ input[type='number'] {
 .Cate_btn_R:hover{
     background-color: rgba(80, 80, 80, 0.4) !important;
 }
+/*=====메뉴창=====*/
