@@ -228,7 +228,6 @@ const Home = React.memo(() => {
             }
         }, [socket]);
 
-
         const onPasswordChange = (newValue) => {
             setIsPasswordChangeDiv(newValue);
             setIsPasswordChangeDiv2(true);
@@ -333,7 +332,7 @@ useEffect(() => {
     const userName = localStorage.getItem('userName');
     if (userName) {
         //const ws = new WebSocket(`wss://localhost:9002/test`)
-        const ws = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
+        const ws = new WebSocket(`wss://192.168.0.4:9002/test?userName=${userName}`);
         console.log("새로고침" + userName);
         setRtcUserName(userName);
 
@@ -431,7 +430,7 @@ const handleGrandchildData = (data) => {
                 
                 if(username){
                 //const ws = new WebSocket(`wss://localhost:9002/test`)
-                const ws = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
+                const ws = new WebSocket(`wss://192.168.0.4:9002/test?userName=${userName}`);
 
                 setSocket(ws)
                 // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
