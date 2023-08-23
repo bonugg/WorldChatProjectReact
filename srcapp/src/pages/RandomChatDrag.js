@@ -314,7 +314,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         }
         const startRandomC = async (retry = true) => {
             try {
-                const response = await fetch("/random/room", {
+                const response = await fetch("/randomRoom/enter", {
                     method: 'POST',
                     headers: {
                         'Authorization': localStorage.getItem('Authorization'),

@@ -13,7 +13,7 @@ const RandomStart = () => {
         }
 
         try {
-            const response = await fetch("/random/room", {
+            const response = await fetch("/randomRoom/enter", {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",

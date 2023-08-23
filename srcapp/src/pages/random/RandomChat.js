@@ -10,19 +10,14 @@ import {
     Typography,
     Grid,
     Paper,
-    Select
+    Select,
+    InputLabel,
+    MenuItem,
 } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import { Fab } from '@mui/material';
 import SendIcon from "@mui/icons-material/Send";
 
-const options = [
-    { id: 0, lan: "ko" },
-    { id: 1, lan: "en" },
-    { id: 2, lan: "ja" },
-    { id: 3, lan: "zh-CN" },
-    { id: 4, lan: "vi" }
-]
 
 const RandomChat = () => {
     const navigate = useNavigate();
@@ -33,6 +28,38 @@ const RandomChat = () => {
     const [files, setFiles] = useState([]);
     const room = location.state.room; //채팅방 정보
     const client = useRef({});
+    const [sourceCode, setSourceCode] = useState("ko");
+    const [targetCode, setTargetCode] = useState("en");
+    const [sourceText, setSourceText] = useState("");
+    const [targetText, setTargetText] = useState("");
+    const [shouldDetectLanguage, setShouldDetectLanguage] = useState(false);
+    const shouldDetectLanguageRef = useRef(shouldDetectLanguage);
+    const [selectedLanguage, setSelectedLanguage] = useState("en");
+    const selectedLanguageRef = useRef(selectedLanguage);
+    const languages = {
+        "en": "English",
+        "ko": "Korean(한국어)",
+        "ja": "Japanese(日本語)",
+        "zh-CN": "Chinese Simplified(简体中文)",
+        "zh-TW": "Chinese Traditional(中國傳統語言)",
+        "vi": "Vietnamese(Tiếng Việt)",
+        "id": "Indonesian(bahasa Indonésia)",
+        "th": "Thai(ภาษาไทย)",
+        "de": "German(das Deutsche)",
+        "ru": "Russian(Русский язык)",
+        "es": "Spanish(español)",
+        "it": "Italian(Italia)",
+        "fr": "French(Français)"
+    }
+
+    useEffect(() => {
+
+        shouldDetectLanguageRef.current = shouldDetectLanguage;
+    }, [shouldDetectLanguage]);
+
+    useEffect(() => {
+        selectedLanguageRef.current = selectedLanguage;
+    }, [selectedLanguage]);
 
     useEffect(() => {
         console.log("랜덤 채팅방 정보");
@@ -77,14 +104,13 @@ const RandomChat = () => {
         joinEvent();
     }
 
-
-    const onError = (error) => {
-        console.log('WebSocket 에러: ', error);
-    }
-
     function onReceived(payload) {
         let payloadData = JSON.parse(payload.body);
         setMessages((prev) => [...prev, payloadData]);
+    }
+
+    const onError = (error) => {
+        console.log('WebSocket 에러: ', error);
     }
 
     function joinEvent() {
@@ -126,14 +152,24 @@ const RandomChat = () => {
 
 
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // 번역
+        let finalMessage = message;
+        let finalTargetCode = targetCode;
+        const translatedText = await detectAndTranslate(message, finalTargetCode);
+        finalMessage += ` (translated: ${translatedText})`;
+        sendChatMessage(finalMessage);
+        setmessage("");
+    
         if (message.trim() !== "" || !message.trim()) {
             sendChatMessage(message);
             setmessage("");
         } else {
             return;
         }
+    
         uploadFiles();
     };
 
@@ -172,6 +208,40 @@ const RandomChat = () => {
         document.getElementById("fileInput").click();
     }
 
+    //번역
+    const detectAndTranslate = async (text, code) => {
+        try {
+            // 언어 감지 API 호출
+            const detectRes = await axios.post('/randomTranslate/detect', {
+                sourceText: text
+            }, {
+                headers: {
+                    Authorization: `${localStorage.getItem('Authorization')}`
+                }
+            });
+
+            console.log("detectedRes.data: " , detectRes.data)
+
+            // // 감지된 언어를 기반으로 번역 API 호출
+            const detectedCode = detectRes.data.sourceCode; // API 응답 형식에 따라 조정 필요
+            const sourceText = detectRes.data.sourceText;
+            const translateRes = await axios.post('/randomTranslate/translate', {
+                sourceCode: detectedCode,
+                targetCode: code,
+                sourceText: sourceText
+            }, {
+                headers: {
+                    Authorization: `${localStorage.getItem('Authorization')}`
+                }
+            });
+
+             return translateRes.data.translatedText; // API 응답 형식에 따라 조정 필요
+        } catch (error) {
+            console.error("Error during language detection and translation:", error);
+            return text; // 원본 텍스트 반환
+        }
+    }
+
     return (
         <Box
             sx={{
@@ -202,17 +272,13 @@ const RandomChat = () => {
                             </Fab>
                         </form>
                     </Grid>
-                    <Grid item xs={1}>
-                        <form>
-                            <Select name="language" options={options} initValue={options[0]} />
-                        </form>
-                    </Grid>
                     <Grid item xs={8}>
                         <TextField
                             size="small"
                             fullWidth
                             placeholder="Type a message"
                             backgroundColor="#414141"
+                            inputProps={{ style: { color: 'white' } }}
                             variant="outlined"
                             value={message}
                             onChange={handleChange}
@@ -239,6 +305,27 @@ const RandomChat = () => {
                             나가기
                         </Button>
                     </Grid>
+                </Grid>
+                <Grid item xs={6}>
+                    <InputLabel htmlFor="tgtLang" style={{ color: "white" }}>번역언어</InputLabel>
+                    <Select
+                        fullWidth
+                        id="tgtLang"
+                        value={targetCode}
+                        MenuProps={{
+                            anchorOrigin: {
+                                vertical: "bottom",
+                                horizontal: "left"
+                            },
+                            getContentAnchorEl: null
+                        }}
+                        inputProps={{ style: { color: 'white' } }} 
+                        onChange={(e) => setTargetCode(e.target.value)}
+                    >
+                        {Object.entries(languages).map(([code, name]) => (
+                            <MenuItem key={code} value={code} style={{ color: "white" }}>{name}</MenuItem>
+                        ))}
+                    </Select>
                 </Grid>
             </Box>
         </Box>
@@ -282,11 +369,6 @@ const Message = ({ message }) => {
                     alignItems: "center",
                 }}
             >
-                  {message.fileName && (
-                  <Button variant="contained" color="primary" onClick={() => handleFileDownload(message.fileName, message.fileDir)}>
-                      Download File
-                  </Button>
-              )}
                 <Paper
                     variant="outlined"
                     sx={{
