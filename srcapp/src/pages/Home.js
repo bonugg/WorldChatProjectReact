@@ -332,7 +332,8 @@ useEffect(() => {
     const userName = localStorage.getItem('userName');
     if (userName) {
         //const ws = new WebSocket(`wss://localhost:9002/test`)
-        const ws = new WebSocket(`wss://192.168.0.4:9002/test?userName=${userName}`);
+
+        const ws = new WebSocket(`wss://192.168.0.48:9002/test?userName=${userName}`);
         console.log("새로고침" + userName);
         setRtcUserName(userName);
 
@@ -354,7 +355,7 @@ useEffect(() => {
 
         setSocket(ws);
     }
-}, []);  // 이 배열이 비어 있으므로 이 useEffect는 컴포넌트가 마운트될 때만 실행됩니다.
+}, []);  // 이 배열이 비어 있으므로 이 useEffect는 컴포넌트가 마운트될 때만 실행되게
 
 
 
@@ -430,7 +431,7 @@ const handleGrandchildData = (data) => {
                 
                 if(username){
                 //const ws = new WebSocket(`wss://localhost:9002/test`)
-                const ws = new WebSocket(`wss://192.168.0.4:9002/test?userName=${userName}`);
+                const ws = new WebSocket(`wss://192.168.0.48:9002/test?userName=${userName}`);
 
                 setSocket(ws)
                 // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
