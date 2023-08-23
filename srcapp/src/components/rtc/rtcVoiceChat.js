@@ -7,7 +7,7 @@ import React, {useEffect, useRef, useState} from 'react';
 
 // const addr = "localhost:3001"
 
-const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcChat, type2, setType2}) => {
+const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setType2}) => {
     const [isTalking, setIsTalking] = useState(false);
     const [socket, setSocket] = useState(null);
     const [localUserName, setLocalUserName] = useState(null);
@@ -159,7 +159,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcChat, type2, setType2})
 
 
         stop(); // 웹소켓 연결 종료 및 비디오/오디오 정지
-        setShowRtcChat(false);
+        setShowRtcVoiceChat(false);
     };
 
     // 페이지 시작시 실행되는 메서드 -> socket 을 통해 server 와 통신한다
@@ -256,7 +256,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcChat, type2, setType2})
             remoteAudio.current = null;
             localAudio.current = null;
 
-            setShowRtcChat(false);
+            setShowRtcVoiceChat(false);
             alert("상대방과의 연결이 끊어졌습니다.");
 
             // myPeerConnection 초기화
