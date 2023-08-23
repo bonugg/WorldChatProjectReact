@@ -331,10 +331,11 @@ useEffect(() => {
 
 useEffect(() => {
     const userName = localStorage.getItem('userName');
-
     if (userName) {
         //const ws = new WebSocket(`wss://localhost:9002/test`)
-        const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
+        const ws = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
+        console.log("새로고침" + userName);
+        setRtcUserName(userName);
 
         ws.onopen = (event) => {
             console.log("WebSocket 연결 성공:", event);
@@ -430,7 +431,7 @@ const handleGrandchildData = (data) => {
                 
                 if(username){
                 //const ws = new WebSocket(`wss://localhost:9002/test`)
-                const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
+                const ws = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
 
                 setSocket(ws)
                 // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
@@ -1071,7 +1072,7 @@ const handleGrandchildData = (data) => {
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={showRtcVoiceChat}>
-                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcVoiceChat={setShowRtcVoiceChat}/>}
+                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcVoiceChat={setShowRtcVoiceChat} type2={type2} setType2={setType2}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>

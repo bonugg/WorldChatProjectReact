@@ -28,20 +28,20 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
         localUserName = localStorage.getItem('userName');
     }
 
-    socket.onclose = function(event) {
-        if (event.wasClean) {
-            console.log(`Closed cleanly, code=${event.code}, reason=${event.reason}`);
-        } else {
-            console.log('Connection died');
-            setTimeout(() => {
-                reconnect();
-            }, 5000);  // 5 seconds
-        }
-    };
-    function reconnect() {
-        socket = new WebSocket("wss://your-server/signal");
-        // 여기에 다른 이벤트 리스너 설정 코드를 추가
-    }
+    // socket.onclose = function(event) {
+    //     if (event.wasClean) {
+    //         console.log(`Closed cleanly, code=${event.code}, reason=${event.reason}`);
+    //     } else {
+    //         console.log('Connection died');
+    //         setTimeout(() => {
+    //             reconnect();
+    //         }, 5000);  // 5 seconds
+    //     }
+    // };
+    // function reconnect() {
+    //     socket = new WebSocket("wss://your-server/signal");
+    //     // 여기에 다른 이벤트 리스너 설정 코드를 추가
+    // }
     // const socket = new WebSocket('wss://' + window.location.host + '/signal');
 
     //유저 이름 임의 설정 -> 로그인 연동 후 해당 사용자의 고유값으로 변경 예정!
@@ -60,6 +60,10 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     const mediaConstraints = {
         audio: true,
         video: { width: 640, height: 480, frameRate: 24 }
+    };
+    const mediaDisconnection = {
+        audio: false,
+        video: false
     };
     let localStream;
     let localVideoTracks;
@@ -319,6 +323,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
             if (socket != null) {
                 socket.close();
             }
+            // getMedia(mediaDisconnection);
         }
     }
 
