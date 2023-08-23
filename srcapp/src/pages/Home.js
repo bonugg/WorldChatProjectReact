@@ -19,6 +19,9 @@ import MyPage from './MyPage';
 import FreindsList from './FreindsList';
 import PasswordChange from './PasswordChange';
 import ChatComponent from "../components/rtc/rtcChat";
+import ChatVoiceComponent from "../components/rtc/rtcVoiceChat"
+import SockJS from 'sockjs-client';
+// import socket from "ws/lib/websocket";
 
 import CateChatDrag from "./CateChatDrag";
 import RandomChatDrag from "./RandomChatDrag";
@@ -183,9 +186,48 @@ const Home = React.memo(() => {
 
         // rtc
         const [showRtcChat, setShowRtcChat] = useState(false); // RtcChat 상태를 boolean으로 관리
-        const Rtc = () => {
-            setShowRtcChat(true); // RtcChat 상태를 true로 설정
-        }
+        const [showRtcVoiceChat,setShowRtcVoiceChat] = useState(false);
+        const [rtcUserName, setRtcUserName] = useState(null);
+        const [sendUser, setSendUser] = useState(null);
+        const [receiverUser, setReceiverUser] = useState(null);
+        // let rtcUserName = "";
+        // const Rtc = () => {
+        //     console.log("Rtc실행됨");
+        //     setShowRtcChat(true); // RtcChat 상태를 true로 설정
+        // }
+        const [socket, setSocket] = useState(null);
+
+        // let socket;
+        useEffect(() => {
+            if (socket) {
+                socket.onmessage = function (event) {
+                    const receivedMessage = event.data;
+                    if (window.confirm(`Received message: ${receivedMessage}`)) {
+                        setSendUser(receivedMessage.split("님이")[0]);
+                        console.log(setSendUser + "님이 걸었음");
+                        setReceiverUser(rtcUserName);
+                        
+                        if (receivedMessage.includes("영상통화")) {
+                            setShowRtcChat(true);
+                            setShowRtcVoiceChat(false);
+                        } else if (receivedMessage.includes("음성통화")) {
+                            setShowRtcVoiceChat(true);
+                            setShowRtcChat(false);
+                        }
+
+                        //아래는 석이 됬 됐 
+
+                    // if (window.confirm(`Received message: ${event.data}`)) {
+                    //     setSendUser(event.data.split("님이")[0]);
+                    //     setReceiverUser(rtcUserName);
+                    //     console.log("수신자 화면에서 나옴");
+                    //     setShowRtcChat(true);
+
+                    }
+                };
+            }
+        }, [socket]);
+
 
         const onPasswordChange = (newValue) => {
             setIsPasswordChangeDiv(newValue);
@@ -246,6 +288,127 @@ const Home = React.memo(() => {
             }
         };
 
+        // 아래는 석이 거
+        
+        // const [type2, setType2] = useState('');
+
+        // const handleGrandchildData = async (data) => {
+        //     console.log("자식의 자식 컴포넌트로부터 받은 데이터:", data);
+        //     setDataFromChild(data);
+        //     setReceiverUser(data)
+        //     setSendUser(rtcUserName)
+        //     console.log("보낸이: "+localStorage.getItem('userName'));
+        //     console.log("받는이: "+data);
+        //     try {
+        //         const response = await fetch('/webrtc/request', {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json'
+        //             },
+        //             body: JSON.stringify({
+        //                 sender: localStorage.getItem('userName'),
+        //                 receiver: data
+        //             })
+        //         });
+        //         if (response.ok) {
+        //             console.log("발신자 화면에서 나옴");
+        //             setShowRtcChat(true);
+        //         }
+        //         if (!response.ok) {
+        //             throw new Error(`Logout failed with status: ${response.status}`);
+        //         }
+
+        const [dataFromChild, setDataFromChild] = useState(null);
+        const [type2, setType2] = useState('');
+
+useEffect(() => {
+    if (type2) {
+        sendRequestToServer();
+        console.log('유즈이펙트' + type2);
+    }
+}, [type2]); 
+
+
+useEffect(() => {
+    const userName = localStorage.getItem('userName');
+    if (userName) {
+        //const ws = new WebSocket(`wss://localhost:9002/test`)
+        const ws = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
+        console.log("새로고침" + userName);
+        setRtcUserName(userName);
+
+        ws.onopen = (event) => {
+            console.log("WebSocket 연결 성공:", event);
+        };
+
+        ws.onmessage = (event) => {
+            console.log("서버로부터 메시지 수신:", event.data);
+        };
+
+        ws.onerror = (event) => {
+            console.error("WebSocket 오류 발생:", event);
+        };
+
+        ws.onclose = (event) => {
+            console.log("WebSocket 연결 종료:", event);
+        };
+
+        setSocket(ws);
+    }
+}, []);  // 이 배열이 비어 있으므로 이 useEffect는 컴포넌트가 마운트될 때만 실행됩니다.
+
+
+
+
+
+
+
+
+const sendRequestToServer = async () => {
+    try {
+        const response = await fetch('/webrtc/request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: localStorage.getItem('userName'),
+                receiver: receiverUser,
+                type:type2
+            })
+        });
+
+        if (response.ok) {
+            console.log(type2+"타입ㅂㅂㅂㅂㅂㅂㅂㅂ");
+            if (type2 === "video") {
+                console.log("비디오테스트");
+                setShowRtcChat(true);
+                setShowRtcVoiceChat(false);
+            } else if (type2 === "voice") {
+                setShowRtcVoiceChat(true);
+                setShowRtcChat(false);
+            }
+        } else {
+            throw new Error(`Logout failed with status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Error during logout:", error);
+    }
+};
+
+const setChatType = (type) => {
+    setType2(type);
+};
+
+const handleGrandchildData = (data) => {
+    console.log(data+"1232132121");
+    setDataFromChild(data);
+    setReceiverUser(data);
+    setSendUser(rtcUserName);
+};
+
+
+
         //로그인 로직
         const handleSubmit = async (e) => {
             e.preventDefault();
@@ -263,6 +426,34 @@ const Home = React.memo(() => {
                 const userName = response.headers.get('userName');
                 localStorage.setItem('Authorization', accessToken);
                 localStorage.setItem('userName', userName);
+                console.log("로그인 사용자: " + userName);
+                setRtcUserName(userName);
+                
+                if(username){
+                //const ws = new WebSocket(`wss://localhost:9002/test`)
+                const ws = new WebSocket(`wss://192.168.0.187:9002/test?userName=${userName}`);
+
+                setSocket(ws)
+                // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
+                ws.onopen = (event) => {
+                    console.log("WebSocket 연결 성공:", event);
+                };
+
+                // 다른 이벤트 리스너들도 추가할 수 있습니다.
+                ws.onmessage = (event) => {
+                    console.log("서버로부터 메시지 수신:", event.data);
+                };
+
+                ws.onerror = (event) => {
+                    console.error("WebSocket 오류 발생:", event);
+                };
+
+                ws.onclose = (event) => {
+                    console.log("WebSocket 연결 종료:", event);
+                };
+            }
+
+                // setSocket(ws);
                 // 페이지 이동
                 setUsername('');
                 setPassword('');
@@ -285,6 +476,7 @@ const Home = React.memo(() => {
                 setLoggedOut(true);
             }
         };
+
         //회원가입 로직
         const handleSubmitSignUp = async (e) => {
             e.preventDefault();
@@ -540,10 +732,28 @@ const Home = React.memo(() => {
 
                 if (response.ok) {
                     localStorage.removeItem('Authorization');
-                    localStorage.removeItem('userName');
+
                     alert("Logout");
                     setLoggedIn(false);
                     setLoggedOut(true);
+                    try {
+                        const response = await fetch('/webrtc/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'text/plain'
+                            },
+                            body: localStorage.getItem('userName')
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Logout failed with status: ${response.status}`);
+                        }
+
+                        console.log("Logout successful");
+                    } catch (error) {
+                        console.error("Error during logout:", error);
+                    }
+                    localStorage.removeItem('userName');
                     home();
 
                 } else {
@@ -703,6 +913,7 @@ const Home = React.memo(() => {
 
             setSignUpDiv(false);
             setLoginDiv(false);
+            setShowRtcChat(false);
         }
         const home = () => {
             if (!isSignUpZoom && !isLoginZoom && !isMapageZoom) {
@@ -721,6 +932,7 @@ const Home = React.memo(() => {
             setMyPageDiv(false);
             setSignUpDiv(false);
             setLoginDiv(false);
+            setShowRtcChat(false);
         };
 
         //로딩 전 메뉴바 숨기기
@@ -786,11 +998,14 @@ const Home = React.memo(() => {
                         </DivStyledMenu>
                         <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
                             <FreindsList
+                                onData={handleGrandchildData}
+                                setChatType={setChatType}
                                 FriendsList={FriendsList}
                                 FriendNationally={FriendNationally}
                                 logoutApi3={logoutApi3}
                                 isOneOnOneChatDiv={isOneOnOneChatDiv}
                             />
+                            {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>
                         <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"}
                                    ref={passwordChangeDivRef}>
@@ -853,7 +1068,11 @@ const Home = React.memo(() => {
 
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent/>} {/* RtcChat 상태가 true일 때 rtcChat 컴포넌트 렌더링 */}
+                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat} type2={type2} setType2={setType2}/>}
+                        </DivStyledMenu>
+
+                        <DivStyledMenu visible={showRtcVoiceChat}>
+                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcVoiceChat={setShowRtcVoiceChat} type2={type2} setType2={setType2}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
@@ -991,7 +1210,7 @@ const Home = React.memo(() => {
                                     <a className="menu_a" onClick={home}>Home</a>
                                 </li>
                                 <li className="menu_li">
-                                    <a className="menu_a" onClick={Rtc}>Test</a>
+                                    {/*<a className="menu_a" onClick={Rtc}>Test</a>*/}
                                 </li>
                                 {loggedIn ? (
                                     <>

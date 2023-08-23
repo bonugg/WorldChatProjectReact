@@ -3,13 +3,42 @@ import React, {useState} from 'react';
 import Button from "@mui/material/Button";
 import "./css/FreindsList.css";
 import Profile from "../img/profile.png";
+// import rtcConnect from "../components/rtc/rtcChat"
+import styled, {keyframes} from "styled-components";
 
-const FreindsListItem = React.memo(({user, friendsChatDiv}) => {
+const slideDown = keyframes`
+0% {
+  transform: scale(0);
+}
+100% {
+  transform: scale(1);
+}
+`;
+
+const DivStyledMenu = styled.div`
+visibility: ${props => props.visible ? 'visible' : 'hidden'};
+animation: ${props => props.visible ? slideDown : ""} 0.35s ease-in-out;
+position: absolute;
+left: 50%;
+top: 50%;
+transform-origin: center;
+transform: ${props => props.visible ? 'translate(-50%, -50%) scaleY(1)' : 'translate(-50%, -50%) scaleY(0)'};
+`;
+
+const FreindsListItem = React.memo(({user, friendsChatDiv,onData,setChatType}) => {
     const {userId, userName, userNickName, userProfileName} = user;
     const friendsChatDivOn = (userId, userNickName) => {
         friendsChatDiv(true, userId, userNickName);
     };
-    return (
+
+    const Rtc = (type) => {
+        console.log("이름"+userName);
+        onData(userName);
+        setChatType(type);
+       
+    }
+
+        return (
         <div className={"friendsList_item_div"}>
             <div className={"friendsList_item_div2"}>
                 <div className={"friendsList_item_img"}
@@ -30,12 +59,14 @@ const FreindsListItem = React.memo(({user, friendsChatDiv}) => {
                         1:1 Chat
                     </Button>
                     <Button
-                        className={"friendsList_item_btn2"}
+                    onClick={() => Rtc("video")} 
+                         className={"friendsList_item_btn2"}
                     >
                         Video Chat
                     </Button>
                     <Button
-                        className={"friendsList_item_btn2"}
+                       onClick={() => Rtc("voice")}  
+                       className={"friendsList_item_btn2"}
                     >
                         Voice Chat
                     </Button>
@@ -44,5 +75,6 @@ const FreindsListItem = React.memo(({user, friendsChatDiv}) => {
         </div>
     );
 });
+
 
 export default FreindsListItem;

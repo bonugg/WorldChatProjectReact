@@ -14,11 +14,13 @@ import Philippines from "../img/flag/Philippines-flag.png";
 
 import "./css/FreindsList.css";
 
-const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv}) => {
+
+const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType}) => {
     const [userList, setUserList] = useState([]);
     const [nationallyName, setNationallyName] = useState('');
     const [isChatDiv, setIsChatDiv] = useState(false);
     const freindsList = async (retry = true) => {
+        
         try {
             const response = await fetch('/api/v1/user/friendsList', {
                 method: 'POST',
@@ -98,11 +100,8 @@ const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList,isOne
             <div className={"friendsList"}>
                 <div className={"friendsList_2"}>
                         {userList && userList.map(user => <FreindsListItem key={user.userId}
-                                                                           user={user}
-                                                                           friendsChatDiv={friendsChatDivOn}
-                            >
-                            </FreindsListItem>
-                        )}
+                                                        user={user} onData={onData} setChatType={setChatType}  friendsChatDiv={friendsChatDivOn}></FreindsListItem>)}
+                                                                           
                 </div>
             </div>
         </div>
