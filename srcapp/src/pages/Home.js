@@ -95,7 +95,6 @@ const DivStyled = styled.div`
   /* Add other CSS properties for the loginDiv here */
 `;
 
-
 const Home = React.memo(() => {
         //드래그 채팅창 기능
         const [showDrag, setShowDrag] = useState(false);
@@ -330,10 +329,14 @@ useEffect(() => {
 
 useEffect(() => {
     const userName = localStorage.getItem('userName');
+    let host = "";
+    host = window.location.host;
+    console.log(host)
+    host = host.slice(0, -4);
     if (userName) {
         //const ws = new WebSocket(`wss://localhost:9002/test`)
-        const ws = new WebSocket(`wss://192.168.0.4:9002/test?userName=${userName}`);
-        console.log("새로고침" + userName);
+        const ws = new WebSocket(`wss://${host}9002/test?userName=${userName}`);
+        console.log("새로고침 - " + `wss://${host}9002/test?userName=${userName}`);
         setRtcUserName(userName);
 
         ws.onopen = (event) => {
@@ -410,6 +413,10 @@ const handleGrandchildData = (data) => {
 
         //로그인 로직
         const handleSubmit = async (e) => {
+            let host = "";
+            host = window.location.host;
+            console.log(host)
+            host = host.slice(0, -4);
             e.preventDefault();
             const response = await fetch('/login', {
                 method: 'POST',
@@ -430,7 +437,7 @@ const handleGrandchildData = (data) => {
                 
                 if(username){
                 //const ws = new WebSocket(`wss://localhost:9002/test`)
-                const ws = new WebSocket(`wss://192.168.0.4:9002/test?userName=${userName}`);
+                const ws = new WebSocket(`wss://${host}9002/test?userName=${userName}`);
 
                 setSocket(ws)
                 // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);

@@ -156,8 +156,6 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcChat, type2, setType2})
     const exitRoom = () => {
         setType2('');
         console.log("exit" + type2);
-
-
         stop(); // 웹소켓 연결 종료 및 비디오/오디오 정지
         setShowRtcChat(false);
     };
@@ -358,7 +356,6 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcChat, type2, setType2})
             log('ICE Candidate Event: ICE candidate sent');
         }
     }
-
     function handleTrackEvent(event) {
         log('Track Event: set stream to remote Audio element');
         if (remoteAudio.current) { // remoteAudio가 null이 아닌지 확인
