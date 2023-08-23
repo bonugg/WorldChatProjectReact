@@ -36,7 +36,7 @@ const slideUpUserList = keyframes`
     width: 0px;
   }
 `;
-// 사용자 목록 패널 스타일
+// 메뉴 패널 스타일
 const MenuPanel = styled.div`
   visibility: ${props => props.visible === "visible" ? 'visible' : props.visible === "" ? "" : "hidden"};
   animation: ${props => props.visible === "visible" ? slideDownUserList : props.visible === "" ? slideUpUserList : "hidden"} 0.25s ease-in-out;
@@ -100,6 +100,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
 
         const client = useRef({});
         const LoginUserNickName = useRef({});
+        const otherUserId = useRef(null);
 
         //현재 스크롤바의 위치를 담는 상태 변수
         const [scroll, setScroll] = useState('');
@@ -271,6 +272,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         };
         const disconnect = () => {
             if (client.current && typeof client.current.disconnect === "function") {
+                otherUserId.current = null;
                 setSelectedLanguage(" ");
                 setMessages([]);
                 setIsChatReadOnly(false);
@@ -301,6 +303,10 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                     setRandomStartText("start a random chat");
                 }
                 setIsChatDiv(false);
+            }else if(payloadData.type == "CHAT"){
+                if (payloadData.sender !== LoginUserNickName.current){
+                    otherUserId.current = payloadData.userId;
+                }
             }
             if (payloadData.sender !== LoginUserNickName.current && selectedLanguageRef.current != " ") {
                 console.log(payloadData);
@@ -371,7 +377,6 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         const trackPos = (data) => {
             setPosition({x: data.x, y: data.y});
         };
-
         const handleMinimizeClick = () => {
             setMenuDiv(false);
             setMenuDiv2(false);
@@ -405,7 +410,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
             }
             const startRandomC = async (retry = true) => {
                 try {
-                    const response = await fetch("/random/room", {
+                    const response = await fetch("/randomRoom/enter", {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -439,7 +444,6 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                         }
                         return console.error(result.errorMessage);
                     }
-
                     console.log(`Created random room name: ${result}`);
                     console.log(`Created random room name: ${result.randomRoomDTO}`);
                     setRoom(result.randomRoomDTO);
@@ -461,6 +465,26 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         const exitChatDiv = () => {
             setRandomStartText("start a random chat");
             setIsChatDiv(false);
+        };
+        const friendAddClick = (otherId) => {
+            const requestFrdAxios = async() => {
+                try {
+                    const response = await axios.post('/friends/request', {userId: otherId},
+                        {headers: {
+                                Authorization: `${localStorage.getItem('Authorization')}`
+                            }});
+                    console.log(response);
+                    console.log(response.data.item.msg)
+                    if(response.data.item.msg === "request ok") {
+                        alert("친구 신청이 완료되었습니다")
+                    } else if(response.data.item.msg === "already frds") {
+                        alert("이미 친구이거나 응답 대기중입니다.")
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+            requestFrdAxios();
         };
 
 
@@ -661,6 +685,16 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                         <div className={"EnterRoom"}>
                                             <div className={"EnterRoom_2"}>
                                                 <div className={"EnterRoomCate"}>
+                                                    {otherUserId.current !== null ?(
+                                                        <Button
+                                                            className={"userList"}
+                                                            onClick={() => {friendAddClick(otherUserId.current)}}
+                                                        >USER LIST
+                                                        </Button>
+                                                    ):(
+                                                        <>
+                                                        </>
+                                                    )}
                                                 </div>
                                                 <div className={"EnterRoomName"}>
                                                     <span className={"EnterRoomName_2"}>

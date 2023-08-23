@@ -17,7 +17,7 @@
 }
 .userList_title{
     width: 200px;
-    height: 50px;
+    height: 450px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -619,6 +619,14 @@ input[type='number'] {
     width: 135px;
 }
 .roomList_item_div_3{
+    width: 18%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.roomList_item_div_3_full{
+    color: indianred;
     width: 18%;
     height: 100%;
     display: flex;

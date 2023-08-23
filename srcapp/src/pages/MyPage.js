@@ -4,6 +4,8 @@ import "./css/Home.css";
 import Button from "@mui/material/Button";
 import "./css/Mypage.css";
 import home from "./Home";
+import axios from "axios";
+import FriendsReceivedListItem from "./FriendsReceivedListItem";
 
 
 const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
@@ -18,6 +20,61 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
         const [MypageuserProfileOriginName, setMypageuserProfileOriginName] = useState("");
         const [messageButtonText, setMessageButtonText] = useState("Change Message");
         const [profileButtonText, setProfileButtonText] = useState("Change Picture");
+
+        const [mypageOnClick, setMypageOnClick] = useState(true);
+        const [friendsReceivedOnClick, setFriendsReceivedOnClick] = useState(false);
+        const [friendsRequesteddOnClick, setFriendsRequesteddOnClick] = useState(false);
+
+        const [receivedList, setReceivedList] = useState([]);
+
+        const mypageOn = () => {
+            setMypageOnClick(true);
+            setFriendsReceivedOnClick(false);
+            setFriendsRequesteddOnClick(false);
+        }
+        const friendRecievedOn = () => {
+            setMypageOnClick(false);
+            setFriendsReceivedOnClick(true);
+            setFriendsRequesteddOnClick(false);
+        }
+        const friendRequestedOn = () => {
+            setMypageOnClick(false);
+            setFriendsReceivedOnClick(false);
+            setFriendsRequesteddOnClick(true);
+        }
+
+        //친구 요청을 승인하거나 거절한 항목 삭제
+        const removeItemFromList = (id) => {
+            console.log("아이디 출력 "+id)
+            console.log(receivedList);
+            setReceivedList(prevList => prevList.filter(item => item.id != id));
+        }
+
+        useEffect(() => {
+            if(friendsReceivedOnClick){
+                const getReceivedListAxios = async () => {
+                    try {
+                        const response = await axios.get('/friends/received-list', {
+                            headers: {
+                                Authorization: `${localStorage.getItem('Authorization')}`
+                            }
+                        });
+                        console.log(response);
+                        console.log(response.data.items);
+                        console.log(response.data.items[0].user);
+                        console.log(response.data.items[0].user.userName);
+                        if(response.data && response.data.items) {
+                            setReceivedList(() => response.data.items);
+                        }
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }
+                getReceivedListAxios();
+            }
+        },[friendsReceivedOnClick]);
+
+
 
         const userInfo = async (retry = true) => {
             setPreviewImage(null);
@@ -134,7 +191,7 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
 
         const uploadImage = async (retry = true) => {
             try {
-                if(selectedFile == null){
+                if (selectedFile == null) {
                     setProfileButtonText("Same Picture");
                     setTimeout(() => {
                         setProfileButtonText("Change Picture");
@@ -165,10 +222,10 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
 
                 const data = await response.text(); // 데이터를 JSON 객체로 변환
                 if (response.ok) {
-                    if(data == "image upload"){
+                    if (data == "image upload") {
                         setProfileButtonText("Change Success");
                         setSelectedFile(null);
-                    }else {
+                    } else {
                         if (retry) {
                             await uploadImage(false);
                         }
@@ -216,7 +273,7 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
                 setTimeout(() => {
                     setMessageButtonText("Change Message");
                 }, 1500);
-            }catch (error){
+            } catch (error) {
                 if (retry) {
                     await userMessageChange(false);
                 }
@@ -225,81 +282,125 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
 
         return (
             <div className={"myPageDiv"}>
-                <div className={"myPageDiv2"}>
-                    <div className={"myPageDiv_profile"}>
-                        <img
-                            className={"myPageDiv_profile_img"}
-                            src={MypageuserProfileName ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/"+ MypageuserProfileName : previewImage ? previewImage :Profile}
-                            onClick={handleClickImage}
-                        />
-                        <input
-                            type="file"
-                            id="imageInput"
-                            accept="image/*"
-                            style={{display: "none"}}
-                            onChange={handleImageChange}
-                        />
+                <Button
+                    type={"button"}
+                    className={mypageOnClick ? "menu_1_clicked" : "menu_1"}
+                    onClick={mypageOn}
+                >
+                    Mypage
+                </Button>
+                <Button
+                    type={"button"}
+                    className={friendsReceivedOnClick ? "menu_2_clicked": "menu_2"}
+                    onClick={friendRecievedOn}
+                >
+                    Friends
+                    Received
+                </Button>
+                <Button
+                    type={"button"}
+                    className={friendsRequesteddOnClick ? "menu_3_clicked" : "menu_3"}
+                    onClick={friendRequestedOn}
+                >
+                    Friends
+                    Requested
+                </Button>
+                {mypageOnClick ? (
+                    <div className={"myPage_clicked"}>
+                        <div className={"myPageDiv2"}>
+                            <div className={"myPageDiv_profile"}>
+                                <img
+                                    className={"myPageDiv_profile_img"}
+                                    src={MypageuserProfileName ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + MypageuserProfileName : previewImage ? previewImage : Profile}
+                                    onClick={handleClickImage}
+                                />
+                                <input
+                                    type="file"
+                                    id="imageInput"
+                                    accept="image/*"
+                                    style={{display: "none"}}
+                                    onChange={handleImageChange}
+                                />
 
-                    </div>
-                    <div className={"myPageDiv_profile_btn"}>
-                        <Button
-                            className={profileButtonText == 'Change Picture' ? "myPageDiv_profile_btn2" :
-                                profileButtonText == 'Change Success' ? "myPageDiv_profile_btn3" : "myPageDiv_profile_btn4"}
-                            onClick={uploadImage}
-                        >
-                            {profileButtonText}
-                        </Button>
-                    </div>
-                </div>
-                <div className={"myPageDiv3"}>
-                    <div className={"myPageDiv_info_1"}>
-                        <div className={"myPageDiv_info_1_1"}>
-                            <h5 className={"myPageDiv_info_1_text"}>ID</h5>
-                            <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
-                                   value={MypageuserName}/>
-                            <h5 className={"myPageDiv_info_2_text"}>NICKNAME</h5>
-                            <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
-                                   value={MypageuserNickName}/>
-                            <h5 className={"myPageDiv_info_3_text"}>NATIONALITY</h5>
-                            <input type={"text"} className={"myPageDiv_info_1_1_input"} readOnly={true}
-                                   value={MypageuserNationality}/>
-                        </div>
-                    </div>
-                    <div className={"myPageDiv_info_2"}>
-                        <div className={"myPageDiv_info_1_1"}>
-                            <h5 className={"myPageDiv_info_1_text"}>EMAIL</h5>
-                            <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
-                                   value={MypageuserEmail}/>
-                            <h5 className={"myPageDiv_info_2_text"}>PHONE</h5>
-                            <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
-                                   value={MypageuserPhone}/>
-                            <div>
-                                <Button className={"myPageDiv_info_1_btn"} onClick={passwordChangeDiv}>Change
-                                    Password
+                            </div>
+                            <div className={"myPageDiv_profile_btn"}>
+                                <Button
+                                    className={profileButtonText == 'Change Picture' ? "myPageDiv_profile_btn2" :
+                                        profileButtonText == 'Change Success' ? "myPageDiv_profile_btn3" : "myPageDiv_profile_btn4"}
+                                    onClick={uploadImage}
+                                >
+                                    {profileButtonText}
                                 </Button>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div className={"myPageDiv4"}>
-                    <div className={"myPageDiv_Message_div"}>
-                        <div className={"myPageDiv_Message_text"}>
+                        <div className={"myPageDiv3"}>
+                            <div className={"myPageDiv_info_1"}>
+                                <div className={"myPageDiv_info_1_1"}>
+                                    <h5 className={"myPageDiv_info_1_text"}>ID</h5>
+                                    <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
+                                           value={MypageuserName}/>
+                                    <h5 className={"myPageDiv_info_2_text"}>NICKNAME</h5>
+                                    <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
+                                           value={MypageuserNickName}/>
+                                    <h5 className={"myPageDiv_info_3_text"}>NATIONALITY</h5>
+                                    <input type={"text"} className={"myPageDiv_info_1_1_input"} readOnly={true}
+                                           value={MypageuserNationality}/>
+                                </div>
+                            </div>
+                            <div className={"myPageDiv_info_2"}>
+                                <div className={"myPageDiv_info_1_1"}>
+                                    <h5 className={"myPageDiv_info_1_text"}>EMAIL</h5>
+                                    <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
+                                           value={MypageuserEmail}/>
+                                    <h5 className={"myPageDiv_info_2_text"}>PHONE</h5>
+                                    <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
+                                           value={MypageuserPhone}/>
+                                    <div>
+                                        <Button className={"myPageDiv_info_1_btn"} onClick={passwordChangeDiv}>Change
+                                            Password
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className={"myPageDiv4"}>
+                            <div className={"myPageDiv_Message_div"}>
+                                <div className={"myPageDiv_Message_text"}>
                                         <textarea className={"myPageDiv_Message_textarea"}
                                                   onChange={handleTextAreaChange}
                                                   value={textAreaValue}
                                                   placeholder={"Please enter within 100 characters"}
                                         >
                                         </textarea>
-                        </div>
-                        <div className={"myPageDiv_Message_btn_div"}>
-                            <Button
-                                className={messageButtonText == 'Change Message' ? "myPageDiv_Message_btn" : "myPageDiv_Message_btn2"}
-                                onClick={userMessageChange}>
-                                {messageButtonText}
-                            </Button>
+                                </div>
+                                <div className={"myPageDiv_Message_btn_div"}>
+                                    <Button
+                                        className={messageButtonText == 'Change Message' ? "myPageDiv_Message_btn" : "myPageDiv_Message_btn2"}
+                                        onClick={userMessageChange}>
+                                        {messageButtonText}
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                ):
+                    friendsReceivedOnClick ? (
+                        <div className={"friendRecieved_clicked"}>
+                            <div className={"friendRecieved_div"}>
+                                request received
+                            </div>
+                            <div className={"friendRecieved_div_2"}>
+                                    {receivedList && receivedList.map(r => (
+                                        <FriendsReceivedListItem key={r.id} list={r} onRemove={removeItemFromList}></FriendsReceivedListItem>
+                                    ))}
+                            </div>
+                        </div>
+                    ): (
+                        <div className={"friendRequested_clicked"}>
+                            친구요청리스트2
+                        </div>
+                    )
+                }
             </div>
         );
     })

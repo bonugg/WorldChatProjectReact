@@ -345,7 +345,7 @@ a {
     transform: translate(-50%, -50%);
     width: 600px;
     height: 650px;
-    border-radius: 10px;
+    border-radius: 0px 10px 10px 10px;
     background-color: rgba(50, 50, 50, 0.7);
     border: 2px solid rgba(50, 50, 50, 0.9);
 }
@@ -786,7 +786,7 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
 button[type=submit] {
     width: 90%;
     height: 50px !important;
-    padding-left: 20px !important;
+    padding-left: 20px;
     box-sizing: border-box !important;
     border-radius: 10px !important;
     margin-right: 0px !important;

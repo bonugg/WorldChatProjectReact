@@ -183,10 +183,10 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
 
         const [roomList, setRoomList] = useState([]);
         const [CateName, setCateName] = useState('Select Category');
-        const [CateChatList, setCateChatList] = useState([]);
         const [CateRoom, setCateRoom] = useState({});
         const [isChatDiv, setIsChatDiv] = useState(false);
-
+        //현재 선택중인 카테고리
+        const currentCate = useRef(null);
         // stompClient를 useState로 관리합니다.
         const [stompClient, setStompClient] = useState(null);
         //인풋창 비활성화 상태 변수
@@ -548,6 +548,9 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const showUserListOutput = (messageOutput) => {
             setuserList((prevUserList) => [...messageOutput]);
         };
+        const roomListAdd = (roomListadd) => {
+            setRoomList((prevroomList) => [...roomListadd]);
+        };
         const isScrollbarAtBottom = (element) => {
             // 현재 스크롤 위치 + 클라이언트 높이가 스크롤 영역의 전체 높이와 동일한지 확인
             const scrollThreshold = 199; // 스크롤 바가 바닥에 있는 것으로 판단할 수 있는 임계 값
@@ -569,9 +572,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const setCateRoomAndHandleChatDivUpdate = (chatDivUpdateValue, cateRoomValue) => {
             setCateRoom(cateRoomValue)
             setIsChatDiv(chatDivUpdateValue);
-        };
-        const handleCateChatList = (value) => {
-            setCateChatList(value);
+            roomListLoad(currentCate.current);
         };
         const handleChange = (event) => {
             const {name, value} = event.target;
@@ -587,6 +588,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             if (category === undefined) {
                 category = "ALL";
             }
+            currentCate.current = category;
             try {
                 const response = await fetch(`/api/v1/cateChat/roomList/${category}`, {
                     method: 'GET',
@@ -606,6 +608,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                 }
                 const data = await response.json();
                 if (data) {
+                    console.log(data.items);
                     if (data.items.length == 0) {
                         setRoomList(() => []);
                         setCateName(category);
@@ -647,7 +650,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                 if (rs_cateRoom.cateId) {
                     CloseCreateRoom();
                     setCreateRoomId(rs_cateRoom.cateId);
-                    roomListLoad(formValues.interest);
+                    roomListAdd([rs_cateRoom]);
                 } else {
                     console.log("cateRoomCreate 재시도")
                     if (retry) {
@@ -1291,7 +1294,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                 key={room.cateId}
                                                                 room={room}
                                                                 onCateRoomAndChatDivUpdate={setCateRoomAndHandleChatDivUpdate}
-                                                                userCnt={handleCateChatList}
                                                                 shouldImmediatelyEnter={room.cateId === createRoomId}
                                                             ></CateChatListItem>
                                                         ))
