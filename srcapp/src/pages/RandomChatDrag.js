@@ -345,7 +345,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                         await startRandomC(false);
                     }
                     return console.error(result.errorMessage);
-                }
+                } 
 
                 console.log(`Created random room name: ${result.randomRoomName}`);
                 setRoom(result);
