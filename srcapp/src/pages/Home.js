@@ -333,7 +333,7 @@ useEffect(() => {
     if (userName) {
         //const ws = new WebSocket(`wss://localhost:9002/test`)
 
-        const ws = new WebSocket(`wss://192.168.0.48:9002/test?userName=${userName}`);
+        const ws = new WebSocket(`wss://192.168.0.11:9002/test?userName=${userName}`);
         console.log("새로고침" + userName);
         setRtcUserName(userName);
 
@@ -431,7 +431,7 @@ const handleGrandchildData = (data) => {
                 
                 if(username){
                 //const ws = new WebSocket(`wss://localhost:9002/test`)
-                const ws = new WebSocket(`wss://192.168.0.48:9002/test?userName=${userName}`);
+                const ws = new WebSocket(`wss://192.168.0.11:9002/test?userName=${userName}`);
 
                 setSocket(ws)
                 // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);

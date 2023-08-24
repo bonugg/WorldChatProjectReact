@@ -4,12 +4,14 @@ import 'bootstrap/dist/js/bootstrap.bundle.min'
 import axios from "axios";
 import qs from "qs";
 import React, {useEffect, useRef} from 'react';
+import { AltRoute } from '@mui/icons-material';
 
 // const addr = "localhost:3001"
 
 const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     console.log(type2+"asd");
     console.log("ChatRoom 실행")
+    
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
     let host = "";
@@ -19,6 +21,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     console.log("wss://" + host + "9002" + "/signal")
     let socket = new WebSocket("wss://" + host + "9002" + "/signal");
     let localUserName = "";
+    const localRoom = sendUser + "님과 " + receiverUser + "님의 화상채팅방";
     // let loginUserName = "";
     // console.log(rtcUserName+"이게 넘어온 이름")
 
@@ -86,7 +89,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
             remoteVideo.current.srcObject = localStream;
         }
     }, [remoteVideo])
-    const localRoom = sendUser + "님과 " + receiverUser + "님의 화상채팅방";
+    
 
     socket.onerror = function (error) {
         console.log("WebSocket Error: ", error);
@@ -142,10 +145,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
 
     // 방 나가기 함수
     const exitRoom = () => {
-        setType2('');
-        console.log("exit"+type2);
-
-
+        console.log("exit@@@@@@@@@@@@@@@@"+type2);
         stop(); // 웹소켓 연결 종료 및 비디오/오디오 정지
         setShowRtcChat(false);
     };
@@ -155,6 +155,8 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
         console.log("peertest !!!!!!!!!!!!!!!!!!!!!!!!!");
         let message = JSON.parse(msg.data);
         console.log("메시지 타입: " + message.type);
+        console.log("메세지 프롬 : " + message.from);
+        console.log("localUsername : " + localUserName);
 
         switch (message.type) {
             case 'video-toggle':
@@ -188,7 +190,8 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
                 break;
 
             case "leave":
-                console.log("실행되면 안됨");
+                console.log("User left message received");
+                //alert(message.message);  // "상대방과 연결이 끊겼습니다"를 알림으로 표시
                 stop();
                 break;
 
@@ -197,6 +200,8 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
         }
     };
 
+
+    
 
     async function chatListCount() {
         const params = {
@@ -275,16 +280,16 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
         stop();
     }
 
+
     function stop() {
-        log("Send 'leave' message to server");
-        sendToServer({
-            from: localUserName,
-            type: 'leave',
-            data: localRoom
-        });
+
+        alert("상대방과 연결이 끊겼습니다.");
 
         console.log(localUserName+"exit")
         console.log(localRoom+"exit");
+
+        setType2('');
+
 
         if (myPeerConnection) {
             log('Close the RTCPeerConnection');
@@ -303,26 +308,40 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
             if (remoteVideo.srcObject) {
                 console.log("상대 카메라 꺼짐");
                 remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+                //remoteVideo.srcObject = null;
             }
             if (localVideo.srcObject) {
                 console.log("내 카메라 꺼짐");
                 localVideo.srcObject.getTracks().forEach(track => track.stop());
+                //localVideo.srcObject = null;
             }
 
             remoteVideo.current = null;
             localVideo.current = null;
 
-            setShowRtcChat(false);
-            alert("상대방과의 연결이 끊어졌습니다.");
-
             // myPeerConnection 초기화
             myPeerConnection.close();
             myPeerConnection = null;
+            
+
+            setShowRtcChat(false);
+            //alert("상대방과 연결을 종료하시겠습니까?");
+
+            log("Send 'leave' message to server");
+            sendToServer({
+                from: localUserName,
+                type: 'leave',
+                data: localRoom
+            });
+
+            
 
             log('Close the socket');
-            if (socket != null) {
+            //if (socket && socket.readyState === WebSocket.OPEN) {
                 socket.close();
-            }
+                socket = null;
+            //}
+
 
             // getMedia(mediaDisconnection);
 

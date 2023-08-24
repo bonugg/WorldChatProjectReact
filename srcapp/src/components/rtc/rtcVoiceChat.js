@@ -119,7 +119,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                     break;
 
                 case "leave":
-                    console.log("실행되면 안됨");
+                    
                     stop();
                     break;
 
@@ -207,14 +207,19 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 
 // 방 나가기 함수
     const exitRoom = () => {
-        setType2('');
-        console.log("exit" + type2);
+        console.log("exit@@@@@@@@@@@" + type2);
         stop(); // 웹소켓 연결 종료 및 비디오/오디오 정지
         setShowRtcVoiceChat(false);
+        console.log("exit되고나서 @@@@@@@@@@@" + type2);
+
     };
 
     function stop() {
-        log("Send 'leave' message to server");
+
+        setType2('');
+
+        alert("상대방과의 연결이 끊어졌습니다.");
+        
         sendToServer({
             from: localUserName,
             type: 'leave',
@@ -244,12 +249,14 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
             remoteAudio.current = null;
             localAudio.current = null;
 
-            alert("상대방과의 연결이 끊어졌습니다.");
+           
             setShowRtcVoiceChat(false);
 
             // myPeerConnection 초기화
             myPeerConnection.close();
             myPeerConnection = null;
+
+            log("Send 'leave' message to server");
 
             log('Close the socket');
             if (socket != null) {
