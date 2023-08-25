@@ -3,8 +3,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min'
 import axios from "axios";
 import qs from "qs";
-import React, {useEffect, useRef, useState} from 'react';
-import RtcChatDrag from "./RtcChatDrag";
+import React, {useEffect, useRef, useState, useContext} from 'react';
+import UserListContext from '../../context/UserListContext';
+import Profile from "../../img/profile.png";
 import RtcVoiceChatDrag from "./RtcVoiceChatDrag";
 
 // const addr = "localhost:3001"
@@ -14,8 +15,6 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     const [receiverIsTalking, setReceiverIsTalking] = useState(false);
     const [socket, setSocket] = useState(null);
     const [localUserName, setLocalUserName] = useState(null);
-
-
     const [rtcChatDrag, setRtcChatDrag] = useState(false);
     const handleRtcVoiceShowDrag = () => {
         setRtcChatDrag(true);
@@ -29,7 +28,11 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     }, [])
 
 
+    const {userList, setUserList} = useContext(UserListContext);
     // let localUserName = "";
+
+    const sendUserProfile = userList.find(u => u.userName === sendUser)?.userProfileName;
+    const receiverUserProfile = userList.find(u => u.userName === receiverUser)?.userProfileName;
 
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
@@ -44,6 +47,8 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         const ws = new WebSocket("wss://" + host + "9002" + "/voice");
         setSocket(ws);
 
+        updateUserList();
+
         // 컴포넌트가 언마운트될 때 WebSocket 연결을 종료
         // let loginUserName = "";
         // console.log(rtcUserName+"이게 넘어온 이름")
@@ -52,6 +57,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
             console.log("발신 유저 이름: " + sendUser)
             console.log("수신 유저 이름: " + receiverUser)
             setLocalUserName(localStorage.getItem('userName'));
+
         }
         // return () => {
         //     ws.close();
@@ -136,7 +142,13 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                     break;
 
                 case "leave":
-                    console.log("실행되면 안됨");
+
+                    stop();
+                    break;
+
+                case "rejective":
+                    alert("상대방이 요청을 거절하였습니다.");
+                    // 화상채팅 종료 로직 (예: socket.close(); 등)
                     stop();
                     break;
 
@@ -144,6 +156,8 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                     handleErrorMessage('Wrong type message received from server');
             }
         };
+
+
         socket.onopen = function () {
             log('WebSocket connection opened to Room: #' + localRoom);
             console.log(localUserName + "이거 나오냐?????????");
@@ -209,10 +223,10 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                 }
 
                 var average = values / length;
-                console.log("-----------     "+average)
+                console.log("-----------     " + average)
                 if (average > 15) {
                     setReceiverIsTalking(true);
-                } else if(average < 10) {
+                } else if (average < 10) {
                     setReceiverIsTalking(false);
                 }
             }
@@ -281,7 +295,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                         console.log(average)
                         if (average > 15) {
                             setSenderIsTalking(true);
-                        } else if(average < 10) {
+                        } else if (average < 10) {
                             setSenderIsTalking(false);
                         }
 
@@ -317,14 +331,19 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 
 // 방 나가기 함수
     const exitRoom = () => {
-        setType2('');
-        console.log("exit" + type2);
+        console.log("exit@@@@@@@@@@@" + type2);
         stop(); // 웹소켓 연결 종료 및 비디오/오디오 정지
         setShowRtcVoiceChat(false);
+        console.log("exit되고나서 @@@@@@@@@@@" + type2);
+
     };
 
     function stop() {
-        log("Send 'leave' message to server");
+
+        setType2('');
+
+        alert("상대방과의 연결이 끊어졌습니다.");
+
         sendToServer({
             from: localUserName,
             type: 'leave',
@@ -354,16 +373,17 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
             remoteAudio.current = null;
             localAudio.current = null;
 
-            alert("상대방과의 연결이 끊어졌습니다.");
+
             setShowRtcVoiceChat(false);
 
             // myPeerConnection 초기화
             myPeerConnection.close();
             myPeerConnection = null;
-            navigator.mediaDevices.getUserMedia({
-                audio: false
-            });
+            // navigator.mediaDevices.getUserMedia({
+            //     audio: false
+            // });
             localStream = null;
+            log("Send 'leave' message to server");
             log('Close the socket');
             if (socket != null) {
                 socket.close();
@@ -401,28 +421,37 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         }
     }
 
-    // 웹 소켓 연결 되었을 때 - open - 상태일때 이벤트 처리
-
-
-    async function exitRooms(roomId) {
-        const url = '/chat/delRoom';
-        const config = {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-
+    const updateUserList = async (retry = true) => {
         try {
-            const response = await axios.post(url, roomId, config);
-            console.log(response.data);
-            if (response.data === "true") {
-                myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
+            const response = await fetch('/api/v1/user/friendsList', {
+                method: 'POST',
+                headers: {
+                    Authorization: localStorage.getItem('Authorization'),
+                    'userName': localStorage.getItem('userName'),
+                },
+            });
+            const accessToken = response.headers.get('Authorization');
+            if (accessToken != null) {
+                localStorage.setItem('Authorization', accessToken);
             }
-            return response.data;
+            if (response.headers.get('refresh') != null) {
+                // 이 부분은 로그아웃 로직에 맞게 처리해야 합니다.
+                // 예: logoutApi3(true);
+                return;
+            }
+            const data = await response.json();
+            if (data) {
+                setUserList(() => data.items);
+            }
         } catch (error) {
-            console.error('There was a problem with the axios operation:', error.message);
+            if (retry) {
+                await updateUserList(false);
+            }
         }
     }
+
+
+    // 웹 소켓 연결 되었을 때 - open - 상태일때 이벤트 처리
 
     // 에러 발생 시 이벤트 처리
 
@@ -641,12 +670,19 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         socket.close();
     }
 
+    console.log(userList);
+    console.log("샌드 이미지 " + sendUserProfile)
+    console.log("샌드 이미지 " + receiverUserProfile)
+// rtcVoiceChat 컴포넌트 내부에서...
+
 //-----------------여기부터 이제 추가될 화상채팅에서 끌어온 로직
     return (
         <div className="rtcVoiceChat">
             <RtcVoiceChatDrag onClose={handleDragClose} remoteAudio={remoteAudio} show={rtcChatDrag}
                               localRoom={localRoom} exitRoom={exitRoom} senderIsTalking={senderIsTalking}
-                              receiverIsTalking={receiverIsTalking}></RtcVoiceChatDrag>
+                              receiverIsTalking={receiverIsTalking}
+                              src1={sendUserProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + sendUserProfile : Profile}
+                              src2={receiverUserProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + receiverUserProfile : Profile}></RtcVoiceChatDrag>
             {/*<div className="users">*/}
             {/*    <div style={senderIsTalking ? {color: 'green'} : null} className="sendUser">{sendUser}</div>*/}
             {/*    <div style={receiverIsTalking ? {color: 'green'} : null} className="receiverUser">{receiverUser}</div>*/}
@@ -654,7 +690,33 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
             {/*</div>*/}
 
             {/*<audio ref={remoteAudio} autoPlay></audio>*/}
+
+
+            {/*// return (*/}
+            {/*// <div className="rtcVoiceChat">*/}
+            {/*// <div className="users">*/}
+            {/*// <div style={isTalking ? {color: 'green'} : null} className="sendUser">*/}
+            {/*// <img*/}
+            {/*//                     className="profile_img"*/}
+            {/*//                     src={sendUserProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/"+ sendUserProfile : Profile}*/}
+            {/*//                 />*/}
+            {/*//                 {sendUser}*/}
+            {/*//             </div>*/}
+            {/*//             <div style={isTalking ? {color: 'green'} : null} className="receiverUser">*/}
+            {/*                 <img*/}
+            {/*                     className="profile_img"*/}
+            {/*                     src={receiverUserProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/"+ receiverUserProfile : Profile}*/}
+            {/*                 />*/}
+            {/*//                 {receiverUser}*/}
+            {/*//             </div>*/}
+            {/*//             <button onClick={exitRoom}>Exit Room</button>*/}
+
+
+            {/*</div>*/}
+
+            {/*// <audio ref={remoteAudio} autoPlay></audio>*/}
         </div>
     );
+
 };
 export default RtcVoiceChat

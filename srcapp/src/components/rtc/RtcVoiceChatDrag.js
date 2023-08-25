@@ -2,11 +2,12 @@ import React, {useState, useEffect} from 'react'
 import Draggable from 'react-draggable';
 import Button from "@mui/material/Button";
 
-function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking,senderIsTalking}) {
+function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking,senderIsTalking,src1,src2}) {
     const [position, setPosition] = useState({x: -183, y: -286});
     const [isMinimized, setIsMinimized] = useState(false);
     const [isClosed, setIsClosed] = useState(false);
-
+console.log(src1+"src1@@@@@@@@@@@@@@")
+console.log(src2+"src2@@@@@@@@@@@@@@")
     //버튼 토글
     const [button1Active, setButton1Active] = useState(false);
     const [button2Active, setButton2Active] = useState(false);
@@ -116,7 +117,9 @@ function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking
                                         height: '60%',
                                         left: '-15%',
                                         top: '15%',
-                                        backgroundColor: 'red',
+                                        backgroundImage: `url(${src1})`,
+                                        backgroundSize: 'cover',  // cover 값을 설정
+                                        backgroundPosition: 'center',  // 이미지를 중앙에 배치
                                         zIndex: 2  // In front of the audio tag
                                     } : {
                                         position: 'absolute',  // Absolute positioning
@@ -125,7 +128,9 @@ function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking
                                         height: '60%',
                                         left: '-15%',
                                         top: '15%',
-                                        backgroundColor: 'red',
+                                        backgroundImage: `url(${src1})`,
+                                        backgroundSize: 'cover',  // cover 값을 설정
+                                        backgroundPosition: 'center',  // 이미지를 중앙에 배치
                                         border: '5px solid green',
                                         zIndex: 2  // In front of the audio tag
                                     }}
@@ -140,7 +145,9 @@ function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking
                                         height: '60%',
                                         right: '-15%',
                                         top: '15%',
-                                        backgroundColor: 'blue',
+                                        backgroundImage: `url(${src2})`,
+                                        backgroundSize: 'cover',  // cover 값을 설정
+                                        backgroundPosition: 'center',  // 이미지를 중앙에 배치
                                         zIndex: 2  // In front of the audio tag
                                     } : {
                                         position: 'absolute',  // Absolute positioning
@@ -148,7 +155,9 @@ function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking
                                         height: '60%',
                                         right: '-15%',
                                         top: '15%',
-                                        backgroundColor: 'blue',
+                                        backgroundImage: `url(${src2})`,
+                                        backgroundSize: 'cover',  // cover 값을 설정
+                                        backgroundPosition: 'center',  // 이미지를 중앙에 배치
                                         border: '5px solid green',
                                         zIndex: 2  // In front of the audio tag
                                     }}

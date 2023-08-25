@@ -11,15 +11,21 @@ import Russia from "../img/flag/Russia-flag.png";
 import Taiwan from "../img/flag/Taiwan-flag.png";
 import Ukraine from "../img/flag/Ukraine-flag.png";
 import Philippines from "../img/flag/Philippines-flag.png";
+import UserListContext from "../context/UserListContext";
+import { useContext } from "react";
 
 import "./css/FreindsList.css";
 
 
 const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType}) => {
-    const [userList, setUserList] = useState([]);
+    //const [userList, setUserList] = useState([]);
+    const { userList, setUserList } = useContext(UserListContext);
+
     const [nationallyName, setNationallyName] = useState('');
     const [isChatDiv, setIsChatDiv] = useState(false);
     const freindsList = async (retry = true) => {
+
+       
         
         try {
             const response = await fetch('/api/v1/user/friendsList', {
