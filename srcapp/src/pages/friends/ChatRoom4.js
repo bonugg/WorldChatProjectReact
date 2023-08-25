@@ -17,9 +17,7 @@ const ChatRoom4 = () => {
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-
     const userName = localStorage.getItem("userName");
-
 
     const [shouldDetectLanguage, setShouldDetectLanguage] = useState(false);
     const shouldDetectLanguageRef = useRef(shouldDetectLanguage);
@@ -73,6 +71,24 @@ const ChatRoom4 = () => {
         }
     }
 
+    const checkOther = async () => {
+        try {
+            const response = await axios.get(`/chatroom/check-other/${roomId}`, {
+                headers: {
+                    Authorization: `${localStorage.getItem('Authorization')}`
+                }
+            });
+            console.log(response);
+            if(response.data.item.msg == "friend is offline") {
+                alert("친구가 채팅방에 없음");
+            } else {
+                alert("친구가 채팅방에 있음");
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
     const connect = () => {
         client.current = new StompJs.Client({
             webSocketFactory: () => new SockJS("/friendchat"),
@@ -81,23 +97,33 @@ const ChatRoom4 = () => {
             },
             onConnect:() => {
                 getChatMessageFromDB();
+                // checkOther();
                 client.current.subscribe(`/frdSub/${roomId}`, async ({body}) => {
+
                     console.log("Received a message", body);
 
                     console.log("Message received. Should detect language:", shouldDetectLanguageRef.current);  // 이 부분 추가
 
                     const receivedMessage = JSON.parse(body);
-                    if (receivedMessage.sender !== "qwe" && shouldDetectLanguageRef.current) {
-                        const translatedText = await detectAndTranslate(receivedMessage.message);
-                        if (translatedText) {
-                            receivedMessage.translatedMessage = translatedText;
+                    console.log(receivedMessage);
+                    if (receivedMessage.type === "status") {
+                        if (receivedMessage.content === "online") {
+                            updateReads();
                         }
+                    } else {
+                        if (receivedMessage.sender !== "qwe" && shouldDetectLanguageRef.current) {
+                            const translatedText = await detectAndTranslate(receivedMessage.message);
+                            if (translatedText) {
+                                receivedMessage.translatedMessage = translatedText;
+                            }
+                        }
+                        setMessages((messages) => [...messages, receivedMessage]);
                     }
-                    setMessages((messages) => [...messages, receivedMessage]);
                 });
             },
             connectHeaders: {
-                Authorization: `${localStorage.getItem('Authorization')}`
+                Authorization: `${localStorage.getItem('Authorization')}`,
+                roomId: roomId
             },
             onStompError: (frame) => {
                 console.error("에러러어어어ㅓ엉")
@@ -203,8 +229,6 @@ const ChatRoom4 = () => {
         setMessage(prevMessage => prevMessage + emoji);
     }
 
-
-
     const detectAndTranslate = async (text) => {
 
         console.log(text);
@@ -260,35 +284,32 @@ const ChatRoom4 = () => {
         }
     };
 
-    const detectLanguage = async (text) => {
-
-        console.log(text);
-
-        try {
-            const response = await axios.post("/language/detect", { query: text }, {
-                headers: {
-                    Authorization: `${localStorage.getItem('Authorization')}`
-                }
-            });
-            console.log(response);
-            console.log(response.data)
-            console.log("여기에 문제가 있을거같긴해 나도. 이게 제일 못미더워")
-            if (response.data && response.data.langCode) {
-                return response.data.langCode;
-            } else {
-                return null;
-            }
-        } catch (error) {
-            console.error("Error detecting language:", error);
-            return null;
-        }
-    }
-
     const handleLanguageChange = (e) => {
         setSelectedLanguage(e.target.value);
         console.log("언어선택 했어요. 진짜로 했어요");
         console.log(e.target.value);
     };
+
+    const updateReads = async () => {
+        try {
+            const response = await axios.put(`/chatroom/${roomId}`, null, {
+                headers: {
+                    Authorization: `${localStorage.getItem('Authorization')}`
+                }
+            });
+            console.log(response.data.items);
+            console.log("안읽은거 읽음처리 됐냐???")
+            if(response.data && response.data.items) {
+                const updatedMessages = response.data.items;
+                setMessages(prevMessages => prevMessages.map(msg => {
+                    const updateMsg = updatedMessages.find(uMsg => uMsg.id == msg.id);
+                    return updateMsg ? updateMsg : msg;
+                }));
+            };
+        } catch (e) {
+            console.log(e);
+        }
+    }
 
     return (
         <div>
@@ -300,7 +321,10 @@ const ChatRoom4 = () => {
                 {messages == null
                     ? null
                     : messages.map((item, index) => (
+
                         <div key={index}>
+                            <div>{item.id}</div>
+                            <div>{item.checkRead ? "읽음" : "안읽음"}</div>
                             <div>{item.createdAt}</div>
                             <div>{item.sender}</div>
                             <div>{item.translatedMessage ? `(번역) ${item.translatedMessage}` : item.message}</div>
@@ -337,7 +361,7 @@ const ChatRoom4 = () => {
                             console.log("Checkbox clicked. Should detect language:", !shouldDetectLanguage);
                         }}
                     />
-                    언어 감지하기
+                    activate translation
                 </label>
             </div>
             <form onSubmit={sendMessage}>

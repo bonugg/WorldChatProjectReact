@@ -7,7 +7,6 @@ const FriendsListItem = ({frds}) => {
     const {id, user, friends, statement} = frds;
     const navi = useNavigate();
 
-
     const createChat = useCallback((e) => {
         const id = e.target.dataset.id;
         console.log("채팅방만들래래래래래래ㅐ래래래래랠")
@@ -31,9 +30,22 @@ const FriendsListItem = ({frds}) => {
             }
         }
         createChatAxios();
-
-
     },[]);
+
+    const deleteFrd = async (e) => {
+        const id = e.target.dataset.id;
+        try {
+            const response = await axios.post("/friends/delete-friends", {userId: id},
+                {
+                    headers: {
+                        'Authorization': localStorage.getItem('Authorization')
+                    }
+                })
+            console.log(response);
+        } catch (e) {
+            console.log(e);
+        }
+    }
 
     return (
         <tr>
@@ -42,6 +54,7 @@ const FriendsListItem = ({frds}) => {
             <td>{friends.userName}</td>
             <td>{statement}</td>
             <button type='submit' onClick={createChat} data-id={friends.userId}>1:1채팅</button>
+            <button type='submit' onClick={deleteFrd} data-id={friends.userId}>친삭</button>
         </tr>
     )
 }
