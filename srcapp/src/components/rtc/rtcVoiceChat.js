@@ -4,13 +4,31 @@ import 'bootstrap/dist/js/bootstrap.bundle.min'
 import axios from "axios";
 import qs from "qs";
 import React, {useEffect, useRef, useState} from 'react';
+import RtcChatDrag from "./RtcChatDrag";
+import RtcVoiceChatDrag from "./RtcVoiceChatDrag";
 
 // const addr = "localhost:3001"
 
 const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setType2}) => {
-    const [isTalking, setIsTalking] = useState(false);
+    const [senderIsTalking, setSenderIsTalking] = useState(false);
+    const [receiverIsTalking, setReceiverIsTalking] = useState(false);
     const [socket, setSocket] = useState(null);
     const [localUserName, setLocalUserName] = useState(null);
+
+
+    const [rtcChatDrag, setRtcChatDrag] = useState(false);
+    const handleRtcVoiceShowDrag = () => {
+        setRtcChatDrag(true);
+    };
+    const handleDragClose = () => {
+        setRtcChatDrag(false);
+    };
+    useEffect(() => {
+        handleRtcVoiceShowDrag();
+        // alert("드래그 실행");
+    }, [])
+
+
     // let localUserName = "";
 
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
@@ -51,20 +69,19 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 // 미디어 제약 사항 설정
     const mediaConstraints = {
         audio: true,
-        video:false
+        video: false
     };
     let localStream;
     let myPeerConnection;
     const localRoom = sendUser + "님과 " + receiverUser + "님의 음성채팅방";
     // const localAudio = document.getElementById('local_Audio');
     const localAudio = useRef(null);
-
     useEffect(() => {
         console.log("streamAudio test1");
         if (localAudio.current && localStream) {
             localAudio.current.srcObject = localStream;
         }
-    }, [localStream, localAudio]);
+    }, [localAudio]);
 
     const remoteAudio = useRef(null);
     useEffect(() => {
@@ -129,7 +146,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         };
         socket.onopen = function () {
             log('WebSocket connection opened to Room: #' + localRoom);
-            console.log(localUserName+"이거 나오냐?????????");
+            console.log(localUserName + "이거 나오냐?????????");
             sendToServer({
                 from: localUserName,
                 type: 'join',
@@ -149,14 +166,84 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         };
     }, [socket])
 
+//음성감지
+
+    useEffect(() => {
+        if (!remoteAudio?.current?.srcObject) {
+            console.log("여기 어딨오....................")
+            return;
+        }
+
+        const stream = remoteAudio.current.srcObject;
+
+        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let analyser = audioContext.createAnalyser();
+        console.log("에러1");
+        let microphone = audioContext.createMediaStreamSource(stream);
+        let javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+        analyser.smoothingTimeConstant = 0.8;
+        analyser.fftSize = 1024;
+
+        microphone.connect(analyser);
+        analyser.connect(javascriptNode);
+        javascriptNode.connect(audioContext.destination);
+
+        let lastEventTimestamp = 0;
+        const THROTTLE_INTERVAL = 100; // 0.2초
+
+        javascriptNode.onaudioprocess = () => {
+            const currentTime = Date.now();
+
+            // 마지막 이벤트로부터 0.2초 이상 경과한 경우에만 처리
+            if (currentTime - lastEventTimestamp > THROTTLE_INTERVAL) {
+                lastEventTimestamp = currentTime;
+
+                var array = new Uint8Array(analyser.frequencyBinCount);
+                analyser.getByteFrequencyData(array);
+                var values = 0;
+
+                var length = array.length;
+                for (var i = 0; i < length; i++) {
+                    values += array[i];
+                }
+
+                var average = values / length;
+                console.log("-----------     "+average)
+                if (average > 15) {
+                    setReceiverIsTalking(true);
+                } else if(average < 10) {
+                    setReceiverIsTalking(false);
+                }
+            }
+        };
+
+        return () => {
+            if (javascriptNode) {
+                javascriptNode.disconnect();
+            }
+            if (analyser) {
+                analyser.disconnect();
+            }
+            if (microphone) {
+                microphone.disconnect();
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+        };
+    }, [remoteAudio, remoteAudio?.current, remoteAudio?.current?.srcObject]);  // remoteAudio가 변경될 때마다 useEffect를 다시 실행합니다.
+
+
     useEffect(() => {
 
         navigator.mediaDevices.getUserMedia({audio: true})
             .then(stream => {
                 //LocalAudioRef.current.srcObject = stream;
 
-                let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                let audioContext = new (window.AudioContext || window.stream)();
                 let analyser = audioContext.createAnalyser();
+                console.log("에러2");
                 let microphone = audioContext.createMediaStreamSource(stream);
                 let javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
 
@@ -166,24 +253,40 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                 microphone.connect(analyser);
                 analyser.connect(javascriptNode);
                 javascriptNode.connect(audioContext.destination);
+                let lastEventTimestamp = 0;
+                const THROTTLE_INTERVAL = 100; // 0.2초
 
                 javascriptNode.onaudioprocess = () => {
-                    var array = new Uint8Array(analyser.frequencyBinCount);
-                    analyser.getByteFrequencyData(array);
-                    var values = 0;
+                    const currentTime = Date.now();
 
-                    var length = array.length;
-                    for (var i = 0; i < length; i++) {
-                        values += array[i];
+                    // 마지막 이벤트로부터 0.2초 이상 경과한 경우에만 처리
+                    if (currentTime - lastEventTimestamp > THROTTLE_INTERVAL) {
+                        lastEventTimestamp = currentTime;
+
+                        var array = new Uint8Array(analyser.frequencyBinCount);
+                        analyser.getByteFrequencyData(array);
+                        var values = 0;
+
+                        var length = array.length;
+                        for (var i = 0; i < length; i++) {
+                            values += array[i];
+                        }
+                        var average = values / length;
+
+                        // if (average > 200) { // 임계값을 조정하여 적절한 민감도로 설정하십시오.
+                        //     setSenderIsTalking(true);
+                        // } else if(average < 10) {
+                        //     setSenderIsTalking(false);
+                        // }
+                        console.log(average)
+                        if (average > 15) {
+                            setSenderIsTalking(true);
+                        } else if(average < 10) {
+                            setSenderIsTalking(false);
+                        }
+
                     }
 
-                    var average = values / length;
-
-                    if (average > 20) { // 임계값을 조정하여 적절한 민감도로 설정하십시오.
-                        setIsTalking(true);
-                    } else {
-                        setIsTalking(false);
-                    }
                 };
 
                 return () => {
@@ -202,6 +305,13 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                 };
             })
             .catch(error => console.error('Error accessing audio stream:', error));
+
+        let timerId;
+        // return () => {
+        //     timerId = setTimeout(() => {
+        //     }, 100);  // 0.1초의 딜레이
+        // };
+
     }, []); // 이 useEffect는 컴포넌트가 마운트될 때 한 번만 실행됩니다.
 
 
@@ -250,7 +360,10 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
             // myPeerConnection 초기화
             myPeerConnection.close();
             myPeerConnection = null;
-
+            navigator.mediaDevices.getUserMedia({
+                audio: false
+            });
+            localStream = null;
             log('Close the socket');
             if (socket != null) {
                 socket.close();
@@ -322,8 +435,6 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         stop();
     }
 
-
-
     function log(message) {
         // console.log(message);
     }
@@ -342,6 +453,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     function getMedia(constraints) {
         console.log("stream test3");
         if (localStream) {
+            console.log("stream test3-1??");
             localStream.getTracks().forEach(track => {
                 track.stop();
             });
@@ -377,6 +489,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     function getLocalMediaStream(mediaStream) {
         console.log("stream test4");
         localStream = mediaStream;
+        localAudio.srcObject = mediaStream;
         localStream.getTracks().forEach(track => myPeerConnection.addTrack(track, localStream));
     }
 
@@ -410,6 +523,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
             log('ICE Candidate Event: ICE candidate sent');
         }
     }
+
     function handleTrackEvent(event) {
         log('Track Event: set stream to remote Audio element');
         if (remoteAudio.current) { // remoteAudio가 null이 아닌지 확인
@@ -511,7 +625,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         log("Adding received ICE candidate: " + JSON.stringify(candidate));
         myPeerConnection.addIceCandidate(candidate).catch(handleErrorMessage);
     }
-    
+
     const cleanupAudioResources = () => {
         if (localAudio.current && localAudio.current.srcObject) {
             const tracks = localAudio.current.srcObject.getTracks();
@@ -530,13 +644,16 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 //-----------------여기부터 이제 추가될 화상채팅에서 끌어온 로직
     return (
         <div className="rtcVoiceChat">
-            <div className="users">
-                <div style={isTalking ? {color: 'green'} : null} className="sendUser">{sendUser}</div>
-                <div style={isTalking ? {color: 'green'} : null} className="receiverUser">{receiverUser}</div>
-                <button onClick={exitRoom}>Exit Room</button>
-            </div>
+            <RtcVoiceChatDrag onClose={handleDragClose} remoteAudio={remoteAudio} show={rtcChatDrag}
+                              localRoom={localRoom} exitRoom={exitRoom} senderIsTalking={senderIsTalking}
+                              receiverIsTalking={receiverIsTalking}></RtcVoiceChatDrag>
+            {/*<div className="users">*/}
+            {/*    <div style={senderIsTalking ? {color: 'green'} : null} className="sendUser">{sendUser}</div>*/}
+            {/*    <div style={receiverIsTalking ? {color: 'green'} : null} className="receiverUser">{receiverUser}</div>*/}
+            {/*    <button onClick={exitRoom}>Exit Room</button>*/}
+            {/*</div>*/}
 
-            <audio ref={remoteAudio} autoPlay></audio>
+            {/*<audio ref={remoteAudio} autoPlay></audio>*/}
         </div>
     );
 };

@@ -3,22 +3,36 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min'
 import axios from "axios";
 import qs from "qs";
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
+import RtcChatDrag from "./RtcChatDrag";
 
 // const addr = "localhost:3001"
 
 const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
+    const [rtcChatDrag, setRtcChatDrag] = useState(false);
+    const handleRtcShowDrag = () => {
+        setRtcChatDrag(true);
+    };
+    const handleDragClose = () => {
+        setRtcChatDrag(false);
+    };
+
     console.log(type2+"asd");
-    console.log("ChatRoom 실행")
+    console.log("ChatRoom 실행");
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
     let host = "";
     host = window.location.host;
     console.log(host)
     host = host.slice(0, -4);
-    console.log("wss://" + host + "9002" + "/signal")
+    console.log("wss://" + host + "9002" + "/signal");
     let socket = new WebSocket("wss://" + host + "9002" + "/signal");
     let localUserName = "";
+
+    useEffect(()=>{
+        handleRtcShowDrag();
+        // alert("드래그 실행");
+    },[])
     // let loginUserName = "";
     // console.log(rtcUserName+"이게 넘어온 이름")
 
@@ -522,36 +536,37 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
 
     return (
         <main role="main" className="container-fluid text-center">
-            <h1>ChatForYOU with WebRTC</h1>
-            <div className="col-lg-12 mb-3">
-                <div className="mb-3">Local User Id</div>
-                <div className="col-lg-12 mb-3">
-                    <div className="d-flex justify-content-around mb-3">
-                        <div id="buttons" className="row">
-                            <ButtonGroup className="mr-2">
-                                <Button onClick={toggleVideo} outline color="success" id="video_off">Video
-                                    On/Off</Button>
-                            </ButtonGroup>
-                            <ButtonGroup className="mr-2">
-                                <Button onClick={toggleAudio} outline color="success" id="audio_off">Audio
-                                    On/Off</Button>
-                            </ButtonGroup>
-                            <Button onClick={exitRoom} outline color="danger" id="exit" name="exit">
-                                Exit Room
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+            <RtcChatDrag onClose={handleDragClose} localVideo={localVideo} remoteVideo={remoteVideo} show={rtcChatDrag} localRoom={localRoom} toggleVideo={toggleVideo} toggleAudio={toggleAudio} exitRoom={exitRoom}></RtcChatDrag>
+            {/*<h1>ChatForYOU with WebRTC</h1>*/}
+            {/*<div className="col-lg-12 mb-3">*/}
+            {/*    <div className="mb-3">Local User Id</div>*/}
+            {/*    <div className="col-lg-12 mb-3">*/}
+            {/*        <div className="d-flex justify-content-around mb-3">*/}
+            {/*            <div id="buttons" className="row">*/}
+            {/*                <ButtonGroup className="mr-2">*/}
+            {/*                    <Button onClick={toggleVideo} outline color="success" id="video_off">Video*/}
+            {/*                        On/Off</Button>*/}
+            {/*                </ButtonGroup>*/}
+            {/*                <ButtonGroup className="mr-2">*/}
+            {/*                    <Button onClick={toggleAudio} outline color="success" id="audio_off">Audio*/}
+            {/*                        On/Off</Button>*/}
+            {/*                </ButtonGroup>*/}
+            {/*                <Button onClick={exitRoom} outline color="danger" id="exit" name="exit">*/}
+            {/*                    Exit Room*/}
+            {/*                </Button>*/}
+            {/*            </div>*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
 
-                <div className="row justify-content-around mb-3">
-                    <div className="col-lg-6 mb-3">
-                        <video id="local_video" ref={localVideo} autoPlay playsInline></video>
-                    </div>
-                    <div className="col-lg-6 mb-3">
-                        <video id="remote_video" ref={remoteVideo} autoPlay playsInline></video>
-                    </div>
-                </div>
-            </div>
+            {/*    <div className="row justify-content-around mb-3">*/}
+            {/*        <div className="col-lg-6 mb-3">*/}
+            {/*            /!*<video id="local_video" ref={localVideo} autoPlay playsInline></video>*!/*/}
+            {/*        </div>*/}
+            {/*        <div className="col-lg-6 mb-3">*/}
+            {/*            /!*<video id="remote_video" ref={remoteVideo} autoPlay playsInline></video>*!/*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*</div>*/}
         </main>
     );
 };

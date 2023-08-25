@@ -102,12 +102,16 @@ const Home = React.memo(() => {
         const [oneOnOneUserNickName, setOneOnOneUserNickName] = useState('');
         const [randomChatDrag, setRandomChatDrag] = useState(false);
         const [oneononeChatDrag, setOneononeChatDrag] = useState(false);
+        const [rtcChatDrag, setRtcChatDrag] = useState(false);
         //드래그 이벤트
         const handleShowDrag = () => {
             setShowDrag(true);
         };
         const handleRandomShowDrag = () => {
             setRandomChatDrag(true);
+        };
+        const handleRtcShowDrag = () => {
+            setShowRtcChat(true);
         };
         const isOneOnOneChatDiv = (isDiv, userId, userNickName) => {
             setOneononeChatDrag(isDiv);
@@ -123,6 +127,9 @@ const Home = React.memo(() => {
         };
         const handleOneOnOneShowDragClose = () => {
             setOneononeChatDrag(false);
+        };
+        const handleRtcShowDragClose = () => {
+            setRtcChatDrag(false);
         };
         //계정 기억 상태 변수
         const [rememberAccount, setRememberAccount] = useState(false);
@@ -1074,7 +1081,7 @@ const handleGrandchildData = (data) => {
 
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat} type2={type2} setType2={setType2}/>}
+                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat} type2={type2} setType2={setType2} onClose={handleRtcShowDragClose}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={showRtcVoiceChat}>

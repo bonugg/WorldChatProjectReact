@@ -49,7 +49,7 @@ const MenuPanel = styled.div`
   overflow-y: hidden;
   overflow-x: hidden;
   transition: all 0.25s ease-in-out;
-  border-radius: 10px;
+  border-radius: 10px;g
   background: rgba(255, 255, 255, 0.5);
 `;
 
