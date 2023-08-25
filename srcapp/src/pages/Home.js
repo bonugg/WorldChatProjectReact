@@ -20,6 +20,7 @@ import FreindsList from './FreindsList';
 import PasswordChange from './PasswordChange';
 import ChatComponent from "../components/rtc/rtcChat";
 import ChatVoiceComponent from "../components/rtc/rtcVoiceChat"
+import UserListContext from '../context/UserListContext';
 import SockJS from 'sockjs-client';
 // import socket from "ws/lib/websocket";
 
@@ -197,6 +198,9 @@ const Home = React.memo(() => {
         // }
         const [socket, setSocket] = useState(null);
 
+        //friendList Context API
+        const [userList, setUserList] = useState([]);
+
         // let socket;
         useEffect(() => {
             if (socket) {
@@ -333,7 +337,7 @@ useEffect(() => {
     if (userName) {
         //const ws = new WebSocket(`wss://localhost:9002/test`)
 
-        const ws = new WebSocket(`wss://192.168.0.11:9002/test?userName=${userName}`);
+        const ws = new WebSocket(`wss://192.168.0.48:9002/test?userName=${userName}`);
         console.log("새로고침" + userName);
         setRtcUserName(userName);
 
@@ -431,7 +435,7 @@ const handleGrandchildData = (data) => {
                 
                 if(username){
                 //const ws = new WebSocket(`wss://localhost:9002/test`)
-                const ws = new WebSocket(`wss://192.168.0.11:9002/test?userName=${userName}`);
+                const ws = new WebSocket(`wss://192.168.0.48:9002/test?userName=${userName}`);
 
                 setSocket(ws)
                 // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
@@ -954,6 +958,8 @@ const handleGrandchildData = (data) => {
             );
         }
 
+        console.log("home userList" + userList);
+
         return (
             <div className={"full"}>
                 <Suspense fallback={<Fallback/>}>
@@ -996,7 +1002,9 @@ const handleGrandchildData = (data) => {
                                 logoutApi={logoutApi}
                             />
                         </DivStyledMenu>
+
                         <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
+                        <UserListContext.Provider value={{ userList, setUserList }}>
                             <FreindsList
                                 onData={handleGrandchildData}
                                 setChatType={setChatType}
@@ -1005,8 +1013,10 @@ const handleGrandchildData = (data) => {
                                 logoutApi3={logoutApi3}
                                 isOneOnOneChatDiv={isOneOnOneChatDiv}
                             />
+                        </UserListContext.Provider>
                             {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>
+
                         <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"}
                                    ref={passwordChangeDivRef}>
                             <PasswordChange
@@ -1071,9 +1081,11 @@ const handleGrandchildData = (data) => {
                             {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat} type2={type2} setType2={setType2}/>}
                         </DivStyledMenu>
 
-                        <DivStyledMenu visible={showRtcVoiceChat}>
-                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcVoiceChat={setShowRtcVoiceChat} type2={type2} setType2={setType2}/>}
-                        </DivStyledMenu>
+                        <UserListContext.Provider value={{ userList, setUserList }}>
+                            <DivStyledMenu visible={showRtcVoiceChat}>
+                                {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcVoiceChat={setShowRtcVoiceChat} type2={type2} setType2={setType2}/>}
+                            </DivStyledMenu>
+                        </UserListContext.Provider>
 
                         <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
                             {/* Content inside the loginDiv */}
@@ -1262,6 +1274,7 @@ const handleGrandchildData = (data) => {
                 </Suspense>
             </div>
         );
+
     })
 ;
 
