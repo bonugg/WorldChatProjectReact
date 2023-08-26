@@ -323,7 +323,9 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
             if (socket != null) {
                 socket.close();
             }
+
             // getMedia(mediaDisconnection);
+
         }
     }
 
