@@ -123,7 +123,8 @@ const ChatRoom4 = () => {
             },
             connectHeaders: {
                 Authorization: `${localStorage.getItem('Authorization')}`,
-                roomId: roomId
+                roomId: roomId,
+                chatType : "friendsChat"
             },
             onStompError: (frame) => {
                 console.error("에러러어어어ㅓ엉")
