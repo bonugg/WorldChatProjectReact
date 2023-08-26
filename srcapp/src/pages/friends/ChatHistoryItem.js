@@ -1,9 +1,12 @@
 const ChatHistoryItem = ({ chats, downloadFile }) => {
-    const {sender, message, createdAt, s3DataUrl, fileName, fileDir } = chats;
+    const {sender, message, createdAt, s3DataUrl, fileName, fileDir, checkRead, id } = chats;
 
     return (
         <div>
-            <div>{createdAt}<br/>{sender} : {message}</div>
+            <div>
+                {id}
+                {checkRead ? "읽음" : "안읽음"}
+                <br/>{createdAt}<br/>{sender} : {message}</div>
             {s3DataUrl && (
                 <div>
                     {fileName.match(/\.(jpg|jpeg|png|gif)$/i)
@@ -20,8 +23,3 @@ const ChatHistoryItem = ({ chats, downloadFile }) => {
 };
 
 export default ChatHistoryItem;
-
-
-
-
-

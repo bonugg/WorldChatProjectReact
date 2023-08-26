@@ -1,74 +1,152 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState, useEffect} from 'react';
 
 import Button from "@mui/material/Button";
 import "./css/FreindsList.css";
 import Profile from "../img/profile.png";
 // import rtcConnect from "../components/rtc/rtcChat"
 import styled, {keyframes} from "styled-components";
+import ChatIcon from '@mui/icons-material/Chat';
+import VideoChatIcon from '@mui/icons-material/VideoChat';
+import PhoneIcon from '@mui/icons-material/Phone';
+import axios from "axios";
+import ClearIcon from "@mui/icons-material/Clear";
 
 const slideDown = keyframes`
-0% {
-  transform: scale(0);
-}
-100% {
-  transform: scale(1);
-}
+  0% {
+    width: 0px;
+    height: 0px;
+  }
+  100% {
+    width: 100%;
+    height: 90px;
+  }
+`;
+const slideUp = keyframes`
+  0% {
+    width: 100%;
+    height: 90px;
+    opacity: 1;
+  }
+  100% {
+    width: 0px;
+    height: 0px;
+    opacity: 0;
+  }
 `;
 
 const DivStyledMenu = styled.div`
-visibility: ${props => props.visible ? 'visible' : 'hidden'};
-animation: ${props => props.visible ? slideDown : ""} 0.35s ease-in-out;
-position: absolute;
-left: 50%;
-top: 50%;
-transform-origin: center;
-transform: ${props => props.visible ? 'translate(-50%, -50%) scaleY(1)' : 'translate(-50%, -50%) scaleY(0)'};
+  visibility: ${props => (props.visible ? "visible" : "")};
+  animation: ${props => (props.visible ? slideDown : slideUp)} 0.35s ease-in-out;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: ${props => (props.visible ? "100%" : "0px")};
+  height: ${props => (props.visible ? "90px" : "0px")};
+  transform-origin: center;
+  padding: 0px 10px;
+  transition: width 0.25s ease-in-out, height 0.25s ease-in-out;
+  z-index: ${props => (props.visible ? "2" : "0")};
+  opacity: ${props => (props.visible ? "1" : "0")};
 `;
+const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setChatType}) => {
+    const {id, user, friends, statement} = frd;
+    const [deleteDiv, setDeleteDiv] = useState(false);
+    const [statements, setStatements] = useState(false);
 
-const FreindsListItem = React.memo(({user, friendsChatDiv,onData,setChatType}) => {
-    const {userId, userName, userNickName, userProfileName} = user;
     const friendsChatDivOn = (userId, userNickName) => {
         friendsChatDiv(true, userId, userNickName);
     };
 
     const Rtc = (type) => {
-        console.log("이름"+userName);
-        onData(userName);
+        console.log("이름" + friends.userName);
+        onData(friends.userName);
         setChatType(type);
-       
-    }
 
-        return (
+    }
+    const deleteDivStart = () => {
+        setDeleteDiv(true);
+    }
+    const deleteCancle = () => {
+        setDeleteDiv(false);
+    }
+    const deleteFriend = useCallback((e) => {
+        const deleteFriendAxios = async () => {
+            try {
+                const response = await axios.post('/friends/delete-friends', {userId: friends.userId},
+                    {
+                        headers: {
+                            "Authorization": localStorage.getItem("Authorization"),
+                        }
+                    });
+                console.log(response);
+                console.log(response.data);
+                console.log(response.data.item);
+                if (response.data.item.msg == "delete ok") {
+                    setStatements(true);
+                    setTimeout(() => onRemove(id), 1000);  // Add this line
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        deleteFriendAxios();
+    }, [onRemove]);
+
+    return (
         <div className={"friendsList_item_div"}>
-            <div className={"friendsList_item_div2"}>
+            <DivStyledMenu visible={deleteDiv}>
+                <div className={statements ? "friendsList_delete_div" : "friendsList_delete_div2"}>
+                        <span className={"friend_del_text"}>
+                            delete your friend?
+                        </span>
+                    <Button
+                        onClick={deleteFriend}
+                        className={"friend_del_yes_btn"}
+                    >
+                        Delete
+                    </Button>
+                    <Button
+                        onClick={deleteCancle}
+                        className={"friend_del_cancle_btn"}
+                    >
+                        Cancle
+                    </Button>
+                </div>
+            </DivStyledMenu>
+            <div className={deleteDiv ? "friendsList_item_div2" : "friendsList_item_div3"}>
+                <Button
+                    onClick={deleteDivStart}
+                    className={"friend_del_btn"}
+                >
+                </Button>
                 <div className={"friendsList_item_img"}
                 >
                     <img
                         className={"myPageDiv_profile_img2"}
-                        src={userProfileName ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/"+ userProfileName : Profile}
+                        src={friends.userProfileName ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + friends.userProfileName : Profile}
                     />
                 </div>
                 <div className={"friendsList_item_nickname"}>
-                    <span className={"friendsList_item_nickname_text"}>{userNickName}</span>
+                    <span className={"friendsList_item_nickname_text"}>{friends.userNickName}</span>
                 </div>
                 <div className={"friendsList_item_btn_div"}>
                     <Button
                         className={"friendsList_item_btn"}
-                        onClick={() => friendsChatDivOn(userId, userNickName)}
+                        onClick={() => friendsChatDivOn(friends.userId, friends.userNickName)}
                     >
-                        1:1 Chat
+                        <ChatIcon/>
                     </Button>
                     <Button
-                    onClick={() => Rtc("video")} 
-                         className={"friendsList_item_btn2"}
+                        onClick={() => Rtc("video")}
+                        className={"friendsList_item_btn2"}
                     >
-                        Video Chat
+                        <VideoChatIcon/>
                     </Button>
                     <Button
-                       onClick={() => Rtc("voice")}  
-                       className={"friendsList_item_btn2"}
+                        onClick={() => Rtc("voice")}
+                        className={"friendsList_item_btn2"}
                     >
-                        Voice Chat
+                        <PhoneIcon/>
                     </Button>
                 </div>
             </div>

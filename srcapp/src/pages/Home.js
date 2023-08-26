@@ -13,6 +13,7 @@ import Logo from "../img/logo.png";
 import Background from "../img/background.jpg";
 import Logo_no_text from "../img/logo_no_text.png";
 import Logo_text from "../img/logo_text.png";
+import Black from "../assets/textures/black.png";
 
 import Earth from "../components/earth/index";
 import MyPage from './MyPage';
@@ -28,15 +29,13 @@ import RandomChatDrag from "./RandomChatDrag";
 import OneOnOneChatDrag from "./OneOnOneChatDrag";
 
 const CanvasContainer = styled.div`
-  width: 100%;
+  width: calc(100% - 300px);
   height: 100%;
-  //background: rgba(50, 50, 50, 0.3);
+
   overflow: hidden;
-    // background-image: url(${Background});
-  // background-repeat: no-repeat;
-  // background-position: top center;
-  // background-size: cover;
-  // background-attachment: fixed;
+  background-image: url('//unpkg.com/three-globe/example/img/night-sky.png');
+  background-repeat: no-repeat;
+  background-size: cover;
 `;
 
 const slideDown = keyframes`
@@ -103,17 +102,27 @@ const Home = React.memo(() => {
         const [oneOnOneUserNickName, setOneOnOneUserNickName] = useState('');
         const [randomChatDrag, setRandomChatDrag] = useState(false);
         const [oneononeChatDrag, setOneononeChatDrag] = useState(false);
+
+        const [FrdId, setFrdId] = useState('');
+        const [FrdId2, setFrdId2] = useState('');
         //드래그 이벤트
         const handleShowDrag = () => {
             setShowDrag(true);
         };
         const handleRandomShowDrag = () => {
+            console.log("!");
             setRandomChatDrag(true);
         };
         const isOneOnOneChatDiv = (isDiv, userId, userNickName) => {
             setOneononeChatDrag(isDiv);
             setOneOnOneUserId(userId);
             setOneOnOneUserNickName(userNickName);
+        };
+        const removeItemFromHomeComponent = (id) => {
+            setFrdId(id);
+        };
+        const removeItemFromHomeComponent2 = (id) => {
+            setFrdId2(id);
         };
 
         const handleDragClose = () => {
@@ -132,6 +141,7 @@ const Home = React.memo(() => {
         const [isLoginZoom, setIsLoginZoom] = useState(false);
         const [isSignUpZoom, setIsSignUpZoom] = useState(false);
         const [isMapageZoom, setIsMapageZoom] = useState(false);
+        const [isHomeZoom, setIsHomeZoom] = useState(false);
         const [LoginZoom, setLoginZoom] = useState(0);
         const [mouseLock, setMouseLock] = useState(false);
 
@@ -144,6 +154,7 @@ const Home = React.memo(() => {
         const [FriendsList, setFriendsList] = useState(false);
         //도시 클릭 시 나라 이름 출력
         const [FriendNationally, setFriendNationally] = useState('');
+        const [FriendListApi, setFriendListApi] = useState(false);
 
         //로그인 및 회원가입 화면 창 띄우기
         const [LoginDiv, setLoginDiv] = useState(false);
@@ -186,7 +197,7 @@ const Home = React.memo(() => {
 
         // rtc
         const [showRtcChat, setShowRtcChat] = useState(false); // RtcChat 상태를 boolean으로 관리
-        const [showRtcVoiceChat,setShowRtcVoiceChat] = useState(false);
+        const [showRtcVoiceChat, setShowRtcVoiceChat] = useState(false);
         const [rtcUserName, setRtcUserName] = useState(null);
         const [sendUser, setSendUser] = useState(null);
         const [receiverUser, setReceiverUser] = useState(null);
@@ -206,7 +217,7 @@ const Home = React.memo(() => {
                         setSendUser(receivedMessage.split("님이")[0]);
                         console.log(setSendUser + "님이 걸었음");
                         setReceiverUser(rtcUserName);
-                        
+
                         if (receivedMessage.includes("영상통화")) {
                             setShowRtcChat(true);
                             setShowRtcVoiceChat(false);
@@ -215,13 +226,13 @@ const Home = React.memo(() => {
                             setShowRtcChat(false);
                         }
 
-                        //아래는 석이 됬 됐 
+                        //아래는 석이 됬 됐
 
-                    // if (window.confirm(`Received message: ${event.data}`)) {
-                    //     setSendUser(event.data.split("님이")[0]);
-                    //     setReceiverUser(rtcUserName);
-                    //     console.log("수신자 화면에서 나옴");
-                    //     setShowRtcChat(true);
+                        // if (window.confirm(`Received message: ${event.data}`)) {
+                        //     setSendUser(event.data.split("님이")[0]);
+                        //     setReceiverUser(rtcUserName);
+                        //     console.log("수신자 화면에서 나옴");
+                        //     setShowRtcChat(true);
 
                     }
                 };
@@ -246,6 +257,10 @@ const Home = React.memo(() => {
         const FriendsNationally = (newValue) => {
             setFriendNationally(newValue);
         };
+        const FriendListApiOn = (newValue) => {
+            setFriendListApi(newValue);
+        };
+
         const logoutApi = (newValue) => {
             if (newValue) {
                 logout();
@@ -288,7 +303,7 @@ const Home = React.memo(() => {
         };
 
         // 아래는 석이 거
-        
+
         // const [type2, setType2] = useState('');
 
         // const handleGrandchildData = async (data) => {
@@ -320,92 +335,85 @@ const Home = React.memo(() => {
         const [dataFromChild, setDataFromChild] = useState(null);
         const [type2, setType2] = useState('');
 
-useEffect(() => {
-    if (type2) {
-        sendRequestToServer();
-        console.log('유즈이펙트' + type2);
-    }
-}, [type2]); 
-
-
-useEffect(() => {
-    const userName = localStorage.getItem('userName');
-    if (userName) {
-        //const ws = new WebSocket(`wss://localhost:9002/test`)
-        const ws = new WebSocket(`wss://192.168.0.4:9002/test?userName=${userName}`);
-        console.log("새로고침" + userName);
-        setRtcUserName(userName);
-
-        ws.onopen = (event) => {
-            console.log("WebSocket 연결 성공:", event);
-        };
-
-        ws.onmessage = (event) => {
-            console.log("서버로부터 메시지 수신:", event.data);
-        };
-
-        ws.onerror = (event) => {
-            console.error("WebSocket 오류 발생:", event);
-        };
-
-        ws.onclose = (event) => {
-            console.log("WebSocket 연결 종료:", event);
-        };
-
-        setSocket(ws);
-    }
-}, []);  // 이 배열이 비어 있으므로 이 useEffect는 컴포넌트가 마운트될 때만 실행됩니다.
-
-
-
-
-
-
-
-
-const sendRequestToServer = async () => {
-    try {
-        const response = await fetch('/webrtc/request', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                sender: localStorage.getItem('userName'),
-                receiver: receiverUser,
-                type:type2
-            })
-        });
-
-        if (response.ok) {
-            console.log(type2+"타입ㅂㅂㅂㅂㅂㅂㅂㅂ");
-            if (type2 === "video") {
-                console.log("비디오테스트");
-                setShowRtcChat(true);
-                setShowRtcVoiceChat(false);
-            } else if (type2 === "voice") {
-                setShowRtcVoiceChat(true);
-                setShowRtcChat(false);
+        useEffect(() => {
+            if (type2) {
+                sendRequestToServer();
+                console.log('유즈이펙트' + type2);
             }
-        } else {
-            throw new Error(`Logout failed with status: ${response.status}`);
-        }
-    } catch (error) {
-        console.error("Error during logout:", error);
-    }
-};
+        }, [type2]);
 
-const setChatType = (type) => {
-    setType2(type);
-};
 
-const handleGrandchildData = (data) => {
-    console.log(data+"1232132121");
-    setDataFromChild(data);
-    setReceiverUser(data);
-    setSendUser(rtcUserName);
-};
+        useEffect(() => {
+            const userName = localStorage.getItem('userName');
+            if (userName) {
+                //const ws = new WebSocket(`wss://localhost:9002/test`)
+                const ws = new WebSocket(`wss://192.168.0.4:9002/test?userName=${userName}`);
+                console.log("새로고침" + userName);
+                setRtcUserName(userName);
 
+                ws.onopen = (event) => {
+                    console.log("WebSocket 연결 성공:", event);
+                };
+
+                ws.onmessage = (event) => {
+                    console.log("서버로부터 메시지 수신:", event.data);
+                };
+
+                ws.onerror = (event) => {
+                    console.error("WebSocket 오류 발생:", event);
+                };
+
+                ws.onclose = (event) => {
+                    console.log("WebSocket 연결 종료:", event);
+                };
+
+                setSocket(ws);
+            }
+        }, []);  // 이 배열이 비어 있으므로 이 useEffect는 컴포넌트가 마운트될 때만 실행됩니다.
+
+
+        const sendRequestToServer = async () => {
+            try {
+                const response = await fetch('/webrtc/request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sender: localStorage.getItem('userName'),
+                        receiver: receiverUser,
+                        type: type2
+                    })
+                });
+
+                if (response.ok) {
+                    console.log(type2 + "타입ㅂㅂㅂㅂㅂㅂㅂㅂ");
+                    if (type2 === "video") {
+                        console.log("비디오테스트");
+                        setShowRtcChat(true);
+                        setShowRtcVoiceChat(false);
+                    } else if (type2 === "voice") {
+                        setShowRtcVoiceChat(true);
+                        setShowRtcChat(false);
+                    }
+                } else {
+                    throw new Error(`Logout failed with status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error("Error during logout:", error);
+            }
+        };
+
+        const setChatType = (type) => {
+            setType2(type);
+        };
+
+        const handleGrandchildData = (data) => {
+            console.log(data + "1232132121");
+            setDataFromChild(data);
+            setReceiverUser(data);
+            setSendUser(rtcUserName);
+        };
 
 
         //로그인 로직
@@ -427,30 +435,30 @@ const handleGrandchildData = (data) => {
                 localStorage.setItem('userName', userName);
                 console.log("로그인 사용자: " + userName);
                 setRtcUserName(userName);
-                
-                if(username){
-                //const ws = new WebSocket(`wss://localhost:9002/test`)
-                const ws = new WebSocket(`wss://192.168.0.4:9002/test?userName=${userName}`);
 
-                setSocket(ws)
-                // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
-                ws.onopen = (event) => {
-                    console.log("WebSocket 연결 성공:", event);
-                };
+                if (username) {
+                    //const ws = new WebSocket(`wss://localhost:9002/test`)
+                    const ws = new WebSocket(`wss://192.168.0.4:9002/test?userName=${userName}`);
 
-                // 다른 이벤트 리스너들도 추가할 수 있습니다.
-                ws.onmessage = (event) => {
-                    console.log("서버로부터 메시지 수신:", event.data);
-                };
+                    setSocket(ws)
+                    // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
+                    ws.onopen = (event) => {
+                        console.log("WebSocket 연결 성공:", event);
+                    };
 
-                ws.onerror = (event) => {
-                    console.error("WebSocket 오류 발생:", event);
-                };
+                    // 다른 이벤트 리스너들도 추가할 수 있습니다.
+                    ws.onmessage = (event) => {
+                        console.log("서버로부터 메시지 수신:", event.data);
+                    };
 
-                ws.onclose = (event) => {
-                    console.log("WebSocket 연결 종료:", event);
-                };
-            }
+                    ws.onerror = (event) => {
+                        console.error("WebSocket 오류 발생:", event);
+                    };
+
+                    ws.onclose = (event) => {
+                        console.log("WebSocket 연결 종료:", event);
+                    };
+                }
 
                 // setSocket(ws);
                 // 페이지 이동
@@ -957,18 +965,84 @@ const handleGrandchildData = (data) => {
             <div className={"full"}>
                 <Suspense fallback={<Fallback/>}>
                     <div className={"fullScreen"}>
-                        <img
-                            onClick={home}
-                            className={`logo_main`}
+                        <RandomChatDrag show={randomChatDrag} logoutApiCate={logoutApiCate}
+                                        onClose={handleRandomShowDragClose}/>
+                        <OneOnOneChatDrag show={oneononeChatDrag} oneOnOneUserId={oneOnOneUserId}
+                                          oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
+                                          onClose={handleOneOnOneShowDragClose}/>
+                        <CateChatDrag show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
+                        <aside
+                            className={`side-bar`}
                             style={isLoading ? {display: "none"} : {}}
-                            src={Logo_no_text}
-                        ></img>
-                        <img
-                            onClick={home}
-                            className={`logo_main_text`}
-                            style={isLoading ? {display: "none"} : {}}
-                            src={Logo_text}
-                        ></img>
+                        >
+                            <div className={"logo_div"}>
+                                <img
+                                    onClick={home}
+                                    className={`logo_main_text`}
+                                    style={isLoading ? {display: "none"} : {}}
+                                    src={Logo_text}
+                                ></img>
+                            </div>
+
+                            <section className="side-bar__icon-box">
+                                <section className="side-bar__icon-1">
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                </section>
+                            </section>
+                            <ul>
+                                <li className="menu_li"
+                                    onClick={home}
+                                    style={{marginTop: '10px', border: '0px solid #222526', borderTopWidth: '1px'}}
+                                >
+                                    <span style={{color: '#FFBD1F'}}>H</span>ome
+                                </li>
+                                {loggedIn ? (
+                                    <>
+                                        <li className="menu_li" onClick={mypage}>
+                                            <span style={{color: '#FFBD1F'}}>M</span>yPage
+                                        </li>
+                                        <li className="menu_li">
+                                            <span style={{color: '#FFBD1F'}}>C</span>hat
+                                            <ul className="menu_li">
+                                                <li onClick={handleRandomShowDrag}
+                                                    className={"menu_li_sub"}
+                                                >Random Chat
+                                                </li>
+                                                <li onClick={handleShowDrag}
+                                                    className={"menu_li_sub"}
+                                                >Category Chat
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li className="menu_li"
+                                            onClick={logout}
+                                        >
+                                            <span style={{color: '#FFBD1F'}}>L</span>ogout
+                                        </li>
+                                    </>
+                                ) : (
+                                    <>
+                                        <li className="menu_li" onClick={login}>
+                                            <span style={{color: '#FFBD1F'}}>L</span>ogin
+                                        </li>
+                                        <li className="menu_li"
+                                            onClick={signup}
+                                        >
+                                            <span style={{color: '#FFBD1F'}}>S</span>ignUp
+                                        </li>
+                                    </>
+                                )}
+                                <div className={"foot"}>
+                                    <span className={"foot_text"}>@2023 WWC, Inc</span>
+                                </div>
+
+                            </ul>
+                        </aside>
+                        {/*<div style={{width : '300px', height: '100%'}}>*/}
+
+                        {/*</div>*/}
                         <CanvasContainer>
                             <Canvas>
                                 <CameraControl targetPosition={targetPosition} cameraPosition={cameraPosition}/>
@@ -984,6 +1058,9 @@ const handleGrandchildData = (data) => {
                                     FriendsList={FriendsList}
                                     isFriendsListZoom={isFriendsListZoom}
                                     FriendsNationally={FriendsNationally}
+                                    FriendListApiOn={FriendListApiOn}
+                                    FrdId={FrdId}
+                                    FrdId2={FrdId2}
                                 />
                             </Canvas>
                         </CanvasContainer>
@@ -993,6 +1070,7 @@ const handleGrandchildData = (data) => {
                                 MyPageDiv={MyPageDiv}
                                 onPasswordChange={onPasswordChange}
                                 logoutApi={logoutApi}
+                                onRemove={removeItemFromHomeComponent}
                             />
                         </DivStyledMenu>
                         <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
@@ -1001,8 +1079,10 @@ const handleGrandchildData = (data) => {
                                 setChatType={setChatType}
                                 FriendsList={FriendsList}
                                 FriendNationally={FriendNationally}
+                                FriendListApi={FriendListApi}
                                 logoutApi3={logoutApi3}
                                 isOneOnOneChatDiv={isOneOnOneChatDiv}
+                                onRemove={removeItemFromHomeComponent2}
                             />
                             {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>
@@ -1067,11 +1147,15 @@ const handleGrandchildData = (data) => {
 
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat} type2={type2} setType2={setType2}/>}
+                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser}
+                                                           setShowRtcChat={setShowRtcChat} type2={type2}
+                                                           setType2={setType2}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={showRtcVoiceChat}>
-                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcVoiceChat={setShowRtcVoiceChat} type2={type2} setType2={setType2}/>}
+                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser}
+                                                                     setShowRtcVoiceChat={setShowRtcVoiceChat} type2={type2}
+                                                                     setType2={setType2}/>}
                         </DivStyledMenu>
 
                         <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
@@ -1156,10 +1240,6 @@ const handleGrandchildData = (data) => {
                                                     {/* 필리핀 추가 */}
                                                     <MenuItem className={"menu_li_select"} value="RU">RU</MenuItem>
                                                     {/* 러시아 추가 */}
-                                                    <MenuItem className={"menu_li_select"} value="TW">TW</MenuItem>
-                                                    {/* 대만 추가 */}
-                                                    <MenuItem className={"menu_li_select"} value="UA">UA</MenuItem>
-                                                    {/* 우크라이나 추가 */}
                                                     <MenuItem className={"menu_li_select"} value="AU">AU</MenuItem>
                                                     {/* 호주 추가 */}
                                                     <MenuItem className={"menu_li_select"} value="IT">IT</MenuItem>
@@ -1191,72 +1271,7 @@ const handleGrandchildData = (data) => {
                                 </div>
                             </div>
                         </DivStyledMenu>
-                        <aside
-                            className={`side-bar`}
-                            style={isLoading ? {display: "none"} : {}}
-                        >
-                            <section className="side-bar__icon-box">
-                                <section className="side-bar__icon-1">
-                                    <div></div>
-                                    <div></div>
-                                    <div></div>
-                                </section>
-                            </section>
-                            <ul>
-                                <li className="menu_li"
-                                    style={{marginTop: '20px'}}
-                                >
-                                    <a className="menu_a" onClick={home}>Home</a>
-                                </li>
-                                <li className="menu_li">
-                                    {/*<a className="menu_a" onClick={Rtc}>Test</a>*/}
-                                </li>
-                                {loggedIn ? (
-                                    <>
-                                        <li className="menu_li">
-                                            <a className="menu_a" id="menu_a2" onClick={mypage}>MyPage
-                                            </a>
-                                        </li>
-                                        <li className="menu_li">
-                                            <a className="menu_a">Chat</a>
-                                            <ul className="menu_li">
-                                                <li onClick={handleRandomShowDrag}
-                                                    className={"menu_li_sub"}
-                                                >
-                                                    Random Chat
-                                                </li>
-                                                <li onClick={handleShowDrag}
-                                                    className={"menu_li_sub"}
-                                                >
-                                                    Category Chat
-                                                </li>
-                                            </ul>
-                                        </li>
-                                        <li className="menu_li">
-                                            <a className="menu_a" id="menu_a2" onClick={logout}>Logout
-                                            </a>
-                                        </li>
-                                    </>
-                                ) : (
-                                    <>
-                                        <li className="menu_li">
-                                            <a className="menu_a" id="menu_a2" onClick={login}>Login
-                                            </a>
-                                        </li>
-                                        <li className="menu_li">
-                                            <a className="menu_a" onClick={signup}>SignUp</a>
-                                        </li>
-                                    </>
-                                )}
-                            </ul>
-                        </aside>
                         {/* 드래그 채팅창 사이드 밖 영역 */}
-                        <RandomChatDrag show={randomChatDrag} logoutApiCate={logoutApiCate}
-                                        onClose={handleRandomShowDragClose}/>
-                        <OneOnOneChatDrag show={oneononeChatDrag} oneOnOneUserId={oneOnOneUserId} oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
-                                          onClose={handleOneOnOneShowDragClose}/>
-                        <CateChatDrag show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
-
                     </div>
                 </Suspense>
             </div>

@@ -13,6 +13,7 @@ import "./css/CateChat.css";
 import CateChatListItem from './CateChatListItem';
 import styled, {keyframes} from "styled-components";
 import axios from "axios";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 
 const MessageStyled = styled.p`
 `;
@@ -1045,7 +1046,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                         onClick={() => downloadFile(message.fileName, message.fileDir)}
                                                                                         className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn" : "downBtn2"}
                                                                                     >
-                                                                                        D
+                                                                                        <FileDownloadIcon/>
                                                                                     </Button> {/* 다운로드 버튼 */}
                                                                                 </div>
                                                                             )}
@@ -1084,7 +1085,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                         onClick={() => downloadFile(message.fileName, message.fileDir)}
                                                                                         className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn_other" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn_other" : "downBtn_other2"}
                                                                                     >
-                                                                                        D
+                                                                                        <FileDownloadIcon/>
                                                                                     </Button> {/* 다운로드 버튼 */}
                                                                                 </div>
                                                                             )}
@@ -1313,7 +1314,8 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                     position: 'absolute',
                                     left: '50%',
                                     bottom: '80px',
-                                    transform: 'translateX(-50%)',
+                                    transform: 'translateX(calc(-50% + 150px))', // 수정된 부분
+                                    zIndex: '2',
                                 }}
                                 className={"maximum_btn"}
                             >

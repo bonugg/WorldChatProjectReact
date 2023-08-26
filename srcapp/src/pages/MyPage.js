@@ -6,9 +6,10 @@ import "./css/Mypage.css";
 import home from "./Home";
 import axios from "axios";
 import FriendsReceivedListItem from "./FriendsReceivedListItem";
+import FriendsRequestedListItem from "./FriendsRequestedListItem";
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) => {
 
-
-const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
         //마이페이지
         const [MypageuserName, setMypageuserName] = useState('');
         const [MypageuserNickName, setMypageuserNickName] = useState('');
@@ -26,7 +27,7 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
         const [friendsRequesteddOnClick, setFriendsRequesteddOnClick] = useState(false);
 
         const [receivedList, setReceivedList] = useState([]);
-
+        const [requetedList, setRequestedList] = useState([]);
         const mypageOn = () => {
             setMypageOnClick(true);
             setFriendsReceivedOnClick(false);
@@ -46,8 +47,12 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
         //친구 요청을 승인하거나 거절한 항목 삭제
         const removeItemFromList = (id) => {
             console.log("아이디 출력 "+id)
-            console.log(receivedList);
             setReceivedList(prevList => prevList.filter(item => item.id != id));
+            onRemove(id);
+        }
+        const removeItemFromList2 = (id) => {
+            console.log("아이디 출력 "+id)
+            setRequestedList(prevList => prevList.filter(item => item.id != id));
         }
 
         useEffect(() => {
@@ -61,8 +66,6 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
                         });
                         console.log(response);
                         console.log(response.data.items);
-                        console.log(response.data.items[0].user);
-                        console.log(response.data.items[0].user.userName);
                         if(response.data && response.data.items) {
                             setReceivedList(() => response.data.items);
                         }
@@ -73,6 +76,27 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
                 getReceivedListAxios();
             }
         },[friendsReceivedOnClick]);
+
+        useEffect(() => {
+            if(friendsRequesteddOnClick){
+                const getRequestedListAxios = async() => {
+                    try {
+                        const response = await axios.get('/friends/requested-list', {
+                            headers: {
+                                Authorization: `${localStorage.getItem('Authorization')}`
+                            }
+                        });
+                        console.log(response);
+                        if(response.data && response.data.items) {
+                            setRequestedList(() => response.data.items);
+                        }
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }
+                getRequestedListAxios();
+            }
+        },[friendsRequesteddOnClick]);
 
 
 
@@ -124,6 +148,7 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
 
         useEffect(() => {
             if (MyPageDiv) {
+                mypageOn();
                 userInfo();
             }
         }, [MyPageDiv]);
@@ -281,7 +306,20 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
         };
 
         return (
-            <div className={"myPageDiv"}>
+            <div
+                 style={{
+                     position: 'fixed',
+                     top: '50%',
+                     left: '50%',
+                     transform: 'translate(-50%, -50%)',
+                     width: friendsReceivedOnClick || friendsRequesteddOnClick ? '450px ': '600px',
+                     height: friendsReceivedOnClick || friendsRequesteddOnClick ? '550px ': '650px',
+                     borderRadius: '0px 10px 10px 10px',
+                     border: '2px solid rgba(50, 50, 50, 0.9)',
+                     background: 'rgba(50, 50, 50, 0.7)',
+                     transition: 'width 0.25s ease-in-out, height 0.25s ease-in-out'
+                 }}
+            >
                 <Button
                     type={"button"}
                     className={mypageOnClick ? "menu_1_clicked" : "menu_1"}
@@ -390,14 +428,46 @@ const MyPage = React.memo(({onPasswordChange, MyPageDiv, logoutApi}) => {
                                 request received
                             </div>
                             <div className={"friendRecieved_div_2"}>
-                                    {receivedList && receivedList.map(r => (
-                                        <FriendsReceivedListItem key={r.id} list={r} onRemove={removeItemFromList}></FriendsReceivedListItem>
-                                    ))}
+                                {receivedList.length === 0 ?
+                                    (
+                                        <div className={"friendRecieved_div_3"}>
+                                            No Requests Received
+                                        </div>
+                                    ):(
+                                        <TransitionGroup>
+                                            {receivedList && receivedList.map(r => (
+                                                <CSSTransition key={r.id} timeout={500} classNames="item">
+                                                    <FriendsReceivedListItem list={r} onRemove={removeItemFromList}></FriendsReceivedListItem>
+                                                </CSSTransition>
+                                            ))}
+                                        </TransitionGroup>
+                                    )
+                                }
                             </div>
                         </div>
                     ): (
                         <div className={"friendRequested_clicked"}>
-                            친구요청리스트2
+                            <div className={"friendRecieved_clicked"}>
+                                <div className={"friendRecieved_div"}>
+                                    request sent
+                                </div>
+                                <div className={"friendRecieved_div_2"}>
+                                    {requetedList.length === 0 ?
+                                        (
+                                          <div className={"friendRecieved_div_3"}>No Request
+                                          </div>
+                                        ):(
+                                            <TransitionGroup>
+                                                {requetedList && requetedList.map(r => (
+                                                    <CSSTransition key={r.id} timeout={500} classNames="item">
+                                                        <FriendsRequestedListItem list={r} onRemove={removeItemFromList2}></FriendsRequestedListItem>
+                                                    </CSSTransition>
+                                                ))}
+                                            </TransitionGroup>
+                                        )
+                                    }
+                                </div>
+                            </div>
                         </div>
                     )
                 }

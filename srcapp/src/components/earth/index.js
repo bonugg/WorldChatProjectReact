@@ -12,6 +12,15 @@ import CloudsMap from "../../assets/textures/cloud.jpg";
 import {TextureLoader} from "three";
 import MarsMap from "../../assets/textures/mars.jpg";
 import SunMap from "../../assets/textures/sun.jpg";
+import KRMAP from "../../img/flag/KR.png";
+import USMAP from "../../img/flag/US.png";
+import CAMAP from "../../img/flag/CA.png";
+import ITMAP from "../../img/flag/IT.png";
+import JPMAP from "../../img/flag/JP.png";
+import RUMAP from "../../img/flag/RU.png";
+import AUMAP from "../../img/flag/AU.png";
+import PHMAP from "../../img/flag/PH.png";
+import CNMAP from "../../img/flag/CN.png";
 
 const Earth = React.memo(({
                               mainCamera,
@@ -21,19 +30,23 @@ const Earth = React.memo(({
                               loggedOut,
                               isMapageZoom,
                               isFriendsListZoom,
+                              FriendListApiOn,
                               FriendsNationally,
                               isLoginZoom,
                               isSignUpZoom,
+                              FrdId,
+                              FrdId2
                           }) => {
 
     const objectGroup = useRef();
-    const [mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
+    const [KR,US,CA,IT,JP,RU,AU,PH,CN,mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
         TextureLoader,
-        [Pluto_MadeMap, CloudsMap, EarthNightMap, EarthDayMap, EarthNormalMap, EarthSpecularMap, EarthCloudsMap, MarsMap, SunMap]
+        [KRMAP,USMAP,CAMAP,ITMAP,JPMAP,RUMAP,AUMAP,PHMAP,CNMAP,Pluto_MadeMap, CloudsMap, EarthNightMap, EarthDayMap, EarthNormalMap, EarthSpecularMap, EarthCloudsMap, MarsMap, SunMap]
     );
     //클릭 도시 이름 저장 변수
 
     const [FriendsNationally2, setFriendsNationally2] = useState('');
+    const [FriendsNationally3, setFriendsNationally3] = useState('');
     //onMouseDown잠금 상태 변수
     const [isOnMouseDownLock, setIsOnMouseDownLock] = useState(false);
     //onMouseDown잠금 상태 변수
@@ -72,22 +85,63 @@ const Earth = React.memo(({
     const nomarRef = useRef();
     const cloudsRefnomar = useRef();
 
+    const countryCoordinates = {
+        KR: { lat: 37.541, lng: 126.986 },
+        US: { lat: 40.60857, lng: -74.01559 },
+        CA: { lat: 45.42153, lng: -75.69719 },
+        JP: { lat: 35.652832, lng: 139.839478 },
+        CN: { lat: 39.90469, lng: 116.40717 },
+        PH: { lat: 14.609053, lng: 121.022256 },
+        RU: { lat: 55.755825, lng: 37.617298 },
+        TW: { lat: 25.0330, lng: 121.5654 },
+        UA: { lat: 50.4501, lng: 30.5234 },
+        AU: { lat: -35.2809, lng: 149.1300 },
+        IT: { lat: 41.902782, lng: 12.496366 }
+    };
+    const countryTextures = {
+        KR: KR,
+        US: US,
+        CA: CA,
+        IT: IT,
+        JP: JP,
+        RU: RU,
+        AU: AU,
+        PH: PH,
+        CN: CN
+    };
     useEffect(() => {
         if (isCityZoom) {
             isFriendsListZoom(true);
-            FriendsNationally(FriendsNationally2);
+            setFriendsNationally3(FriendsNationally2);
         } else {
             isFriendsListZoom(false);
         }
     }, [isCityZoom]);
 
     useEffect(() => {
+        if (clickedCity) {
+            if(FriendsNationally2 != FriendsNationally3){
+                FriendListApiOn(true);
+                FriendsNationally(FriendsNationally2);
+            }else {
+                FriendListApiOn(false);
+            }
+        }else {
+            FriendListApiOn(false);
+        }
+    }, [clickedCity]);
+
+    useEffect(() => {
         if (loggedIn) {
+            console.log("실행");
             handleEarthClick();
+            if(FrdId2 == 0){
+                setZoomIn(false);
+            }
         } else {
             removeAllCircles();
         }
-    }, [loggedIn]);
+    }, [loggedIn, FrdId, FrdId2, isMapageZoom]);
 
 
     // 5초 뒤 강제 클릭 이벤트
@@ -143,13 +197,14 @@ const Earth = React.memo(({
                     setIsOnMouseClickLock(true);
                     camera.position.lerp(target, 0.1);
                     camera.lookAt(target);
-                    let zoomInDistance = 0.41;
+                    let zoomInDistance = 0.45;
                     let durationThreshold = 1000; // 원하는 시간 설정 (밀리초 단위)
                     setearthR(true);
                     setZoomInLock(true);
                     setIsAtInitialPosition(false);
 
                     let currentDistance = camera.position.distanceTo(target);
+                    console.log(currentDistance);
                     if (currentDistance <= zoomInDistance) {
                         distanceWithinThresholdTime.current += deltaTime * 1000; // ms로 변환
 
@@ -187,6 +242,9 @@ const Earth = React.memo(({
 
                         if (camera.position.distanceTo(initialCameraPosition) < 0.05) {
                             setIsAtInitialPosition(true);
+                            setClickedCity(null);
+                            setFriendsNationally3('');
+                            FriendsNationally('');
                         } else {
                             setIsAtInitialPosition(false);
                             AllresetCityColors();
@@ -207,9 +265,9 @@ const Earth = React.memo(({
             <ambientLight intensity={1.2}/>
             <pointLight color="white" position={[-200, 50, -100]} intensity={1.2}/>
             <Stars
-                radius={300}
-                depth={100}
-                count={5000}
+                radius={100}
+                depth={50}
+                count={200}
                 factor={7}
                 saturation={0}
                 fade={true}
@@ -276,19 +334,9 @@ const Earth = React.memo(({
                 />
             </mesh>
             <mesh position={[0, -60, -30]}>
-                <torusGeometry args={[1.75, 0.11, 16, 100]}/>
-                <meshPhongMaterial
-                    color={'white'}
-                    opacity={0.1}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-            <mesh position={[0, -60, -30]}>
                 <torusGeometry args={[1.75, 0.1, 16, 100]}/>
                 <meshPhongMaterial
-                    color={"black"}
+                    color={'rgba(25,25,25,1)'}
                     depthWrite={true}
                     side={THREE.DoubleSide}
                 />
@@ -322,7 +370,7 @@ const Earth = React.memo(({
                 <mesh
                     ref={earthRef}
                     onPointerDown={onMouseDown}
-                    onPointerMove={onMouseMove} // 추가
+                    onPointerMove={onMouseMove}
                 >
                     <sphereGeometry args={[1, 32, 32]}/>
                     <meshPhongMaterial specularMap={specularMap}/>
@@ -352,9 +400,15 @@ const Earth = React.memo(({
     function onMouseDown(event) {
         if (isOnMouseClickLock) return;
         event.stopPropagation();
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(earthRef.current.children, true);
 
+        const rect = event.nativeEvent.target.getBoundingClientRect();
+        mouse.x = ((event.nativeEvent.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.nativeEvent.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        console.log(earthRef.current.children);
+        console.log('Ray origin (camera space):', raycaster.ray.origin);
+        console.log('Ray direction (camera space):', raycaster.ray.direction);
+        const intersects = raycaster.intersectObjects(earthRef.current.children, true);
         if (intersects.length > 0) {
             const intersection = intersects[0].point;
             const objectUserData = intersects[0].object.userData;
@@ -439,6 +493,7 @@ const Earth = React.memo(({
     }
 
     function onMouseMove(event) {
+        console.log("1")
         if (isOnMouseDownLock) return;
         event.stopPropagation();
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -474,75 +529,63 @@ const Earth = React.memo(({
     }
 
     function handleEarthClick() {
-        // 대한민국 (KR)
-        const kr_lat = 37.541;
-        const kr_lng = 126.986;
-        // 미국 (US)
-        const us_lat = 40.60857;
-        const us_lng = -74.01559;
+        const getNationally = async (retry = true) => {
 
-        // 캐나다 (CA)
-        const ca_lat = 45.42153;
-        const ca_lng = -75.69719;
+            try {
+                const response = await fetch('/friends/nationally-list', {
+                    method: 'GET',
+                    headers: {
+                        Authorization: localStorage.getItem('Authorization'),
+                        'userName': localStorage.getItem('userName'),
+                    },
+                });
 
-        // 일본 (JP)
-        const jp_lat = 35.652832;
-        const jp_lng = 139.839478;
+                const accessToken = response.headers.get('Authorization');
+                if (accessToken != null) {
+                    localStorage.setItem('Authorization', accessToken);
+                }
+                if (response.headers.get('refresh') != null) {
+                    return;
+                }
+                const data = await response.json();
+                console.log(data);
+                console.log(data.items);
+                removeAllCircles();
+                if(data && data.items) {
+                    data.items.forEach((countryCode) => {
+                        const coordinates = countryCoordinates[countryCode];
+                        if (coordinates) {
+                            addRedCircle(addRedCircleXYZ(coordinates.lat, coordinates.lng), countryCode);
+                        } else {
+                            console.error(`Coordinates for country code ${countryCode} not found.`);
+                        }
+                    });
+                }else {
 
-        // 중국 (CN)
-        const cn_lat = 39.90469;
-        const cn_lng = 116.40717;
-
-        // 필리핀 (PH)
-        const ph_lat = 14.609053;
-        const ph_lng = 121.022256;
-
-        // 러시아 (RU)
-        const ru_lat = 55.755825;
-        const ru_lng = 37.617298;
-
-        // 대만 (TW)
-        const tw_lat = 25.0330;
-        const tw_lng = 121.5654;
-
-        // 우크라이나 (UA)
-        const ua_lat = 50.4501;
-        const ua_lng = 30.5234;
-
-        // 호주 (AU)
-        const au_lat = -35.2809;
-        const au_lng = 149.1300;
-
-        // 이탈리아 (IT)
-        const it_lat = 41.902782;
-        const it_lng = 12.496366;
-
-        addRedCircle(addRedCircleXYZ(kr_lat, kr_lng), "KR");
-        addRedCircle(addRedCircleXYZ(us_lat, us_lng), "US");
-        addRedCircle(addRedCircleXYZ(ca_lat, ca_lng), "CA");
-        addRedCircle(addRedCircleXYZ(jp_lat, jp_lng), "JP");
-        addRedCircle(addRedCircleXYZ(cn_lat, cn_lng), "CN");
-        addRedCircle(addRedCircleXYZ(ph_lat, ph_lng), "PH");
-        addRedCircle(addRedCircleXYZ(ru_lat, ru_lng), "RU");
-        addRedCircle(addRedCircleXYZ(tw_lat, tw_lng), "TW");
-        addRedCircle(addRedCircleXYZ(ua_lat, ua_lng), "UA");
-        addRedCircle(addRedCircleXYZ(au_lat, au_lng), "AU");
-        addRedCircle(addRedCircleXYZ(it_lat, it_lng), "IT");
+                }
+            } catch (error) {
+                if (retry) {
+                    await getNationally(false);
+                }
+            }
+        }
+        getNationally();
     }
 
     function addRedCircle(position, city_name) {
-
-        // const geometry = new THREE.TorusGeometry(0.007, 0.007, 10, 10);
-        // const geometry = new THREE.CircleGeometry(0.007, 32); 원반
-        // const geometry = new THREE.CylinderGeometry(0.01, 0.01, 0.01, 32);
+        const mapTexture = countryTextures[city_name];
+        // const geometry = new THREE.TorusGeometry(0.017, 0.007, 10, 10);
+        const geometry = new THREE.CircleGeometry(0.015, 100);
+        // const geometry = new THREE.CylinderGeometry(0.05, 0.05, 0.05, 32);
         // const geometry = new THREE.BoxGeometry(0.02, 0.02, 0.02);
-        const geometry = new THREE.SphereGeometry(0.01, 32, 32);
-        const material = new THREE.MeshBasicMaterial({color: 'white'});
-
+        //
+        // const geometry = new THREE.PlaneGeometry(0.05, 0.05); // Plane geometry 사용
+        // const geometry = new THREE.SphereGeometry(0.01, 32, 32);
+        const material = new THREE.MeshBasicMaterial({ map: mapTexture, side: THREE.DoubleSide});
 
         const circle = new THREE.Mesh(geometry, material);
 
-        const scaleFactor = 1.057; // 기존 위치에서의 바깥 위치 지정
+        const scaleFactor = 1.010; // 기존 위치에서의 바깥 위치 지정
         circle.position.set(position.x * scaleFactor, position.y * scaleFactor, position.z * scaleFactor);
         circle.lookAt(-position.x, -position.y, -position.z);
 

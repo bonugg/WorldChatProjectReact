@@ -19,8 +19,8 @@
 
 .menu_1 {
     position: absolute !important;
-    top: -1px !important;
-    left: -80px !important;;
+    top: -2px !important;
+    left: -82.5px !important;;
     background-color: rgba(50, 50, 50, 0.9) !important;
     color: rgba(255, 255, 255, 0.7) !important;
     font-family: 'Russo One', sans-serif !important;
@@ -37,8 +37,8 @@
 
 .menu_1_clicked {
     position: absolute !important;
-    top: -1px !important;
-    left: -80px !important;;
+    top: -2px !important;
+    left: -82.5px !important;;
     background-color: rgba(255, 255, 255, 0.3) !important;
     color: rgba(255, 255, 255, 0.7) !important;
     font-family: 'Russo One', sans-serif !important;
@@ -51,8 +51,8 @@
 
 .menu_2 {
     position: absolute !important;
-    top: 105px !important;
-    left: -80px !important;
+    top: 104px !important;
+    left: -82.5px !important;;
     background-color: rgba(50, 50, 50, 0.9) !important;
     color: rgba(255, 255, 255, 0.7) !important;
     font-family: 'Russo One', sans-serif !important;
@@ -70,8 +70,8 @@
 
 .menu_2_clicked {
     position: absolute !important;
-    top: 105px !important;
-    left: -80px !important;
+    top: 104px !important;
+    left: -82.5px !important;
     background-color: rgba(255, 255, 255, 0.3) !important;
     color: rgba(255, 255, 255, 0.7) !important;
     font-family: 'Russo One', sans-serif !important;
@@ -85,8 +85,8 @@
 
 .menu_3 {
     position: absolute !important;
-    top: 211px !important;
-    left: -80px !important;
+    top: 210px !important;
+    left: -82.5px !important;
     background-color: rgba(50, 50, 50, 0.9) !important;
     color: rgba(255, 255, 255, 0.7) !important;
     font-family: 'Russo One', sans-serif !important;
@@ -104,8 +104,8 @@
 
 .menu_3_clicked {
     position: absolute !important;
-    top: 211px !important;
-    left: -80px !important;
+    top: 210px !important;
+    left: -82.5px !important;
     background-color: rgba(255, 255, 255, 0.3) !important;
     color: rgba(255, 255, 255, 0.7) !important;
     font-family: 'Russo One', sans-serif !important;
@@ -130,92 +130,142 @@
     text-transform: uppercase;
     color: white;
 }
-.friendRecieved_div_2{
+
+.friendRecieved_div_2 {
     width: 100%;
     height: 90%;
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.05);
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
     padding: 10px 20px 20px;
     box-sizing: border-box;
     overflow: auto;
 }
-.received_item{
+.friendRecieved_div_3{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 20px;
+}
+
+.received_item {
     width: 100%;
     height: 50px;
     display: flex;
     align-items: center;
-    background-color: rgba(50, 50, 50, 0.5);
+    background-color: rgba(25, 25, 25, 0.8);
     border: 1px solid rgba(0, 0, 0, 0.5);
     margin-top: 10px;
-    border-radius:4px;
+    border-radius: 4px;
+    transition: background-color 0.25s ease-in-out;
 }
-.request_user{
+
+.received_item2 {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    background-color: rgba(205, 92, 92, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    margin-top: 10px;
+    border-radius: 4px;
+    transition: background-color 0.25s ease-in-out;
+}
+
+.received_item3 {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 128, 0, 0.2) !important;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    margin-top: 10px;
+    border-radius: 4px;
+    transition: background-color 0.25s ease-in-out;
+}
+
+.request_user {
     width: 30%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
+    font-size: 15px;
 }
-.statement{
-    width: 20%;
+
+.statement {
+    width: 30%;
     height: 100%;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 15px;
-    margin-left: 10px;
-    transition: opacity 0.25s ease;
+    font-size: 12px;
+    transition: all 0.25s ease;
     opacity: 1;
 }
-.statement.fade-out {
-    opacity: 0;
-}
-.request_btn{
-    width: 50%;
+
+.request_btn {
+    width: 40%;
     height: 100%;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     padding: 5px;
     box-sizing: border-box;
 }
-.received_btn{
-    width: 50% !important;
+.request_btn_2 {
+    width: 40%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 5px;
+    box-sizing: border-box;
+}
+.received_btn {
+    width: 30% !important;
+    min-width: 30% !important;
     height: 100% !important;
     min-height: 100% !important;
     max-height: 100% !important;
-    background-color: rgba(0, 0, 0, 0.8) !important;
-    color: green !important;
-    font-size: 12px !important;
+    background-color: rgba(0, 128, 0, 0.5) !important;
+    color: white !important;
+    font-size: 10px !important;
     font-family: 'Russo One', sans-serif !important;
-    padding-right: 0px !important;
-    padding-left: 1px !important;
-    box-sizing: border-box !important;
-}
-.received_btn:hover{
-    background-color: rgba(0, 0, 0, 0.4) !important;
-    color: rgba(0, 128, 0, 0.8) !important;
-}
-.received_btn_2{
-    margin-left: 5px !important;
-    width: 50% !important;
-    height: 100% !important;
-    min-height: 100% !important;
-    max-height: 100% !important;
-    background-color: rgba(0, 0, 0, 0.8) !important;
-    color: indianred !important;
-    font-size: 12px !important;
-    font-family: 'Russo One', sans-serif !important;
-    padding-right: 0px !important;
+    padding-right: 13px !important;
     padding-left: 2px !important;
     box-sizing: border-box !important;
 }
-.received_btn_2:hover{
-    background-color: rgba(0, 0, 0, 0.4) !important;
-    color: rgba(205, 92, 92, 0.8) !important;
+
+.received_btn:hover {
+    background-color: rgba(0, 128, 0, 0.9) !important;
 }
+
+.received_btn_2 {
+    margin-left: 5px !important;
+    width: 30% !important;
+    min-width: 30% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+    background-color: rgba(205, 92, 92, 0.5) !important;
+    color: white !important;
+    font-size: 10px !important;
+    font-family: 'Russo One', sans-serif !important;
+    padding-right: 13px !important;
+    padding-left: 2px !important;
+    box-sizing: border-box !important;
+}
+
+.received_btn_2:hover {
+    background-color: rgba(205, 92, 92, 0.9) !important;
+}
+
 .myPageDiv_profile_btn2 {
     width: 120px;
     height: 40px;
@@ -312,4 +362,25 @@
     transition: all 0.25s ease-in-out;
     font-size: 10px !important;
     font-family: 'Russo One', sans-serif !important;
+}
+
+.item-enter {
+    opacity: 0;
+}
+
+.item-enter-active {
+    opacity: 1;
+    transition: opacity 500ms;
+}
+
+.item-exit {
+    opacity: 1;
+    max-height: 80px;
+    overflow: hidden;
+    transition: all 500ms ease-out;
+}
+
+.item-exit-active {
+    opacity: 0;
+    max-height: 0;
 }

@@ -16,7 +16,7 @@ import styled, {keyframes} from "styled-components";
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 import Picker from '@emoji-mart/react'  // <-- 추가
 import data from '@emoji-mart/data'
-import ChatHistoryItem from "../pages/friends/ChatHistoryItem";
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 const MessageStyled = styled.p`
 `;
@@ -176,7 +176,17 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
 
                 if (response.data && response.data.items) {
                     console.log(response.data.items);
-                    setMessages(() => response.data.items);
+                    // checkRead가 false인 객체만 골라서 해당 속성을 true로 변경
+                    const updatedItems = response.data.items.reduce((acc, item) => {
+                        if (item.checkRead === false) {
+                            acc.push({...item, checkRead: true});
+                        } else {
+                            acc.push(item);
+                        }
+                        return acc;
+                    }, []);
+
+                    setMessages(() => updatedItems);
                 }
             } catch (e) {
                 console.log(e);
@@ -229,6 +239,8 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
             setIsChatReadOnly(false);
             const headers = {
                 Authorization: localStorage.getItem("Authorization"),
+                roomId: roomIdRef.current,
+                friendChat: 'on'
             };
             const socket = new SockJS(`/friendchat`);
             const client = Stomp.over(socket);
@@ -238,15 +250,19 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                 client.subscribe("/frdSub/" + roomIdRef.current, async (messageOutput) => {
                     const responseData = JSON.parse(messageOutput.body);// 이 부분 추가
 
-                    if (responseData.sender !== userNickNameRef.current && selectedLanguageRef.current != " ") {
-                        console.log(responseData);
-                        const translatedText = await detectAndTranslate(responseData.message);
-                        if (translatedText) {
-                            responseData.translatedMessage = translatedText;
+                    if (responseData.type === "status") {
+                        if (responseData.content === "online") {
+                            updateReads();
                         }
+                    } else{
+                        if (responseData.sender !== userNickNameRef.current && selectedLanguageRef.current != " ") {
+                            const translatedText = await detectAndTranslate(responseData.message);
+                            if (translatedText) {
+                                responseData.translatedMessage = translatedText;
+                            }
+                        }
+                        showMessageOutput(responseData);
                     }
-
-                    showMessageOutput(responseData);
                 });
 
                 // 연결된 stompClient 객체를 저장합니다.
@@ -354,6 +370,30 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
             console.log(e.target.value);
         };
 //--------------번역----------------------
+
+        //채팅창 업데이트
+        const updateReads = async () => {
+            try {
+                const response = await axios.put(`/chatroom/${roomIdRef.current}`, null, {
+                    headers: {
+                        Authorization: `${localStorage.getItem('Authorization')}`
+                    }
+                });
+                console.log(response.data.items);
+                console.log("안읽은거 읽음처리 됐냐???")
+                if (response.data && response.data.items) {
+                    const updatedMessages = response.data.items;
+                    setMessages(prevMessages => prevMessages.map(msg => {
+                        const updateMsg = updatedMessages.find(uMsg => uMsg.id == msg.id);
+                        return updateMsg ? updateMsg : msg;
+                    }));
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        //채팅창 업데이트
+
 
 //--------------파일 버튼 클릭 후 파일 첨부 시에 파일 명 인풋창에 표시----------------------
         const handleFileChange = (e) => {
@@ -701,14 +741,14 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                                                     onClick={() => downloadFile(message.fileName, message.fileDir)}
                                                                                     className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn" : "downBtn2"}
                                                                                 >
-                                                                                    D
+                                                                                    <FileDownloadIcon/>
                                                                                 </Button> {/* 다운로드 버튼 */}
                                                                             </div>
                                                                         )}
                                                                         <span
                                                                             className="content_user">{message.message}</span>
                                                                         <span
-                                                                            className="message-regdate">{message.createdAt}</span>
+                                                                            className="message-regdate">{message.createdAt}&nbsp;&nbsp;&nbsp;{message.checkRead ? (<div className={"on"}></div>) : (<div className={"off"}></div>)}</span>
                                                                     </div>
                                                                 ) : (
                                                                     <div>
@@ -740,7 +780,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                                                     onClick={() => downloadFile(message.fileName, message.fileDir)}
                                                                                     className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn_other" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn_other" : "downBtn_other2"}
                                                                                 >
-                                                                                    D
+                                                                                    <FileDownloadIcon/>
                                                                                 </Button> {/* 다운로드 버튼 */}
                                                                             </div>
                                                                         )}
@@ -755,7 +795,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                                         <span
                                                                             className="content_other">{message.message}</span>
                                                                         <span
-                                                                            className="message-regdate_other">{message.createdAt}</span>
+                                                                        className="message-regdate_other">{message.checkRead ? (<div className={"on"}></div>) : (<div className={"off"}></div>)}&nbsp;&nbsp;&nbsp;{message.createdAt}</span>
                                                                     </div>
                                                                 )}
                                                             </MessageStyled>
@@ -783,7 +823,8 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                                         onChange={handleLanguageChange}
                                                                         value={selectedLanguage}
                                                                 >
-                                                                    <MenuItem className={"trans_li_select"} value={" "}>Not translated</MenuItem>
+                                                                    <MenuItem className={"trans_li_select"} value={" "}>Not
+                                                                        translated</MenuItem>
                                                                     {Object.entries(languages).map(([code, name]) => (
                                                                         <MenuItem className={"trans_li_select"} key={code}
                                                                                   value={code}>{name}</MenuItem>
@@ -853,7 +894,8 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                     position: 'absolute',
                                     left: '53.8%',
                                     bottom: '80px',
-                                    transform: 'translateX(-50%)',
+                                    transform: 'translateX(calc(-50% + 150px))', // 수정된 부분
+                                    zIndex: '2',
                                 }}
                                 className={"maximum_btn"}
                             >

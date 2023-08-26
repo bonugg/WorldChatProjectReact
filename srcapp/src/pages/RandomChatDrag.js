@@ -14,6 +14,8 @@ import CateChatListItem from './CateChatListItem';
 import styled, {keyframes} from "styled-components";
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+
 
 const MessageStyled = styled.p`
 `;
@@ -255,6 +257,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
 //--------------번역----------------------
 
         const connect = () => {
+            setMessages([]);
             //endpoint 소켓 생성
             setIsChatReadOnly(false);
             const socket = new SockJS("/random");
@@ -653,7 +656,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                     padding: '1em',
                                     margin: 'auto',
                                     userSelect: 'none',
-                                    zIndex: '2',
+                                    zIndex: '10',
                                     background: 'rgb(50, 50, 50,0.8)',
                                     transition: 'height 0.25s ease-in-out'
                                 }}
@@ -689,7 +692,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                                         <Button
                                                             className={"userList"}
                                                             onClick={() => {friendAddClick(otherUserId.current)}}
-                                                        >USER LIST
+                                                        >Friend add
                                                         </Button>
                                                     ):(
                                                         <>
@@ -758,7 +761,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                         onClick={() => downloadFile(message.fileOrigin, message.fileName)}
                                                                                         className={message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn" : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i) ? "downBtn" : "downBtn2"}
                                                                                     >
-                                                                                        D
+                                                                                        <FileDownloadIcon/>
                                                                                     </Button> {/* 다운로드 버튼 */}
                                                                                 </div>
                                                                             )}
@@ -797,7 +800,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                         onClick={() => downloadFile(message.fileOrigin, message.fileName)}
                                                                                         className={message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn_other" : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i) ? "downBtn_other" : "downBtn_other2"}
                                                                                     >
-                                                                                        D
+                                                                                        <FileDownloadIcon/>
                                                                                     </Button> {/* 다운로드 버튼 */}
                                                                                 </div>
                                                                             )}
@@ -936,7 +939,8 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                     position: 'absolute',
                                     left: '46.2%',
                                     bottom: '80px',
-                                    transform: 'translateX(-50%)',
+                                    transform: 'translateX(calc(-50% + 150px))', // 수정된 부분
+                                    zIndex: '2',
                                 }}
                                 className={"maximum_btn"}
                             >

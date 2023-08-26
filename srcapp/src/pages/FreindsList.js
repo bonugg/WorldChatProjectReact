@@ -1,29 +1,27 @@
 import React, {useEffect, useRef, useState} from "react";
 import FreindsListItem from './FreindsListItem';
-import Korea from "../img/flag/Korea-flag.png";
-import UnitedStates from "../img/flag/United-states-flag.png";
-import Japan from "../img/flag/Japan-flag.png";
-import Canada from "../img/flag/Canada-flag.png";
-import Australia from "../img/flag/Australia-flag.png";
-import China from "../img/flag/China-flag.png";
-import Italy from "../img/flag/Italy-flag.png";
-import Russia from "../img/flag/Russia-flag.png";
-import Taiwan from "../img/flag/Taiwan-flag.png";
-import Ukraine from "../img/flag/Ukraine-flag.png";
-import Philippines from "../img/flag/Philippines-flag.png";
+import Korea from "../img/flag/KR.png";
+import UnitedStates from "../img/flag/US.png";
+import Japan from "../img/flag/JP.png";
+import Canada from "../img/flag/CA.png";
+import Australia from "../img/flag/AU.png";
+import China from "../img/flag/CN.png";
+import Italy from "../img/flag/IT.png";
+import Russia from "../img/flag/RU.png";
+import Philippines from "../img/flag/PH.png";
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import "./css/FreindsList.css";
 
 
-const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType}) => {
+const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType}) => {
     const [userList, setUserList] = useState([]);
-    const [nationallyName, setNationallyName] = useState('');
-    const [isChatDiv, setIsChatDiv] = useState(false);
     const freindsList = async (retry = true) => {
         
         try {
-            const response = await fetch('/api/v1/user/friendsList', {
-                method: 'POST',
+            console.log(FriendNationally);
+            const response = await fetch('/friends/friends-list/' + FriendNationally, {
+                method: 'GET',
                 headers: {
                     Authorization: localStorage.getItem('Authorization'),
                     'userName': localStorage.getItem('userName'),
@@ -38,11 +36,12 @@ const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList,isOne
                 logoutApi3(true); // Home.js에 이벤트 전달
                 return;
             }
-            console.log(response);
             const data = await response.json();
             console.log(data);
-            if (data) {
+            if(data && data.items) {
                 setUserList(() => data.items);
+            }else {
+                setUserList([]);
             }
         } catch (error) {
             if (retry) {
@@ -52,13 +51,13 @@ const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList,isOne
     }
 
     useEffect(() => {
-        if (FriendsList) {
+        console.log(FriendListApi);
+        if (FriendListApi) {
             freindsList();
-            setNationallyName(FriendNationally);
         }else {
-            setNationallyName('');
+            setUserList([]);
         }
-    }, [FriendsList]);
+    }, [FriendNationally]);
 
 
     // 국적 이미지 대응
@@ -70,11 +69,18 @@ const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList,isOne
         CN: China,
         PH: Philippines,
         RU: Russia,
-        TW: Taiwan,
-        UA: Ukraine,
         AU: Australia,
         IT: Italy,
     };
+
+    const removeItemFromList = (id) => {
+        console.log("아이디 출력 "+id)
+        setUserList(prevList => {
+            const updatedList = prevList.filter(item => item.id != id);
+            onRemove(updatedList.length);
+            return updatedList;
+        });
+    }
 
     const getNationalityFlag = (nationality) => {
         if(nationality == ''){
@@ -99,10 +105,17 @@ const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList,isOne
             </div>
             <div className={"friendsList"}>
                 <div className={"friendsList_2"}>
-                        {userList && userList.map(user => <FreindsListItem key={user.userId}
-                                                        user={user} onData={onData} setChatType={setChatType}  friendsChatDiv={friendsChatDivOn}></FreindsListItem>)}
+                    <TransitionGroup>
+                        {userList && userList.map(user => (
+                            <CSSTransition  key={user.id} timeout={500} classNames="item">
+                            <FreindsListItem
+                                             onRemove={removeItemFromList} frd={user} onData={onData} setChatType={setChatType} friendsChatDiv={friendsChatDivOn}>
+                            </FreindsListItem>
+                            </CSSTransition>
+                        ))}
                                                                            
-                </div>
+                    </TransitionGroup>
+                    </div>
             </div>
         </div>
     );
