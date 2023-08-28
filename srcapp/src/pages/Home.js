@@ -10,23 +10,21 @@ import {Suspense} from "react";
 import * as THREE from "three";
 import {keyframes} from 'styled-components';
 import Logo from "../img/logo.png";
-import Background from "../img/background.jpg";
-import Logo_no_text from "../img/logo_no_text.png";
 import Logo_text from "../img/logo_text.png";
-import Black from "../assets/textures/black.png";
-
 import Earth from "../components/earth/index";
 import MyPage from './MyPage';
 import FreindsList from './FreindsList';
 import PasswordChange from './PasswordChange';
 import ChatComponent from "../components/rtc/rtcChat";
 import ChatVoiceComponent from "../components/rtc/rtcVoiceChat"
-import SockJS from 'sockjs-client';
-// import socket from "ws/lib/websocket";
-
 import CateChatDrag from "./CateChatDrag";
 import RandomChatDrag from "./RandomChatDrag";
 import OneOnOneChatDrag from "./OneOnOneChatDrag";
+import GroupsIcon from '@mui/icons-material/Groups';
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
+import VideoChatIcon from '@mui/icons-material/VideoChat';
+import PhoneIcon from '@mui/icons-material/Phone';
+import GroupIcon from '@mui/icons-material/Group';
 
 const CanvasContainer = styled.div`
   width: calc(100% - 300px);
@@ -103,6 +101,10 @@ const Home = React.memo(() => {
             const [randomChatDrag, setRandomChatDrag] = useState(false);
             const [oneononeChatDrag, setOneononeChatDrag] = useState(false);
 
+            const [randomMax, setRandomMax] = useState(true);
+            const [cateMax, setCateMax] = useState(true);
+            const [friendMax, setFriendMax] = useState(true);
+
             const [FrdId, setFrdId] = useState('');
             const [FrdId2, setFrdId2] = useState('');
             //드래그 이벤트
@@ -131,6 +133,16 @@ const Home = React.memo(() => {
             const handleRandomShowDragClose = () => {
                 setRandomChatDrag(false);
             };
+            const handleIsMinimized = (mini) => {
+                setRandomMax(false);
+            }
+            const handleIsMinimizedCate = (mini) => {
+                setCateMax(false);
+            }
+            const handleIsMinimizedFriend = (mini) => {
+                setFriendMax(false);
+            }
+
             const handleOneOnOneShowDragClose = () => {
                 setOneononeChatDrag(false);
             };
@@ -949,6 +961,15 @@ const Home = React.memo(() => {
                     setIsLoading(false);
                 }, 500);
             }, []);
+            const RandomHandleMinimizeClick = () => {
+                setRandomMax(true);
+            }
+            const CateHandleMinimizeClick = () => {
+                setCateMax(true);
+            }
+            const FriendHandleMinimizeClick = () => {
+                setFriendMax(true);
+            }
 
             function Fallback() {
 
@@ -965,12 +986,15 @@ const Home = React.memo(() => {
                 <div className={"full"}>
                     <Suspense fallback={<Fallback/>}>
                         <div className={"fullScreen"}>
-                            <RandomChatDrag show={randomChatDrag} logoutApiCate={logoutApiCate}
+                            <RandomChatDrag randomMax={randomMax} isMinimize={handleIsMinimized} show={randomChatDrag}
+                                            logoutApiCate={logoutApiCate}
                                             onClose={handleRandomShowDragClose}/>
-                            <OneOnOneChatDrag show={oneononeChatDrag} oneOnOneUserId={oneOnOneUserId}
+                            <OneOnOneChatDrag friendMax={friendMax} isMinimize={handleIsMinimizedFriend}
+                                              show={oneononeChatDrag} oneOnOneUserId={oneOnOneUserId}
                                               oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
                                               onClose={handleOneOnOneShowDragClose}/>
-                            <CateChatDrag show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
+                            <CateChatDrag cateMax={cateMax} isMinimize={handleIsMinimizedCate}
+                                          show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
                             <aside
                                 className={`side-bar`}
                                 style={isLoading ? {display: "none"} : {}}
@@ -1034,11 +1058,54 @@ const Home = React.memo(() => {
                                             </li>
                                         </>
                                     )}
-                                    <div className={"foot"}>
+                                </ul>
+                                <div className={"foot"}>
+                                    {loggedIn ? (
+                                        <div className="foot_3">
+                                            <Button
+                                                type={'submit'}
+                                                disabled={randomMax}
+                                                onClick={RandomHandleMinimizeClick}
+                                                className={"R_maximum_btn"}
+                                            >
+                                                <QuestionMarkIcon fontSize="small" />
+                                            </Button>
+                                            <Button
+                                                type={'submit'}
+                                                disabled={cateMax}
+                                                onClick={CateHandleMinimizeClick}
+                                                className={"R_maximum_btn"}
+                                            >
+                                                <GroupsIcon fontSize="small" />
+                                            </Button>
+                                            <Button
+                                                disabled={friendMax}
+                                                onClick={FriendHandleMinimizeClick}
+                                                type={'submit'}
+                                                className={"R_maximum_btn"}
+                                            >
+                                                <GroupIcon fontSize="small" />
+                                            </Button>
+                                            <Button
+                                                type={'submit'}
+                                                className={"R_maximum_btn"}
+                                            >
+                                                <VideoChatIcon fontSize="small" />
+                                            </Button>
+                                            <Button
+                                                type={'submit'}
+                                                className={"R_maximum_btn"}
+                                            >
+                                                <PhoneIcon fontSize="small" />
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <></>)
+                                    }
+                                    <div className={"foot_2"}>
                                         <span className={"foot_text"}>@2023 WWC, Inc</span>
                                     </div>
-
-                                </ul>
+                                </div>
                             </aside>
                             {/*<div style={{width : '300px', height: '100%'}}>*/}
 

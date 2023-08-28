@@ -207,23 +207,13 @@ input[type='number'] {
     border-radius: 15px;
     background-color: rgba(50, 50, 50, 0.8);
 }
-.title_cate{
-    width: calc(100% - 200px);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+
 .btnDiv{
     width: 100px;
     display: flex;
     justify-content: flex-end;
 }
-.btnDiv_create{
-    width: 100px;
-    display: flex;
-    justify-content: flex-start;
-}
+
 .maximum_btn{
     width: 30px !important;
     min-width: 30px !important;
@@ -237,43 +227,15 @@ input[type='number'] {
     background-color: rgba(255, 255, 255, 0.5) !important;
     box-shadow: 0px 0px 10px 2px rgba(255, 255, 255, 0.3) !important;
 }
-.minimum{
-    width: 30px !important;
-    min-width: 30px !important;
-    height: 30px !important;
-    background-color: rgba(255, 255, 255, 0.8) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    font-size: 10px !important;
-    border-bottom-right-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-    font-family: 'Russo One', sans-serif !important;
-}
-.minimum:hover{
-    background-color: rgba(255, 255, 255, 0.4) !important;
-}
-.close{
-    width: 30px !important;
-    min-width: 30px !important;
-    height: 30px !important;
-    background-color: rgba(205, 92, 92, 0.8) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    font-size: 10px !important;
-    border-top-left-radius: 0px !important;
-    border-bottom-left-radius: 0px !important;
-    font-family: 'Russo One', sans-serif !important;
-}
-.close:hover{
-    background-color: rgba(205, 92, 92, 0.4) !important;
-}
 
 .select {
     width: 100%;
-    height: calc(100% - 30px);
+    height: 100%;
 }
 
 .chat {
     width: 100%;
-    height: calc(100% - 30px);
+    height: 100%;
 }
 
 .CateChatDiv_Chat {
@@ -303,7 +265,7 @@ input[type='number'] {
 
 .EnterRoomChat {
     width: 100%;
-    height: calc(100% - 60px);
+    height: calc(100% - 50px);
 }
 
 .EnterRoom_2 {
@@ -317,8 +279,8 @@ input[type='number'] {
 .EnterRoomChat_2 {
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
 }
 
 .EnterRoomChat_content {
@@ -336,15 +298,23 @@ input[type='number'] {
     border-top-right-radius: 10px;
     overflow: auto;
 }
+.EnterRoomChat_content_typing{
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 13px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.3);
+}
 .EnterRoomChat_content_2 {
     width: 100%;
-    height: 100%;
+    height: calc(100% - 50px);
     display: flex;
     flex-direction: column;
-    padding: 10px 10px 0px;
+    padding: 0px 10px 10px;
     box-sizing: border-box;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
     overflow: auto;
 }
 
@@ -384,12 +354,13 @@ input[type='number'] {
 }
 .btnSend {
     width: 20% !important;
-    height: 60% !important;
+    height: 50px !important;
+    max-height: 50px !important;
+    min-height: 50px !important;
     font-size: 15px !important;
     color: white !important;
     border: 1px solid rgba(200, 200, 200, 0.4) !important;
     font-family: 'Russo One', sans-serif !important;
-    padding-right: 17px !important;
     box-sizing: border-box;
 }
 
@@ -401,10 +372,11 @@ input[type='number'] {
     align-items: center;
 }
 .EnterRoomCate_text{
-    font-size: 15px;
+    font-size: 12px;
     color: white;
     width: auto;
     height: 30px;
+    line-height: 30px;
     border-radius: 5px;
     background-color: black;
     display: flex;
@@ -413,8 +385,16 @@ input[type='number'] {
     padding-left: 15px;
     padding-right: 15px;
     box-sizing: border-box;
+    margin-right: 7px;
 }
+.EnterRoomNameCate {
+    width: calc(100% - 100px);
+    height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
 
+}
 .EnterRoomName {
     width: calc(100% - 200px);
     height: 100%;
@@ -424,13 +404,20 @@ input[type='number'] {
 
 }
 .EnterRoomName_2{
-    width: 100px;
-    font-size: 15px;
+    max-width: 50%;
+    font-size: 12px;
     color: white;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: center;
+    text-align: left;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 4px;
+    background-color: black;
+    padding-left: 15px;
+    padding-right: 15px;
+    box-sizing: border-box;
 }
 
 .EnterRoomClose {
@@ -442,20 +429,34 @@ input[type='number'] {
     align-items: center;
     color: white;
 }
-
+.userAdd_btn{
+    min-width: 31px !important;
+    width: 31px !important;
+    color: white !important;
+    height: 31px !important;
+    font-size: 12px !important;
+    font-family: 'Russo One', sans-serif !important;
+    background-color: rgba(24, 24, 31, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 4px !important;
+    margin-right: 7px !important;
+}
+.userAdd_btn:hover{
+    background-color: #18181f !important;
+}
 .Close_btn {
     min-width: 30px !important;
-    width: 61px !important;
+    width: 30px !important;
     color: white !important;
     height: 30px !important;
     font-size: 12px !important;
     font-family: 'Russo One', sans-serif !important;
-    background-color: rgba(213, 145, 14, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.5) !important;
-    border-radius: 5px !important;
+    background-color: rgba(205, 92, 92, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 4px !important;
 }
 .Close_btn:hover{
-    background-color: rgba(213, 145, 14, 0.4) !important;
+    background-color: indianred !important;
 }
 
 .CateChat_Room_List {
@@ -576,16 +577,19 @@ input[type='number'] {
     height: 30px !important;
     font-size: 10px !important;
     color: white !important;
-    background-color: black !important;
     font-family: 'Russo One', sans-serif !important;
     padding: 0px !important;
     margin: 0px !important;
     text-align: center !important;
     box-sizing: border-box;
     border-radius: 5px !important;
+    background-color: #121418 !important;
 }
 .userList:hover{
-    background-color: rgba(0, 0, 0, 0.6) !important;
+    background-color: #121418 !important;
+}
+.userList:disabled{
+    background-color: #121418 !important;
 }
 .roomList_item_div2 {
     display: none;
@@ -667,7 +671,7 @@ input[type='number'] {
     word-wrap: break-word;
 }
 .userY {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.9);
     max-width: 80%;
     min-width: 20%;
     margin-left: auto;
@@ -682,7 +686,7 @@ input[type='number'] {
 }
 
 .userX {
-    background-color: rgba(200, 200, 200, 0.8);
+    background-color: rgba(200, 200, 200, 0.7);
     max-width: 80%;
     min-width: 20%;
     margin-right: auto;
@@ -698,6 +702,7 @@ input[type='number'] {
 .userName{
     color: black;
     font-size: 15px;
+    font-family: 'Russo One', sans-serif;
 }
 
 .content_join {
@@ -707,7 +712,7 @@ input[type='number'] {
     padding-right: 11px;
     box-sizing: border-box;
     color: rgba(0, 0, 0, 0.9);
-
+    font-family: 'Russo One', sans-serif;
     display: -webkit-box;
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
