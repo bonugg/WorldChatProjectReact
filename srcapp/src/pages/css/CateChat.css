@@ -317,16 +317,17 @@ input[type='number'] {
 .EnterRoomChat_2 {
     width: 100%;
     height: 100%;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
 }
 
 .EnterRoomChat_content {
     width: 100%;
-    height: 83%;
+    height: 86%;
 }
 .EnterRoomChat_content_3 {
     width: 100%;
     height: 20%;
-    background-color: rgba(255, 255, 255, 0.15);
     display: flex;
     flex-direction: column;
     padding: 10px 10px 0px;
@@ -338,7 +339,6 @@ input[type='number'] {
 .EnterRoomChat_content_2 {
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.15);
     display: flex;
     flex-direction: column;
     padding: 10px 10px 0px;
@@ -350,18 +350,18 @@ input[type='number'] {
 
 .EnterRoomChat_input {
     width: 100%;
-    height: 17%;
+    height: 14%;
 }
 
 .EnterRoomChat_input_form {
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.15);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-end;
     padding-left: 10px;
     padding-right: 10px;
+    padding-bottom: 10px;
     box-sizing: border-box;
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
@@ -369,14 +369,22 @@ input[type='number'] {
 
 .inputchat {
     width: 80% !important;
-    height: 35px;
+    height: 60%;
     margin-right: 10px;
     color: white;
+    border: 1px solid rgba(128, 128, 128, 0.5) !important;
+    border-radius: 10px !important;
 }
-
+.OneChat_menu_div{
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
 .btnSend {
     width: 20% !important;
-    min-height: 35px !important;
+    height: 60% !important;
     font-size: 15px !important;
     color: white !important;
     border: 1px solid rgba(200, 200, 200, 0.4) !important;
@@ -557,9 +565,10 @@ input[type='number'] {
     text-align: center !important;
     box-sizing: border-box;
     border-radius: 5px !important;
+    border: 1px solid gray;
 }
 .roomCreate:hover{
-    background-color: rgba(0, 0, 0, 0.6) !important;
+    background-color: rgba(50, 50, 50, 0.8) !important;
 }
 .userList {
     width: 80px !important;
@@ -578,7 +587,9 @@ input[type='number'] {
 .userList:hover{
     background-color: rgba(0, 0, 0, 0.6) !important;
 }
-
+.roomList_item_div2 {
+    display: none;
+}
 .roomList_item_div {
     width: 100%;
     height: 50px;
@@ -707,7 +718,21 @@ input[type='number'] {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+.content_other_trans{
+    font-size: 14px;
+    text-align: left;
+    padding-left: 11px;
+    padding-right: 11px;
+    box-sizing: border-box;
+    color: rgba(108, 28, 28, 0.88);
 
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    margin-bottom: 5px;
+}
 .content_other {
     font-size: 14px;
     text-align: left;
@@ -836,3 +861,4 @@ input[type='number'] {
 .Cate_btn_R:hover{
     background-color: rgba(80, 80, 80, 0.4) !important;
 }
+/*=====메뉴창=====*/

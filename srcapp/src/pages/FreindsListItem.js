@@ -4,8 +4,11 @@ import Button from "@mui/material/Button";
 import "./css/FreindsList.css";
 import Profile from "../img/profile.png";
 
-const FreindsListItem = React.memo(({user}) => {
+const FreindsListItem = React.memo(({user, friendsChatDiv}) => {
     const {userId, userName, userNickName, userProfileName} = user;
+    const friendsChatDivOn = (userId, userNickName) => {
+        friendsChatDiv(true, userId, userNickName);
+    };
     return (
         <div className={"friendsList_item_div"}>
             <div className={"friendsList_item_div2"}>
@@ -22,6 +25,7 @@ const FreindsListItem = React.memo(({user}) => {
                 <div className={"friendsList_item_btn_div"}>
                     <Button
                         className={"friendsList_item_btn"}
+                        onClick={() => friendsChatDivOn(userId, userNickName)}
                     >
                         1:1 Chat
                     </Button>

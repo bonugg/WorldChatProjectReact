@@ -18,6 +18,7 @@ const RandomStart = () => {
                 headers: {
                     "Content-Type": "application/json",
                     'Authorization': authorization,
+                    'userName': localStorage.getItem('userName'),
                 },
                 body: JSON.stringify({ userName: username })
             });
@@ -30,9 +31,11 @@ const RandomStart = () => {
             if (!result) {
                 return console.error(result.errorMessage);
             }
+
+            console.log(`Created random room name: ${result}`);
+            console.log(`Created random room name: ${result.randomRoomDTO}`);
             
-            console.log(`Created random room name: ${result.randomRoomName}`);
-            navigate(`/random/${result.randomRoomId}`, { state: { room: result } });
+            navigate(`/random/${result.randomRoomDTO.randomRoomId}`, { state: { room: result.randomRoomDTO } });
             return result;
 
         } catch (error) {

@@ -1,11 +1,22 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import Button from "@mui/material/Button";
 import "./css/CateChat.css";
 
 
-const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChatList}) => {
+const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, userCnt, shouldImmediatelyEnter}) => {
     const {cateId, cateName, cateUserCnt, maxUserCnt, interest} = room;
+    const userCntRef = useRef(null);
+
+    useEffect(() => {
+        if (shouldImmediatelyEnter) {
+            cateRoomEnter();
+        }
+    }, [shouldImmediatelyEnter]);
+
+    useEffect(() => {
+         userCntRef.current = userCnt;
+    }, [userCnt]);
 
     const cateRoomEnter = async (retry = true) => {
         try {
@@ -37,7 +48,7 @@ const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChat
                     // 이 곳에 성공적으로 입장한 경우 수행할 작업을 추가하세요.
                     // alert("SUCCESS.");
                     onCateRoomAndChatDivUpdate(true, data.cateRoom);
-                    cateChatList(data.cateChatList);
+                    userCnt(data.cateChatList);
                 }
             } else {
                 if (retry) {
@@ -51,15 +62,16 @@ const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChat
         }
     };
 
-    return (
+    return [cateRoomEnter, (
         <div
-            className={"roomList_item_div"}>
+            className={shouldImmediatelyEnter ? 'roomList_item_div2' : 'roomList_item_div'}
+        >
             <div className={"roomList_item_div_2"}>
                 <span className={"roomList_name_1"}>ROOM NAME :&nbsp;</span>
                 <span className={"roomList_name_2"}>{cateName}</span>
             </div>
             <div className={"roomList_item_div_3"}>
-
+                {cateUserCnt === 0 ? 1 : cateUserCnt}/{maxUserCnt}
             </div>
             <div className={"roomList_item_div_4"}>
                 <Button
@@ -71,7 +83,7 @@ const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChat
 
             </div>
         </div>
-    );
+    )];
 });
 
 export default CateChatListItem;

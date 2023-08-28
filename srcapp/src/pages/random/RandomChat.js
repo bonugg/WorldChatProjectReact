@@ -333,7 +333,7 @@ const RandomChat = () => {
 };
 
 const Message = ({ message }) => {
-    const me = message.sender === localStorage.getItem('userName');
+    const me = message.sender === localStorage.getItem("userName");
 
     //파일 다운로드 처리 함수
     const handleFileDownload = async (fileName, fileDir) => {
@@ -351,7 +351,7 @@ const Message = ({ message }) => {
             link.click();
         } catch (error) {
             console.error("파일 다운로드 실패:", error);
-        }
+        };
     };
 
     return (
