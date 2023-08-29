@@ -10,6 +10,7 @@ import RtcChatDrag from "./RtcChatDrag";
 
 const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     const [rtcChatDrag, setRtcChatDrag] = useState(false);
+    const [socket,setSocket] = useState(null);
     const handleRtcShowDrag = () => {
         setRtcChatDrag(true);
     };
@@ -22,12 +23,16 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
 
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
-    let host = "";
-    host = window.location.host;
-    console.log(host)
-    host = host.slice(0, -4);
-    console.log("wss://" + host + "9002" + "/signal");
-    let socket = new WebSocket("wss://" + host + "9002" + "/signal");
+    useEffect(() => {
+        let host = "";
+        host = window.location.host;
+        console.log(host)
+        host = host.slice(0, -4);
+        console.log("wss://" + host + "9002" + "/signal");
+        let sockets = new WebSocket("wss://" + host + "9002" + "/signal");
+        setSocket(sockets);
+    },[]);
+
     let localUserName = "";
     useEffect(()=>{
         handleRtcShowDrag();
@@ -103,9 +108,11 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     }, [remoteVideo])
     
 
+    if(socket){
     socket.onerror = function (error) {
         console.log("WebSocket Error: ", error);
     };
+}
 
     // 비디오 켜기/끄기 함수
     // const toggleVideo = () => {
@@ -163,6 +170,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     };
 
     // 페이지 시작시 실행되는 메서드 -> socket 을 통해 server 와 통신한다
+    if(socket){
     socket.onmessage = function (msg) {
         console.log("peertest !!!!!!!!!!!!!!!!!!!!!!!!!");
         let message = JSON.parse(msg.data);
@@ -211,6 +219,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
                 handleErrorMessage('Wrong type message received from server');
         }
     };
+}
 
 
     
@@ -243,6 +252,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     }
 
     // 웹 소켓 연결 되었을 때 - open - 상태일때 이벤트 처리
+    if(socket){
     socket.onopen = function () {
         log('WebSocket connection opened to Room: #' + localRoom);
         sendToServer({
@@ -251,13 +261,16 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
             data: localRoom
         });
     };
+}
 
     // 소켓이 끊겼을 때 이벤트처리
+    if(socket){
     socket.onclose = function (message) {
         log('Socket has been closed');
         // alert("연결이 끊어졌습니다.")
         // exitRooms().then(r => {});
     }
+}
 
     async function exitRooms(roomId) {
         const url = '/chat/delRoom';
@@ -280,9 +293,11 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     }
 
     // 에러 발생 시 이벤트 처리
+    if(socket){
     socket.onerror = function (message) {
         handleErrorMessage("Error: " + message);
     };
+}
     // }
 
     window.addEventListener('unload', stop);
@@ -349,10 +364,10 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
             
 
             log('Close the socket');
-            //if (socket && socket.readyState === WebSocket.OPEN) {
+            if (socket != null) {
                 socket.close();
-                socket = null;
-            //}
+
+            }
 
 
             // getMedia(mediaDisconnection);

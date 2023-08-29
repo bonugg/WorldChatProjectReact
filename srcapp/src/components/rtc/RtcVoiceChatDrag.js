@@ -6,8 +6,6 @@ function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking
     const [position, setPosition] = useState({x: -183, y: -286});
     const [isMinimized, setIsMinimized] = useState(false);
     const [isClosed, setIsClosed] = useState(false);
-console.log(src1+"src1@@@@@@@@@@@@@@")
-console.log(src2+"src2@@@@@@@@@@@@@@")
     //버튼 토글
     const [button1Active, setButton1Active] = useState(false);
     const [button2Active, setButton2Active] = useState(false);

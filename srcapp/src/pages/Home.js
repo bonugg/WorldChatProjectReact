@@ -27,6 +27,9 @@ import SockJS from 'sockjs-client';
 import CateChatDrag from "./CateChatDrag";
 import RandomChatDrag from "./RandomChatDrag";
 import OneOnOneChatDrag from "./OneOnOneChatDrag";
+import NotificationModal from "../components/rtc/NotificationModal.js";
+import NotificationDeclineModal from '../components/rtc/NotificationDeclineModal.js';
+import { type } from '@testing-library/user-event/dist/type';
 
 const CanvasContainer = styled.div`
   width: 100%;
@@ -207,33 +210,46 @@ const Home = React.memo(() => {
         //friendList Context API
         const [userList, setUserList] = useState([]);
 
+        const [showModal, setShowModal] = useState(false);
+        const [showDeclineModal,setShowDeclineModal] = useState(false);
+        const [modalContent, setModalContent] = useState("");
+
+        const handleModalConfirm = () => {
+            setShowModal(false);
+            setSendUser(modalContent.split("님이")[0]);
+            setReceiverUser(rtcUserName);
+
+            if (modalContent.includes("영상통화")) {
+                setShowRtcChat(true);
+                setShowRtcVoiceChat(false);
+            } else if (modalContent.includes("음성통화")) {
+                setShowRtcVoiceChat(true);
+                setShowRtcChat(false);
+            }
+        };
+
+        const handleModalDecline = () => {
+            //setSendUser(modalContent.split("님이")[0]);
+            handleDecline();
+
+        }
+
+        const handleSendDeclineModal = () => {
+            setShowRtcVoiceChat(false);
+            setShowDeclineModal(false);
+        }
+        
+        
         // let socket;
         useEffect(() => {
             if (socket) {
                 socket.onmessage = function (event) {
                     const receivedMessage = event.data;
-                    if (window.confirm(`Received message: ${receivedMessage}`)) {
-                        setSendUser(receivedMessage.split("님이")[0]);
-                        console.log(setSendUser + "님이 걸었음");
-                        setReceiverUser(rtcUserName);
-                        
-                        if (receivedMessage.includes("영상통화")) {
-                            setShowRtcChat(true);
-                            setShowRtcVoiceChat(false);
-                        } else if (receivedMessage.includes("음성통화")) {
-                            setShowRtcVoiceChat(true);
-                            setShowRtcChat(false);
-                        }
+                    
+                    console.log("receivedMessage ::::" + receivedMessage );
+                    setModalContent(receivedMessage);
+                    setShowModal(true);
 
-                        //아래는 석이 됬 됐 
-
-                    // if (window.confirm(`Received message: ${event.data}`)) {
-                    //     setSendUser(event.data.split("님이")[0]);
-                    //     setReceiverUser(rtcUserName);
-                    //     console.log("수신자 화면에서 나옴");
-                    //     setShowRtcChat(true);
-
-                    }
                 };
             }
         }, [socket]);
@@ -242,10 +258,12 @@ const Home = React.memo(() => {
             setIsPasswordChangeDiv(newValue);
             setIsPasswordChangeDiv2(true);
         };
+
         const isPasswordChangeDivClose = (newValue) => {
             setIsPasswordChangeDiv(newValue);
             setIsPasswordChangeDiv2(true);
         };
+
         const isFriendsListZoom = (newValue) => {
             if (newValue) {
                 setFriendsList(true);
@@ -297,36 +315,6 @@ const Home = React.memo(() => {
             }
         };
 
-        // 아래는 석이 거
-        
-        // const [type2, setType2] = useState('');
-
-        // const handleGrandchildData = async (data) => {
-        //     console.log("자식의 자식 컴포넌트로부터 받은 데이터:", data);
-        //     setDataFromChild(data);
-        //     setReceiverUser(data)
-        //     setSendUser(rtcUserName)
-        //     console.log("보낸이: "+localStorage.getItem('userName'));
-        //     console.log("받는이: "+data);
-        //     try {
-        //         const response = await fetch('/webrtc/request', {
-        //             method: 'POST',
-        //             headers: {
-        //                 'Content-Type': 'application/json'
-        //             },
-        //             body: JSON.stringify({
-        //                 sender: localStorage.getItem('userName'),
-        //                 receiver: data
-        //             })
-        //         });
-        //         if (response.ok) {
-        //             console.log("발신자 화면에서 나옴");
-        //             setShowRtcChat(true);
-        //         }
-        //         if (!response.ok) {
-        //             throw new Error(`Logout failed with status: ${response.status}`);
-        //         }
-
         const [dataFromChild, setDataFromChild] = useState(null);
         const [type2, setType2] = useState('');
 
@@ -371,10 +359,68 @@ useEffect(() => {
 }, []);  // 이 배열이 비어 있으므로 이 useEffect는 컴포넌트가 마운트될 때만 실행되게
 
 
+const localRoom = sendUser + "님과 " + receiverUser + "님의 음성채팅방"
 
+const handleDecline = async () => {
 
+    try {
+        const response = await fetch('/webrtc/decline', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: localStorage.getItem('userName'),  // 현재 유저 (거절한 사람)
+                receiver: sendUser, // 통화를 요청한 사람
+                roomId:localRoom,
+                
+            })
+        });    
 
+        if (response.ok) {
+            //setShowDeclineModal(true);
+            console.log("decline샌드유저 " + sendUser);
+            console.log("decline리시버유저" + receiverUser);
+            console.log("decline리시버유저 " + localStorage.getItem('userName'));
+            setChatType('');
+            console.log(type2);
+            console.log(localRoom);
+        } else {
+            throw new Error(`Decline request failed with status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Error during decline request:", error);
+    }
 
+    // 모달 닫기
+    setShowModal(false);
+    setShowDeclineModal(false);
+};
+
+useEffect(() => {
+    if (socket) {
+        socket.onmessage = function (event) {
+            const receivedMessage = event.data;
+
+            if (receivedMessage.includes("거절")) {
+                // 거절 메시지를 받았을 때의 로직
+                setShowRtcChat(false);
+                setShowRtcVoiceChat(false);
+                setModalContent(receivedMessage);
+                //setShowModal(false);
+                setShowDeclineModal(true);
+                setChatType('');
+            } else {
+                // 기존의 메시지 처리 로직
+                setModalContent(receivedMessage);
+                setShowModal(true);
+            }
+        };
+    }
+}, [socket]);
+
+console.log("샌드유저 스테이트 확인값 @@@@@@@@@@@@@@@@@" + sendUser);
+console.log("리시버유버 스테이트 확인값 @@@@@@@@@@@@@@@@" + receiverUser);
 
 
 const sendRequestToServer = async () => {
@@ -391,8 +437,12 @@ const sendRequestToServer = async () => {
             })
         });
 
+        console.log("요청샌더 " + sendUser);
+        console.log("요청리시버 " + receiverUser);
+
         if (response.ok) {
             console.log(type2+"타입ㅂㅂㅂㅂㅂㅂㅂㅂ");
+            console.log("api 호출 완료 request@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2")
             if (type2 === "video") {
                 console.log("비디오테스트");
                 setShowRtcChat(true);
@@ -1008,6 +1058,22 @@ const handleGrandchildData = (data) => {
                             </Canvas>
                         </CanvasContainer>
 
+                    <NotificationModal 
+                        show={showModal} 
+                        onHide={() => setShowModal(false)}
+                        onAccept={handleModalConfirm}
+                        onDecline={handleModalDecline}
+                        message={modalContent}
+                    />
+                    <NotificationDeclineModal
+                        show={showDeclineModal}
+                        onHide={() => setShowDeclineModal(false)}
+                        message={modalContent}
+                        onDeclineAccept={handleSendDeclineModal}
+
+                    />
+
+
                         <DivStyledMenu visible={MyPageDiv ? "visible" : ""}>
                             <MyPage
                                 MyPageDiv={MyPageDiv}
@@ -1017,6 +1083,7 @@ const handleGrandchildData = (data) => {
                         </DivStyledMenu>
 
                         <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
+
                         <UserListContext.Provider value={{ userList, setUserList }}>
                             <FreindsList
                                 onData={handleGrandchildData}
@@ -1027,6 +1094,7 @@ const handleGrandchildData = (data) => {
                                 isOneOnOneChatDiv={isOneOnOneChatDiv}
                             />
                         </UserListContext.Provider>
+
                             {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>
 
