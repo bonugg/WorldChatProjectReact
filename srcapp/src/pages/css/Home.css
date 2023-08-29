@@ -119,6 +119,7 @@ body {
     margin-top: 1px;
     width: 100%;
     height: 100px;
+    min-height: 100px;
     padding: 10px;
     box-sizing: border-box;
     display: flex;
@@ -165,8 +166,10 @@ a {
     /*opacity: 0.7;*/
     /*background-size: cover;*/
     /*background-repeat: no-repeat;*/
-    height: 100vh; /* 사이드바의 높이를 전체 화면 높이의 90%로 지정 */
+    height: 100%; /* 사이드바의 높이를 전체 화면 높이의 90%로 지정 */
     box-shadow: 5px 0px 5px -2px rgba(45, 45, 47, 0.5);
+    display: flex;
+    flex-direction: column;
 }
 .side-bar ul{
     background-color: rgba(0, 0, 0, 0) !important;
@@ -362,12 +365,58 @@ a {
 /*    transform: translate(-40px, 0); !* 둥근 모서리의 너비만큼 숨겨주기 *!*/
 /*}*/
 .foot{
-    position: absolute;
-    bottom: 30px;
+    flex: 1;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-end;
     align-items: center;
     width: 100%;
+}
+.foot_2{
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    height: 50px;
+}
+.foot_3{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 7px;
+    padding: 10px;
+    box-sizing: border-box;
+    align-items: center;
+    width: 100%;
+    height: 70px;
+    margin-bottom: 30px;
+}
+
+.R_maximum_btn{
+    margin: auto !important;
+    background-color: #18181f !important;
+    width: 80% !important;
+    min-width: 80% !important;
+    height: 80% !important;
+    border: 0px solid #3b3e3f !important;
+    border-top-width: 1px !important;
+    box-shadow: 2px 3px 0px 0px black;
+    color: white !important;
+    font-family: 'Russo One', sans-serif!important;
+    border-radius: 5px !important;
+    transition: all 0.25s ease-in-out !important;
+}
+.R_maximum_btn:hover{
+    background-color: #272731 !important;
+    box-shadow: -1px -1px 0px 0px black;
+    border-top-width: 0px !important;
+}
+
+.R_maximum_btn:disabled{
+    background-color: #1a1a1f !important;
+    color: rgba(70, 70, 70, 1) !important;
+    box-shadow: -1px -1px 0px 0px black;
+    border-top-width: 0px !important;
+    transition: all 0.25s ease-in-out;
 }
 .foot_text{
     font-size: 10px;
@@ -684,11 +733,11 @@ input[type=text], input[type=password], input[type=file] {
     height: 50px;
     padding-left: 20px;
     box-sizing: border-box;
-    border-radius: 10px;
+    border-radius: 4px;
     background-color: rgba(0, 0, 0, 0.7);
     border: 1px solid rgba(200, 200, 200, 0.2);
     outline: none;
-    font-size: 13px;
+    font-size: 12px;
     transition: all 0.5s ease-in-out;
 }
 
@@ -820,11 +869,10 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
 
 button[type=submit] {
     width: 90%;
-    height: 50px !important;
-    padding-left: 20px;
-    box-sizing: border-box !important;
-    border-radius: 10px !important;
-    margin-right: 0px !important;
+    height: 50px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin-right: 0px;
     background-color: rgba(0, 0, 0, 1);
     border: 1px solid rgba(100, 100, 100, 0.5);
     outline: none;
@@ -915,7 +963,7 @@ button[type=submit]:disabled {
 }
 
 button[type=button]:disabled {
-    background-color: #000000 !important;
+    background-color: #000000;
     color: #343434 !important;
     cursor: auto !important;
 }

@@ -1,8 +1,9 @@
 import React, {useEffect, useRef, useState, useCallback} from "react";
-import Draggable from 'react-draggable';
+import { Rnd } from "react-rnd";
 
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import FolderIcon from '@mui/icons-material/Folder';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import {Stomp, Client} from "@stomp/stompjs";
@@ -14,6 +15,8 @@ import CateChatListItem from './CateChatListItem';
 import styled, {keyframes} from "styled-components";
 import axios from "axios";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import Logo from "../img/logo_no_text.png";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 const MessageStyled = styled.p`
 `;
@@ -24,13 +27,13 @@ const slideDownMenu = keyframes`
   }
   100% {
     width: 330px;
-    height: 70px;
+    height: 50px;
   }
 `;
 const slideUpMenu = keyframes`
   0% {
     width: 330px;
-    height: 70px
+    height: 50px
   }
   100% {
     width: 0px;
@@ -76,12 +79,12 @@ const MenuPanel = styled.div`
   left: 10px; // 수정된 부분
   z-index: 1;
   width: ${props => props.visible ? '330px' : '0px'}; // 기존 속성
-  height: ${props => props.visible ? '70px' : '0px'}; // 기존 속성
+  height: ${props => props.visible ? '50px' : '0px'}; // 기존 속성
   overflow-y: hidden;
   overflow-x: hidden;
   transition: all 0.25s ease-in-out;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  background: rgba(130, 130, 130, 0.7);
 `;
 
 const DivStyled = styled.div`
@@ -133,7 +136,7 @@ const UserListPanel = styled.div`
   }
 `;
 
-const Drag = React.memo(({show, onClose, logoutApiCate}) => {
+const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) => {
         // 위치 및 상태 설정
         const [windowSize, setWindowSize] = useState({
             width: window.innerWidth,
@@ -177,7 +180,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const [createRoom2, setCreatRoom2] = useState(false);
         const createRoomRef = useRef(null);
 
-        const [isMinimized, setIsMinimized] = useState(false);
         const [isClosed, setIsClosed] = useState(false);
 
         const userNickNameRef = useRef(null);
@@ -186,6 +188,12 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const [CateName, setCateName] = useState('Select Category');
         const [CateRoom, setCateRoom] = useState({});
         const [isChatDiv, setIsChatDiv] = useState(false);
+
+        //채팅을 치고 있는지 안 치고 있는지 확인하는 상태 변수
+        const [isTyping, setIsTyping] = useState("");
+        const [Typing, setTyping] = useState([]);
+        const [dots, setDots] = useState('');
+
         //현재 선택중인 카테고리
         const currentCate = useRef(null);
         // stompClient를 useState로 관리합니다.
@@ -241,6 +249,18 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             "fr": "French (Français)"
 
         };
+        const [size, setSize] = useState({ width: "450px", height: "600px"});
+        //rnd
+        const [resizing, setResizing] = useState(false);
+        const handleResizeStart  = () => {
+            // 사이즈 결정
+            setResizing(true);
+        };
+        const handleResizeStop = (e, direction, ref) => {
+            // 사이즈 결정
+            setSize({ width: ref.style.width, height: ref.style.height });
+            setResizing(false); // resizing 상태 업데이트
+        };
 
         useEffect(() => {
             selectedLanguageRef.current = selectedLanguage;
@@ -255,6 +275,35 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         useEffect(() => {
             isScrollRef.current = isScroll;
         }, [isScroll]);
+        useEffect(() => {
+            if (!inputChange) {
+                setSendMessage("");
+            }
+        }, [inputChange]);
+        useEffect(() => {
+            if (stompClient !== null) {
+                if (isTyping === "y") {
+                    sendTypingMessage();
+                } else if(isTyping === "n"){
+                    removeTypingMessage();
+                }
+            }
+        }, [isTyping]);
+        useEffect(() => {
+            if (Typing.length != 0) {
+                // 타이머 설정
+                const timerId = setInterval(() => {
+                    // dots의 길이에 따라 다음 상태 설정
+                    setDots(dots => dots.length < 3 ? dots + '.' : '');
+                }, 800);
+
+                // 컴포넌트가 언마운트되거나 업데이트되기 전에 타이머 제거
+                return () => clearInterval(timerId);
+            } else {
+                setDots("");
+            }
+
+        }, [Typing]);
 
         const toggleUserListPanel = () => {
             setIsUserListVisible((prevIsUserListVisible) => !prevIsUserListVisible);
@@ -311,7 +360,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                 setIsChatReadOnly(true);
                 console.log("Connected: " + frame);
 
-                client.subscribe("/cateSub/" + CateRoom.cateId, async(messageOutput) => {
+                client.subscribe("/cateSub/" + CateRoom.cateId, async (messageOutput) => {
                     const responseData = JSON.parse(messageOutput.body);
                     console.log(responseData);
 
@@ -440,6 +489,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
 
         useEffect(() => {
             if (!show) {
+                setSize({ width: "450px", height: "600px"});
                 setIsClosed(false);
                 setIsChatDiv(false);
             }
@@ -448,6 +498,8 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         useEffect(() => {
             if (isChatDiv) {
                 setCreateRoomId('');
+                setTyping([]);
+                setDots("");
                 connect();
             } else {
                 disconnect();
@@ -484,7 +536,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             setCreatRoom(false);
             setCreatRoom2(false);
             setIsUserListVisible2(false);
-            setIsMinimized(!isMinimized);
+            isMinimize(!false);
         };
 
         const handleCloseClick = () => {
@@ -544,7 +596,17 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
 
         //스크롤바 상태
         const showMessageOutput = (messageOutput) => {
-            setMessages((prevMessages) => [...prevMessages, messageOutput]);
+            if (messageOutput.cateChatContent === 'typing...') {
+                setTyping((prevMessages) => [...prevMessages, messageOutput.sender + " typing "]);
+            } else if (messageOutput.cateChatContent === 'removeTyping') {
+                setTyping(prevList => prevList.filter(item => !item.includes(messageOutput.sender)));
+                setDots("");
+            } else {
+                setTyping(prevList => prevList.filter(item => !item.includes(messageOutput.sender)));
+                setDots("");
+                setIsTyping("f");
+                setMessages((prevMessages) => [...prevMessages, messageOutput]);
+            }
         };
         const showUserListOutput = (messageOutput) => {
             setuserList((prevUserList) => [...messageOutput]);
@@ -714,15 +776,51 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
 //--------------파일 버튼 클릭 시 동작----------------------
 //--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환----------------------
         const handleInputChange = (e) => {
-            setSendMessage('');
             setInputChange(false);
         };
 //--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환----------------------
 //--------------텍스트 채팅 시 입력 메시지 보여주기----------------------
         const handleMessageChange = (e) => {
+            if (e.target.value.trim() !== '') {
+                setIsTyping("y");
+            } else {
+                setIsTyping("n");
+            }
             setSendMessage(e.target.value);
 
         };
+
+        //입력중...메시지 띄우기
+        const sendTypingMessage = () => {
+            // 메시지 전송 처리를 여기서 수행
+            const message = {
+                type: "CHAT",
+                cateId: CateRoom.cateId,
+                cateChatContent: "typing...",
+            };
+
+            stompClient.send(
+                `/catePub/categoryChat/${CateRoom.cateId}/sendMessage`,
+                {},
+                JSON.stringify(message)
+            );
+        }
+        //백스페이스로 입력값을 지웠을 때 입력중...없애기
+        const removeTypingMessage = () => {
+            const message = {
+                type: "CHAT",
+                cateId: CateRoom.cateId,
+                cateChatContent: "removeTyping",
+            };
+
+            stompClient.send(
+                `/catePub/categoryChat/${CateRoom.cateId}/sendMessage`,
+                {},
+                JSON.stringify(message)
+            );
+        }
+
+
 //--------------텍스트 채팅 시 입력 메시지 보여주기----------------------
 //--------------파일 버튼 클릭 후 파일 첨부 시에 파일 명 인풋창에 표시----------------------
         const handleFileChange = (e) => {
@@ -808,28 +906,55 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         };
 //--------------다운로드 파일----------------------
         return (
-            <div className="Drag">
+            <>
                 {!isClosed && (
                     <>
-                        <Draggable defaultPosition={position} onDrag={handleDrag} disabled={isMinimized}>
+                        <Rnd
+                            size={size}
+                            minWidth={450}
+                            minHeight={600}
+                            maxWidth={600}
+                            maxHeight={750}
+                            disabled={!cateMax}
+                            onResizeStop={handleResizeStop}
+                            onResizeStart={handleResizeStart}
+                            default={{ x: position.x, y: position.y }}
+                            enableResizing={{
+                                top: false,
+                                right: true,
+                                bottom: true,
+                                left: false,
+                                topRight: true,
+                                bottomRight: true,
+                                bottomLeft: false,
+                                topLeft: false,
+                            }}
+                            style={{
+                                borderRadius: "15px",
+                                zIndex: "2",
+                                position: "fixed",
+                                display: !cateMax ? "none" : "block",
+                                transition: resizing ? 'none' : 'width 0.25s ease-in-out, height 0.25s ease-in-out'
+                            }}
+                            dragHandleClassName="headerChat"
+                            >
                             <div
                                 className="box"
                                 style={{
-                                    position: isMinimized ? 'absolute' : 'fixed',
-                                    display: isMinimized ? 'none' : 'block',
+                                    position: !cateMax ? 'absolute' : 'fixed',
+                                    display: !cateMax ? 'none' : 'block',
                                     top: '0',
                                     cursor: 'auto',
                                     color: 'black',
-                                    width: '450px',
-                                    height: '600px',
+                                    width: '100%',
+                                    height: '100%',
                                     borderRadius: '15px',
                                     borderTopLeftRadius: isUserListVisible ? '0px' : '15px',
                                     borderBottomLeftRadius: '15px',
-                                    padding: '1em',
+                                    padding: '0px',
                                     margin: 'auto',
                                     userSelect: 'none',
                                     zIndex: '2',
-                                    background: 'rgb(50, 50, 50,0.8)',
                                     transition: isUserListVisible ? 'border-top-left-radius 0s ease-in-out, border-bottom-left-radius 0s ease-in-out' : 'border-top-left-radius 1s ease-in-out, border-bottom-left-radius 1s ease-in-out'
                                 }}
                             >
@@ -936,10 +1061,15 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                         </div>
                                     </div>
                                 </DivStyled>
-                                <div className={"header"}>
+                                <div className={"headerChat"}>
                                     <div className={"btnDiv_create"}>
+                                        <img
+                                            className={"logo_img"}
+                                            src={Logo}
+                                        ></img>
                                         {isChatDiv ? (
                                             <Button
+                                                type={'button'}
                                                 className={"userList"}
                                                 onClick={toggleUserListPanel}
                                                 disabled={!isChatReadOnly}
@@ -972,28 +1102,26 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
 
                                 </div>
                                 {/* 밑으로 컨텐츠 들어갈 부분*/}
-                                {/*<div style={{color:'white', fontSize: '22px'}}>x: {position.x.toFixed(0)}, y: {position.y.toFixed(0)}</div>*/}
+                                <div className={isChatDiv ? "contentChat_true" : "contentChat"}>
                                 {isChatDiv ? (
-                                    <div className={"chat"}>
+                                    <div className={"chatR"}>
                                         <div className={"EnterRoom"}>
                                             <div className={"EnterRoom_2"}>
-                                                <div className={"EnterRoomCate"}>
-                                                    <div className={"EnterRoomCate_text"}>
-                                                        {CateRoom.interest}</div>
-                                                </div>
-                                                <div className={"EnterRoomName"}>
+                                                <div className={"EnterRoomNameCate"}>
                                                     <span className={"EnterRoomName_2"}>
                                                         {CateRoom.cateName}
                                                     </span>
                                                 </div>
                                                 <div className={"EnterRoomClose"}>
-                                                <Button
-                                                    className={"Close_btn"}
-                                                    onClick={() => exitChatDiv(CateRoom.interest)}
-                                                >
-                                                    Back
-                                                </Button>
-                                            </div>
+                                                    <div className={"EnterRoomCate_text"}>
+                                                        {CateRoom.interest}</div>
+                                                    <Button
+                                                        className={"Close_btn"}
+                                                        onClick={() => exitChatDiv(CateRoom.interest)}
+                                                    >
+                                                        <LogoutIcon style={{fontSize : 'small'}}/>
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className={"EnterRoomChat"}>
@@ -1002,9 +1130,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                     <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
                                                         {messages.map((message, index) => {
                                                             const isMyMessage = message.sender === userNickNameRef.current;
-                                                            console.log(message.s3DataUrl)
-                                                            console.log(message.fileName)
-                                                            console.log(message.fileDir)
                                                             return (
                                                                 <MessageStyled
                                                                     key={index}
@@ -1035,7 +1160,8 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                             ? <video src={message.s3DataUrl}
                                                                                                      controls
                                                                                                      className={"message_img"}/> // 동영상 렌더링
-                                                                                            : <div className={"message_other"}>
+                                                                                            : <div
+                                                                                                className={"message_other"}>
                                                                                             <span
                                                                                                 className={"message_other_text"}>
                                                                                                      {message.fileName}
@@ -1074,7 +1200,8 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                             ? <video src={message.s3DataUrl}
                                                                                                      controls
                                                                                                      className={"message_img2"}/> // 동영상 렌더링
-                                                                                            : <div className={"message_other2"}>
+                                                                                            : <div
+                                                                                                className={"message_other2"}>
                                                                                             <span
                                                                                                 className={"message_other_text2"}>
                                                                                                      {message.fileName}
@@ -1107,6 +1234,9 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                             );
                                                         })}
                                                     </div>
+                                                    <div className="EnterRoomChat_content_typing">
+                                                        {Typing.length == 0 ? Typing[0] : Typing[Typing.length - 1]}{dots}
+                                                    </div>
                                                 </div>
                                                 <div className={"EnterRoomChat_input_one"}>
                                                     <form className={"EnterRoomChat_input_form_one"}
@@ -1120,7 +1250,8 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                         className={"menu_btn"}
                                                                         type="button"
                                                                         onClick={handleFileButtonClick}
-                                                                    >FILE
+                                                                    >
+                                                                        <FolderIcon style={{fontSize : 'small'}}/>
                                                                     </Button>
                                                                 </div>
                                                                 <div className={"trans"}>
@@ -1128,9 +1259,11 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                             onChange={handleLanguageChange}
                                                                             value={selectedLanguage}
                                                                     >
-                                                                        <MenuItem className={"trans_li_select"} value={" "}>Not translated</MenuItem>
+                                                                        <MenuItem className={"trans_li_select"} value={" "}>Not
+                                                                            translated</MenuItem>
                                                                         {Object.entries(languages).map(([code, name]) => (
-                                                                            <MenuItem className={"trans_li_select"} key={code}
+                                                                            <MenuItem className={"trans_li_select"}
+                                                                                      key={code}
                                                                                       value={code}>{name}</MenuItem>
                                                                         ))}
                                                                     </Select>
@@ -1304,27 +1437,12 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                         </div>
                                     </div>
                                 )}
-                                {/*</div>*/}
+                                </div>
                             </div>
-                        </Draggable>
-                        {isMinimized && (
-                            <Button
-                                onClick={handleMinimizeClick}
-                                style={{
-                                    position: 'absolute',
-                                    left: '50%',
-                                    bottom: '80px',
-                                    transform: 'translateX(calc(-50% + 150px))', // 수정된 부분
-                                    zIndex: '2',
-                                }}
-                                className={"maximum_btn"}
-                            >
-                                C
-                            </Button>
-                        )}
+                        </Rnd>
                     </>
                 )}
-            </div>
+            </>
         );
     })
 ;

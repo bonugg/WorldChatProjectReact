@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState, useCallback} from "react";
-import Draggable from 'react-draggable';
+import { Rnd } from "react-rnd";
 
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -56,7 +56,7 @@ const MenuPanel = styled.div`
   background: rgba(255, 255, 255, 0.5);
 `;
 
-const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId, oneOnOneUserNickName}) => {
+const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId, oneOnOneUserNickName, friendMax, isMinimize}) => {
         // 위치 및 상태 설정
         const [windowSize, setWindowSize] = useState({
             width: window.innerWidth,
@@ -87,7 +87,6 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
         };
         const [position, setPosition] = useState(initialPosition);
         const handleDrag = useCallback((e, data) => trackPos(data), []);
-        const [isMinimized, setIsMinimized] = useState(false);
         const [isClosed, setIsClosed] = useState(false);
         const [isChatDiv, setIsChatDiv] = useState(false);
 
@@ -152,6 +151,24 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
 
         };
 
+        //채팅을 치고 있는지 안 치고 있는지 확인하는 상태 변수
+        const [isTyping, setIsTyping] = useState("");
+        const [Typing, setTyping] = useState([]);
+        const [dots, setDots] = useState('');
+
+        const [size, setSize] = useState({ width: "450px", height: "600px"});
+        //rnd
+        const [resizing, setResizing] = useState(false);
+        const handleResizeStart  = () => {
+            // 사이즈 결정
+            setResizing(true);
+        };
+        const handleResizeStop = (e, direction, ref) => {
+            // 사이즈 결정
+            setSize({ width: ref.style.width, height: ref.style.height });
+            setResizing(false); // resizing 상태 업데이트
+        };
+
         useEffect(() => {
             selectedLanguageRef.current = selectedLanguage;
         }, [selectedLanguage]);
@@ -165,7 +182,35 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
         useEffect(() => {
             isScrollRef.current = isScroll;
         }, [isScroll]);
+        useEffect(() => {
+            if (!inputChange) {
+                setSendMessage("");
+            }
+        }, [inputChange]);
+        useEffect(() => {
+            if (client !== null) {
+                if (isTyping === "y") {
+                    sendTypingMessage();
+                } else if(isTyping === "n"){
+                    removeTypingMessage();
+                }
+            }
+        }, [isTyping]);
+        useEffect(() => {
+            if (Typing.length != 0) {
+                // 타이머 설정
+                const timerId = setInterval(() => {
+                    // dots의 길이에 따라 다음 상태 설정
+                    setDots(dots => dots.length < 3 ? dots + '.' : '');
+                }, 800);
 
+                // 컴포넌트가 언마운트되거나 업데이트되기 전에 타이머 제거
+                return () => clearInterval(timerId);
+            } else {
+                setDots("");
+            }
+
+        }, [Typing]);
         const getChatMessageFromDB = async () => {
             try {
                 const response = await axios.get(`/chatroom/${roomIdRef.current}`, {
@@ -178,7 +223,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                     console.log(response.data.items);
                     // checkRead가 false인 객체만 골라서 해당 속성을 true로 변경
                     const updatedItems = response.data.items.reduce((acc, item) => {
-                        if (item.checkRead === false) {
+                        if (item.checkRead === false && item.sender != userNickNameRef.current) {
                             acc.push({...item, checkRead: true});
                         } else {
                             acc.push(item);
@@ -410,14 +455,17 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
 
 //--------------텍스트 채팅 시 입력 메시지 보여주기----------------------
         const handleMessageChange = (e) => {
+            if (e.target.value.trim() !== '') {
+                setIsTyping("y");
+            } else {
+                setIsTyping("n");
+            }
             setSendMessage(e.target.value);
-
         };
 //--------------텍스트 채팅 시 입력 메시지 보여주기----------------------
 
 //--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환----------------------
         const handleInputChange = (e) => {
-            setSendMessage('');
             setInputChange(false);
         };
 //--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환----------------------
@@ -526,6 +574,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
 //--------------채팅 창 오픈----------------------
         useEffect(() => {
             if (!show) {
+                setSize({ width: "450px", height: "600px"});
                 setMenuDiv(false);
                 setMenuDiv2(false);
                 setUserNickNameOther("");
@@ -575,7 +624,17 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
 
 //--------------메세지 배열에 추가----------------------
         const showMessageOutput = (messageOutput) => {
-            setMessages((prevMessages) => [...prevMessages, messageOutput]);
+            if (messageOutput.message === 'typing...') {
+                setTyping((prevMessages) => [...prevMessages, messageOutput.sender + " typing "]);
+            } else if (messageOutput.message === 'removeTyping') {
+                setTyping(prevList => prevList.filter(item => !item.includes(messageOutput.sender)));
+                setDots("");
+            } else {
+                setTyping(prevList => prevList.filter(item => !item.includes(messageOutput.sender)));
+                setDots("");
+                setIsTyping("f");
+                setMessages((prevMessages) => [...prevMessages, messageOutput]);
+            }
         };
 //--------------메세지 배열에 추가----------------------
 
@@ -584,7 +643,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
         const handleMinimizeClick = () => {
             setMenuDiv(false);
             setMenuDiv2(false);
-            setIsMinimized(!isMinimized);
+            isMinimize(!false);
         };
 //--------------채팅창 최소화 -----------------------
 
@@ -610,6 +669,34 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
         };
 //--------------메뉴 오픈-----------------------
 
+        //입력중...메시지 띄우기
+        const sendTypingMessage = () => {
+            // 메시지 전송 처리를 여기서 수행
+            const message = {
+                roomId: roomIdRef.current,
+                message: "typing..."
+            };
+
+            stompClient.send(
+                "/frdPub/friendchat",
+                {},
+                JSON.stringify(message)
+            );
+        }
+        //백스페이스로 입력값을 지웠을 때 입력중...없애기
+        const removeTypingMessage = () => {
+            // 메시지 전송 처리를 여기서 수행
+            const message = {
+                roomId: roomIdRef.current,
+                message: "removeTyping"
+            };
+
+            stompClient.send(
+                "/frdPub/friendchat",
+                {},
+                JSON.stringify(message)
+            );
+        }
 
 //--------------메시지 전송 -----------------------
         const handleSendMessage = (event) => {
@@ -653,27 +740,57 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
         };
 //--------------스크롤 바 -----------------------
         return (
-            <div className="Drag">
+            <>
                 {!isClosed && (
                     <>
-                        <Draggable defaultPosition={position} onDrag={handleDrag} disabled={isMinimized}>
+                        <Rnd
+                            size={size}
+                            minWidth={450}
+                            minHeight={600}
+                            maxWidth={600}
+                            maxHeight={750}
+                            disabled={!friendMax}
+                            onResizeStop={handleResizeStop}
+                            onResizeStart={handleResizeStart}
+                            default={{ x: position.x, y: position.y }}
+                            enableResizing={{
+                                top: false,
+                                right: true,
+                                bottom: true,
+                                left: false,
+                                topRight: true,
+                                bottomRight: true,
+                                bottomLeft: false,
+                                topLeft: false,
+                            }}
+                            style={{
+                                borderRadius: "15px",
+                                zIndex: "9999",
+                                position: "fixed",
+                                left: position.x,
+                                top: position.y,
+                                display: !friendMax ? "none" : "block",
+                                transition: resizing ? 'none' : 'width 0.25s ease-in-out, height 0.25s ease-in-out'
+                            }}
+                            dragHandleClassName="header"
+                        >
                             <div
                                 className="box"
                                 style={{
-                                    position: isMinimized ? 'absolute' : 'fixed',
-                                    display: isMinimized ? 'none' : 'block',
+                                    position: !friendMax ? 'absolute' : 'fixed',
+                                    display: !friendMax ? 'none' : 'block',
                                     top: '0',
                                     cursor: 'auto',
                                     color: 'black',
-                                    width: '450px',
-                                    height: '600px',
+                                    width: '100%',
+                                    height: '100%',
                                     borderRadius: '15px',
                                     borderTopLeftRadius: '15px',
                                     borderBottomLeftRadius: '15px',
                                     padding: '1em',
                                     margin: 'auto',
                                     userSelect: 'none',
-                                    zIndex: '2',
+                                    zIndex: '10',
                                     background: 'rgb(50, 50, 50,0.8)',
                                     transition: 'height 0.25s ease-in-out'
                                 }}
@@ -703,6 +820,9 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                     <div className={"EnterRoomChat_one"}>
                                         <div className={"EnterRoomChat_2"}>
                                             <div className={"EnterRoomChat_content_one"}>
+                                                <div className="EnterRoomChat_content_typing">
+                                                    {Typing.length == 0 ? Typing[0] : Typing[Typing.length - 1]}{dots}
+                                                </div>
                                                 <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
                                                     {messages.map((message, index) => {
                                                         const isMyMessage = message.sender === userNickNameRef.current;
@@ -886,25 +1006,10 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                             {/* 밑으로 컨텐츠 들어갈 부분*/}
                             {/*<div style={{color:'white', fontSize: '22px'}}>x: {position.x.toFixed(0)}, y: {position.y.toFixed(0)}</div>*/}
                             {/*</div>*/}
-                        </Draggable>
-                        {isMinimized && (
-                            <Button
-                                onClick={handleMinimizeClick}
-                                style={{
-                                    position: 'absolute',
-                                    left: '53.8%',
-                                    bottom: '80px',
-                                    transform: 'translateX(calc(-50% + 150px))', // 수정된 부분
-                                    zIndex: '2',
-                                }}
-                                className={"maximum_btn"}
-                            >
-                                O
-                            </Button>
-                        )}
+                        </Rnd>
                     </>
                 )}
-            </div>
+            </>
         );
     })
 ;
