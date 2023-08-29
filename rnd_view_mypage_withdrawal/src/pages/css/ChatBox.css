@@ -1,0 +1,74 @@
+/* ChatBox.css */
+.ChatBox {
+  display: flex;
+  flex-direction: column;
+  height: 95%;
+}
+
+.messages {
+  overflow-y: auto;
+  flex-grow: 1;
+  background-color: rgba(5, 4, 4, 0.563);
+  display: flex;
+  flex-direction: column;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  padding: 10px;
+}
+
+.message {
+  color: rgb(211, 211, 223);
+  padding: 5px 10px;
+  margin-bottom: 5px;
+  border-radius: 15px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.message.user {
+  color: white;
+  text-align: left;
+  background-color: #007aff;
+  border-radius: 15px;
+  align-self: flex-end;
+}
+
+.message.partner {
+  color: black;
+  text-align: right;
+  background-color: #f1f0f0;
+  border-radius: 15px;
+  align-self: flex-start;
+}
+
+.input-area {
+  position: relative;
+  z-index: 0;
+  padding: 5px 0;
+  border-top: 1px solid #0e0b0b;
+}
+
+.input-form {
+  display: flex;
+}
+
+.input-field {
+  flex: 0 0 79%;
+  margin-right: 5px;
+  outline: none;
+  padding: 10px;
+  border-right: 2px solid #ffffff;
+  background-color: rgb(10, 8, 8);
+  color: rgba(226, 218, 218, 0.648);
+  font-size: 20px;
+}
+
+.submit-button {
+  width: auto;
+  padding: 6px 12px;
+  color: white;
+  display: absolute;
+  justify-content: center;
+  align-items: center;
+}
