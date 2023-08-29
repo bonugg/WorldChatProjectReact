@@ -2,12 +2,12 @@ import React, {useState, useEffect} from 'react'
 import Draggable from 'react-draggable';
 import Button from "@mui/material/Button";
 
-function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking,senderIsTalking,src1,src2}) {
+function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking,senderIsTalking,src1,src2,toggleMike,localAudio}) {
     const [position, setPosition] = useState({x: -183, y: -286});
     const [isMinimized, setIsMinimized] = useState(false);
     const [isClosed, setIsClosed] = useState(false);
-console.log(src1+"src1@@@@@@@@@@@@@@")
-console.log(src2+"src2@@@@@@@@@@@@@@")
+// console.log(src1+"src1@@@@@@@@@@@@@@")
+// console.log(src2+"src2@@@@@@@@@@@@@@")
     //버튼 토글
     const [button1Active, setButton1Active] = useState(false);
     const [button2Active, setButton2Active] = useState(false);
@@ -22,7 +22,15 @@ console.log(src2+"src2@@@@@@@@@@@@@@")
     const trackPos = (data) => {
         setPosition({x: data.x, y: data.y});
     };
-
+    // let lastEventTimestamp = 0;
+    // const THROTTLE_INTERVAL = 10000; // 0.2초
+    // useEffect(()=>{
+    //     const currentTime = Date.now();
+    //     if (currentTime - lastEventTimestamp > THROTTLE_INTERVAL) {
+    //         lastEventTimestamp = currentTime;
+    //         console.log("test!")
+    //     }
+    // },[senderIsTalking,receiverIsTalking])
     const handleMinimizeClick = () => {
         setIsMinimized(!isMinimized);
     };
@@ -93,6 +101,7 @@ console.log(src2+"src2@@@@@@@@@@@@@@")
                             <div style={{marginLeft:'15%', position: 'relative', width: '70%', height: '70%'}}>
 
                                 {/* audio 태그 */}
+                                <audio ref={localAudio} muted></audio>
                                 <audio
                                     id="local_video"
                                     ref={remoteAudio}
@@ -182,17 +191,18 @@ console.log(src2+"src2@@@@@@@@@@@@@@")
 
                             <div className="button-container"
                                  style={{display: 'flex', justifyContent: 'space-between', marginTop: '10px'}}>
+                                {/*<Button*/}
+                                {/*    style={{*/}
+                                {/*        backgroundColor: button1Active ? '#f05650' : '',*/}
+                                {/*        transition: 'background-color 0.3s',*/}
+                                {/*        color: 'white',*/}
+                                {/*        width: '30%'*/}
+                                {/*    }}*/}
+                                {/*>*/}
+                                {/*    video {button1Active ? 'OFF' : 'ON'}*/}
+                                {/*</Button>*/}
                                 <Button
-                                    style={{
-                                        backgroundColor: button1Active ? '#f05650' : '',
-                                        transition: 'background-color 0.3s',
-                                        color: 'white',
-                                        width: '30%'
-                                    }}
-                                >
-                                    video {button1Active ? 'OFF' : 'ON'}
-                                </Button>
-                                <Button
+                                    onClick={() => {setButton2Active(!button2Active); toggleMike()}}
                                     style={{
                                         backgroundColor: button2Active ? '#f05650' : '',
                                         transition: 'background-color 0.3s',
@@ -202,16 +212,16 @@ console.log(src2+"src2@@@@@@@@@@@@@@")
                                 >
                                     mike {button2Active ? 'OFF' : 'ON'}
                                 </Button>
-                                <Button
-                                    style={{
-                                        backgroundColor: button3Active ? '#f05650' : '',
-                                        transition: 'background-color 0.3s',
-                                        color: 'white',
-                                        width: '30%'
-                                    }}
-                                >
-                                    volume {button3Active ? 'OFF' : 'ON'}
-                                </Button>
+                                {/*<Button*/}
+                                {/*    style={{*/}
+                                {/*        backgroundColor: button3Active ? '#f05650' : '',*/}
+                                {/*        transition: 'background-color 0.3s',*/}
+                                {/*        color: 'white',*/}
+                                {/*        width: '30%'*/}
+                                {/*    }}*/}
+                                {/*>*/}
+                                {/*    volume {button3Active ? 'OFF' : 'ON'}*/}
+                                {/*</Button>*/}
                             </div>
                             {/*<Button style={{right:'10%', textAlign:'center'}}>test</Button>*/}
                             {/*<Button style={{left:'10%', top:'5%'}}>test</Button>*/}
