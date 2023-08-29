@@ -1,9 +1,11 @@
 import React, {useEffect, useRef, useState} from "react";
 import Logo from "../img/logo.png";
+import Button from "@mui/material/Button";
 import "./css/Home.css";
+import "./css/PasswordChange.css";
 
 
-const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi2}) => {
+const PasswordChange = React.memo(({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi2}) => {
     //패스워드 변경
     const [userPwd, setUserPwd] = useState('');
     const [NewUserPwd, setNewUserPwd] = useState('');
@@ -22,7 +24,6 @@ const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi
             setNewUserPwdCheck("");
             setPasswordCheck("At least 8 characters consisting of English and numbers, including 2 special characters");
             setNewPasswordCheckSame("");
-
             setIsPassword(false);
             setIsPassword2(false);
         }
@@ -160,7 +161,6 @@ const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi
     const passwordChangeDiv = () => {
         isPasswordChangeDivClose(false); // Home.js에 이벤트 전달
     }
-
     return (
         <div className={"passwordChangeDiv"}>
             <div>
@@ -169,16 +169,16 @@ const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi
                         className={isPassword ? "passwordChangeDiv_input_success" :
                             isPassword2 ? "passwordChangeDiv_input_fail" : "passwordChangeDiv_input"
                         }
-                        placeholder={"Please enter your "}
+                        placeholder={"Please enter your PASSWORD"}
                         type='password'
                         value={userPwd}
                         onChange={handlePasswordChange}
                     />
-                    <button
+                    <Button
                         className={"passwordChangeDiv_btn"}
                         type={"button"}
                         onClick={PwdCheck}>Check
-                    </button>
+                    </Button>
                 </div>
                 <div className={"passwordChangeDiv_input_Form2"}>
                     <input
@@ -207,20 +207,20 @@ const PasswordChange = ({isPasswordChangeDiv,isPasswordChangeDivClose, logoutApi
                     }>{NewPasswordCheckSame}</p>
                 </div>
                 <div className={"passwordChangeDiv_btn_submit_div"}>
-                    <button
+                    <Button
                         onClick={PwdSave}
                         className={"passwordChangeDiv_btn_submit"}
                         type='submit'
                         disabled={NewPasswordCheckSame != "Password Matching" || PasswordCheck != "Available PASSWORD" || !isPassword
                         }>Change Password
-                    </button>
+                    </Button>
                 </div>
             </div>
 
             {/* Your content here */}
         </div>
     );
-};
+});
 
 
 export default PasswordChange;

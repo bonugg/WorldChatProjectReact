@@ -273,16 +273,14 @@ const MyPage = React.memo(({ onPasswordChange, MyPageDiv, logoutApi }) => {
             // 회원탈퇴 성공 시 처리
             console.log("Successfully unsubscribed");
             alert('Membership withdrawal is complete');
-            
-            // 로그아웃 처리 후 바로 홈화면으로 이동
+            // 로그아웃 처리
             logoutApi(true); // Home.js에 이벤트 전달
-            window.location.href='/';
-            
+            // 홈화면으로 이동
+            window.location.href = '/'; // Home 페이지로 이동
         } else {
             // 실패 시 에러 메시지 출력
             console.error("Failed to unsubscribe");
-            alert('Membership withdrawal is failed');
-        }   
+        }
     };
 
 

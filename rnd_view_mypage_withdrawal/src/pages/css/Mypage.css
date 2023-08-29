@@ -1,0 +1,93 @@
+.myPageDiv_profile_btn2{
+    width: 120px;
+    height: 40px;
+    border-radius: 10px !important;
+    font-size: 10px !important;
+    color: white !important;
+    background-color: black !important;
+    outline: none;
+    cursor: pointer;
+    border: 1px solid black !important;
+    transition: all 0.25s ease-in-out !important;
+    margin-top: 1px;
+    font-family: 'Russo One', sans-serif !important;
+}
+.myPageDiv_profile_btn3{
+    width: 120px;
+    height: 40px;
+    border-radius: 10px !important;
+    font-size: 10px !important;
+    color: rgba(23, 192, 23, 0.74) !important;
+    background-color: black !important;
+    outline: none;
+    cursor: pointer;
+    border: 1px solid black !important;
+    transition: all 0.25s ease-in-out !important;
+    margin-top: 1px;
+    font-family: 'Russo One', sans-serif !important;
+}
+.myPageDiv_profile_btn4{
+    width: 120px;
+    height: 40px;
+    border-radius: 10px !important;
+    font-size: 10px !important;
+    color: indianred !important;
+    background-color: black !important;
+    outline: none;
+    cursor: pointer;
+    border: 1px solid black !important;
+    transition: all 0.25s ease-in-out !important;
+    margin-top: 1px;
+    font-family: 'Russo One', sans-serif !important;
+}
+.myPageDiv_profile_btn2:hover{
+    background-color: rgba(28, 28, 28, 0.8) !important;
+}
+
+.myPageDiv_info_1_btn{
+    width: 230px !important;
+    height: 50px !important;
+    margin-bottom: 0px;
+    color: white !important;
+    cursor: pointer !important;
+    border-radius: 10px !important;
+    background-color: black !important;
+    outline: none;
+    border: 1px solid black !important;
+    transition: all 0.25s ease-in-out;
+    font-size: 13px !important;
+    font-family: 'Russo One', sans-serif !important;
+}
+.myPageDiv_info_1_btn:hover{
+    background-color: rgba(28, 28, 28, 0.8) !important;
+}
+
+.myPageDiv_Message_btn{
+    width: 100% !important;
+    height: 100% !important;
+    margin-bottom: 0px;
+    color: white !important;
+    cursor: pointer;
+    border-radius: 8px !important;
+    background-color: black !important;
+    outline: none;
+    border: 1px solid rgba(100, 100, 100, 0.4) !important;
+    transition: all 0.25s ease-in-out;
+    font-size: 10px !important;
+    font-family: 'Russo One', sans-serif !important;
+}
+.myPageDiv_Message_btn2{
+    width: 100% !important;
+    height: 100% !important;
+    margin-bottom: 0px;
+    color: rgba(23, 192, 23, 0.74) !important;
+    cursor: pointer;
+    border-radius: 8px !important;
+    background-color: black !important;
+    outline: none;
+    border: 1px solid rgba(100, 100, 100, 0.4) !important;
+    transition: all 0.25s ease-in-out;
+    font-size: 10px !important;
+    font-family: 'Russo One', sans-serif !important;
+}
+

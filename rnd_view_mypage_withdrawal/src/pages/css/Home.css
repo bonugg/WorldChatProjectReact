@@ -1,9 +1,25 @@
 * {
     list-style-type: none;
 }
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 0px;
+}
+*::-webkit-scrollbar-thumb {
+    background-color: rgba(50, 50, 50, 0.8);
+}
+*::-webkit-scrollbar-thumb:hover {
+    cursor: pointer;
+    background-color: rgba(50, 50, 50, 0.6);
+}
+
+*::-webkit-scrollbar-track {
+    background-color: rgba(50, 50, 50, 0.5);
+}
+
 
 body {
-    color: #cb3434;
+    color: white;
 }
 
 .hidden {
@@ -14,6 +30,7 @@ body {
 }
 
 .loading {
+    overflow: hidden;
     z-index: 2;
     width: 100vw;
     height: 100vh;
@@ -34,10 +51,10 @@ body {
 }
 
 .loading_text {
-    width: 150px;
-    position: absolute;
-    top: -60px;
-    left: 5px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     color: rgba(255, 255, 255, 0.8);
     font-size: 20px;
     font-weight: bold;
@@ -45,12 +62,10 @@ body {
 }
 
 .spinner {
-    position: relative;
-    display: inline-block;
-    width: 80px;
-    height: 80px;
+    min-width: 150px !important;
+    height: 150px !important;
     border-radius: 50%;
-    border: 5px solid rgba(255, 255, 255, 0.8);
+    border: 9px solid rgba(255, 255, 255, 0.8);
     border-top-color: transparent;
     animation: spin 1s linear infinite;
 }
@@ -71,12 +86,35 @@ body {
         transform: rotate(360deg);
     }
 }
-
+.full{
+    overflow: hidden;
+    background-color: black;
+}
 .fullScreen {
     width: 100vw;
     height: 100vh;
     position: relative;
+    overflow: hidden;
 }
+@media (max-width: 1000px) {
+    .fullScreen{
+        width: 1000px;
+    }
+}
+@media (max-height: 800px) {
+    .fullScreen {
+        height: 800px;
+    }
+    CanvasContainer{
+
+    }
+    .full{
+        overflow: hidden;
+        height: 800px;
+
+    }
+}
+
 
 .logo_main {
     position: absolute;
@@ -119,10 +157,15 @@ a {
     position: fixed; /* 스크롤을 따라오도록 지정 */
     left: 0;
     top: 10%;
-    background-color: rgba(20, 20, 20, 0.8);
-    border: 1px solid rgba(128, 128, 128, 0.4);
+    background-color: rgba(5, 5, 5, 0.5);
+    border: 0px solid rgba(128, 128, 128, 0.2);
+    border-top-width: 4px;
+    border-bottom-width: 4px;
     width: var(--side-bar-width);
     height: 80vh; /* 사이드바의 높이를 전체 화면 높이의 90%로 지정 */
+}
+.side-bar ul{
+    background-color: rgba(0, 0, 0, 0) !important;
 }
 
 /* 아이콘 시작 */
@@ -219,8 +262,8 @@ a {
 .side-bar ul > li > a {
     display: block;
     color: white;
-    font-size: 1.4rem;
-    font-weight: bold;
+    font-size: 20px;
+    font-weight: normal;
     padding-top: 20px;
     padding-bottom: 20px;
     padding-left: 50px;
@@ -255,27 +298,37 @@ a {
 
 /* 모든 메뉴가 마우스 인식 시 반응 */
 .side-bar ul > li:hover > a {
-    background-color: rgba(50, 50, 50, 0.5);
+    background-color: rgba(30, 30, 30, 1);
 }
-
+.menu_li_sub{
+    height: 70px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(30, 30, 30, 1);
+    color: white;
+    transition: all 0.25s ease-in-out;
+}
+.menu_li_sub:hover{
+    background-color: rgba(50, 50, 50, 0.2);
+}
 /* 1차 메뉴의 항목이 마우스 인식 시에 2차 메뉴 등장 */
 .side-bar > ul > li:hover > ul {
     display: block;
     position: absolute;
-    background-color: rgba(28, 28, 28, 0.8);
     top: 0; /* 2차 메뉴의 상단을 1차 메뉴의 상단에 고정 */
-    left: 100%; /* 2차 메뉴를 1차 메뉴의 너비만큼 이동 */
-    width: 80%; /* 1차 메뉴의 너비를 상속 */
+    left: 86.5%; /* 2차 메뉴를 1차 메뉴의 너비만큼 이동 */
+    width: 100%; /* 1차 메뉴의 너비를 상속 */
 }
 
 .menu_li_li:hover {
-    background-color: rgba(40, 40, 40, 0.5);
+    background-color: rgba(50, 50, 50, 0.5);
 }
 
 /* 사이드바 너비의 80%만큼 왼쪽으로 이동 */
 .side-bar {
-    border-bottom-right-radius: 20px;
-    border-top-right-radius: 20px;
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 10px;
     transform: translate(calc(var(--side-bar-width) * -0.7), 0);
     transition: transform 0.5s;
 }
@@ -292,10 +345,9 @@ a {
     transform: translate(-50%, -50%);
     width: 600px;
     height: 650px;
-    border-radius: 20px;
+    border-radius: 10px;
     background-color: rgba(50, 50, 50, 0.7);
-    box-shadow: 0px 0px 50px 4px rgba(100, 100, 100, 0.6);
-
+    border: 2px solid rgba(50, 50, 50, 0.9);
 }
 .passwordChangeDiv{
     position: fixed;
@@ -304,9 +356,9 @@ a {
     transform: translate(-50%, -50%);
     width: 300px;
     height: 400px;
-    border-radius: 15px;
+    border-radius: 10px;
     background-color: rgba(0, 0, 0, 0.9);
-    border: 1px solid rgba(100, 100, 100, 0.8);
+    border: 2px solid rgba(50, 50, 50, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -339,16 +391,7 @@ a {
     position: relative;
     margin-bottom: 0px;
 }
-.passwordChangeDiv_btn_submit{
-    width: 100% !important;
-    height: 50px !important;
-    color: white;
-    cursor: auto;
-    font-size: 13px !important;
-    background-color: black;
-    border-radius: 8px !important;
-    transition: all 0.25s ease-in-out;
-}
+
 .passwordChangeDiv_input_success{
     width: 80% !important;
     height: 50px !important;
@@ -393,27 +436,17 @@ a {
     background-color: rgba(255, 255, 255, 0.2) !important;
     border-radius: 8px !important;
 }
-.passwordChangeDiv_btn{
-    width: 20% !important;
-    height: 50px !important;
-    color: white;
-    cursor: pointer;
-    font-size: 10px !important;
-    background-color: black !important;
-    border-radius: 8px !important;
-    border-top-left-radius: 0px !important;
-    border-bottom-left-radius: 0px !important;
-}
+
 .loginDiv {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 500px;
-    height: 650px;
-    border-radius: 20px;
+    width: 430px;
+    height: 600px;
+    border-radius: 10px;
     background-color: rgba(50, 50, 50, 0.7);
-    box-shadow: 0px 0px 50px 4px rgba(100, 100, 100, 0.6);
+    border: 2px solid rgba(50, 50, 50, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -423,22 +456,22 @@ a {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 500px;
+    width: 430px;
     height: 750px;
-    border-radius: 20px;
+    border-radius: 10px;
     background-color: rgba(50, 50, 50, 0.7);
-    box-shadow: 0px 0px 50px 4px rgba(100, 100, 100, 0.6);
+    border: 2px solid rgba(50, 50, 50, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .loginDiv_2 {
-    width: 80%;
+    width: 90%;
 }
 
 .signupDiv_2 {
-    width: 80%;
+    width: 90%;
 }
 
 .myPageDiv2 {
@@ -466,48 +499,7 @@ a {
     justify-content: center;
     align-items: flex-start;
 }
-.myPageDiv_profile_btn2{
-    width: 120px;
-    height: 40px;
-    border-radius: 10px;
-    font-size: 11px;
-    color: white;
-    background-color: black;
-    outline: none;
-    cursor: pointer;
-    border: 1px solid black;
-    transition: all 0.25s ease-in-out;
-    margin-top: 1px;
-}
-.myPageDiv_profile_btn3{
-    width: 120px;
-    height: 40px;
-    border-radius: 10px;
-    font-size: 11px;
-    color: rgba(23, 192, 23, 0.74);
-    background-color: black;
-    outline: none;
-    cursor: pointer;
-    border: 1px solid black;
-    transition: all 0.25s ease-in-out;
-    margin-top: 1px;
-}
-.myPageDiv_profile_btn4{
-    width: 120px;
-    height: 40px;
-    border-radius: 10px;
-    font-size: 11px;
-    color: indianred;
-    background-color: black;
-    outline: none;
-    cursor: pointer;
-    border: 1px solid black;
-    transition: all 0.25s ease-in-out;
-    margin-top: 1px;
-}
-.myPageDiv_profile_btn2:hover{
-    background-color: rgba(28, 28, 28, 0.8);
-}
+
 .myPageDiv3 {
     width: 100%;
     height: 35%;
@@ -538,21 +530,21 @@ a {
 .myPageDiv_info_1_text{
     color: rgba(255, 255, 255, 0.8) !important;
     position: absolute;
-    top: -30px;
+    top: -13px;
     left: 40px;
     font-size: 10px;
 }
 .myPageDiv_info_2_text{
     color: rgba(255, 255, 255, 0.8) !important;
     position: absolute;
-    top: 40px;
+    top: 57px;
     left: 40px;
     font-size: 10px;
 }
 .myPageDiv_info_3_text{
     color: rgba(255, 255, 255, 0.8) !important;
     position: absolute;
-    top: 110px;
+    top: 127px;
     left: 40px;
     font-size: 10px;
 }
@@ -574,23 +566,7 @@ a {
     font-size: 13px !important;
     border-radius: 10px !important;
 }
-.myPageDiv_info_1_btn{
-    width: 230px;
-    height: 50px;
-    margin-bottom: 0px;
-    color: white;
-    cursor: pointer;
-    border-radius: 10px;
-    background-color: black;
-    color: white;
-    outline: none;
-    border: 1px solid black;
-    transition: all 0.25s ease-in-out;
-    font-size: 13px;
-}
-.myPageDiv_info_1_btn:hover{
-    background-color: rgba(28, 28, 28, 0.8);
-}
+
 .myPageDiv4 {
     width: 100%;
     height: 30%;
@@ -665,7 +641,7 @@ a {
     font-size: 11px;
 }
 .myPageDiv_Message_btn:hover{
-    background-color: rgba(50, 50, 50, 0.5);
+    background-color: rgba(28, 28, 28, 0.8) !important;
 }
 
 input[type=text], input[type=password] {
@@ -679,6 +655,10 @@ input[type=text], input[type=password] {
     outline: none;
     font-size: 13px;
     transition: all 0.5s ease-in-out;
+}
+
+.inputFromTextMui:focus {
+ border: 0px !important;
 }
 
 .inputFromText {
@@ -753,15 +733,34 @@ input[type=text]:focus, input[type=password]:focus {
     box-sizing: border-box;
     width: 100%;
 }
+.loginForm_remmember{
+    display: flex;
+    justify-content: flex-start;
+    padding-left: 30px;
+    box-sizing: border-box;
+    align-items: center;
+    width: 100%;
+}
+.rememberAccountCheckbox{
+    width: 30px !important;
+    height: 30px !important;
+    color: white !important;
+}
+.label_remmember{
+    font-size: 15px;
+    color: white !important;
+}
 
 .error_text {
     height: 60px !important;
-    color: indianred;
+    color: indianred !important;
+    font-family: 'Russo One', sans-serif !important;
 }
 
 .no_error_text {
     height: 60px !important;
-    color: white;
+    color: white !important;
+    font-family: 'Russo One', sans-serif !important;
 }
 
 .login_btn {
@@ -780,16 +779,17 @@ input[type=text]:focus, input[type=password]:focus {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 20px !important;
+    margin-top: 0px !important;
 
 }
 
 button[type=submit] {
     width: 90%;
-    height: 50px;
-    padding-left: 20px;
-    box-sizing: border-box;
-    border-radius: 10px;
+    height: 50px !important;
+    padding-left: 20px !important;
+    box-sizing: border-box !important;
+    border-radius: 10px !important;
+    margin-right: 0px !important;
     background-color: rgba(0, 0, 0, 1);
     border: 1px solid rgba(100, 100, 100, 0.5);
     outline: none;
@@ -808,7 +808,18 @@ button[type=submit]:disabled {
     cursor: auto;
 }
 .checkbtn{
+    border-radius: 0px !important;
+    border-top-right-radius: 10px !important;
+    border-bottom-right-radius: 10px !important;
+    width: 30% !important;
+    height: 50px !important;
+    cursor: pointer;
+    background-color: black !important;
+    color: white !important;
+    border: 1px solid rgba(200, 200, 200, 0.2) !important;
     border-left-width: 0px !important;
+    font-family: 'Russo One', sans-serif !important;
+    transition: all 0.25s ease-out;
 }
 
 .yesIDinput {
@@ -858,26 +869,20 @@ button[type=submit]:disabled {
 }
 
 .SignUpBtn {
-    color: white;
+    color: white !important;
     height: 60px !important;
+    font-family: 'Russo One', sans-serif !important;
 }
-
-button[type=button] {
-    width: 30%;
-    height: 50px;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-    cursor: pointer;
-    background-color: black;
-    color: white;
-    border: 1px solid rgba(200, 200, 200, 0.2);
-    transition: all 0.25s ease-out;
+.SignUpBtn:disabled{
+    background-color: #000000 !important;
+    color: #343434 !important;
+    cursor: auto !important;
 }
 
 button[type=button]:disabled {
-    background-color: #000000;
-    color: #343434;
-    cursor: auto;
+    background-color: #000000 !important;
+    color: #343434 !important;
+    cursor: auto !important;
 }
 
 button[type=button]:disabled:hover {
@@ -945,25 +950,24 @@ button[type=button]:hover {
 
 .Text_sign {
     position: absolute;
-    top: 43px;
+    top: 52px;
     left: 20px;
     font-size: 11px;
     color: rgba(255, 255, 255, 1);
 }
 .Text_sign2{
     position: absolute;
-    top: 43px;
-    left: 20px;
+    top: 53px;
+    left: 12px;
     font-size: 10px;
     color: rgba(255, 255, 255, 1);
 }
 .Text_sign_Error2{
     position: absolute;
-    top: 43px;
-    left: 20px;
+    top: 53px;
+    left: 12px;
     font-size: 10px;
     color: white;
-    font-weight: bold;
 }
 
 .Text_sign_Error {
@@ -976,30 +980,11 @@ button[type=button]:hover {
 }
 .Text_sign_Error_sign{
     position: absolute;
-    top: 43px;
+    top: 52px;
     left: 20px;
-    font-size: 13px;
+    font-size: 11px;
     color: white;
     font-weight: bold;
-}
-
-select {
-    width: 100%;
-    height: 60px;
-    padding-left: 20px;
-    padding-right: 20px;
-    box-sizing: border-box;
-    border-radius: 20px;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(200, 200, 200, 0.2);
-    outline: none;
-    font-size: 15px;
-    color: white;
-    transition: all 0.5s ease-in-out;
-}
-
-select:focus {
-    border: 1px solid rgba(220, 220, 220, 0.8);
 }
 
 .custom_select_wrapper {
@@ -1013,18 +998,38 @@ select:focus {
     -moz-appearance: none;
     appearance: none;
     position: relative;
-    background-color: black;
-    width: 100%;
-    height: 50px;
-    padding-left: 20px;
+    width: 100% !important;
+    height: 50px !important;
+    padding-left: 5px !important;
     padding-right: 20px;
     box-sizing: border-box;
-    border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 10px !important;
+    background-color: rgba(0, 0, 0, 0.7) !important;
     border: 1px solid rgba(200, 200, 200, 0.2);
     outline: none;
-    font-size: 15px;
-    color: rgba(220, 220, 220, 0.5);
+    font-size: 13px !important;
+    color: rgba(220, 220, 220, 0.5) !important;
+    font-family: 'Russo One', sans-serif !important;
+    transition: all 0.25s ease-in-out !important;
+}
+.custom_select * {
+    border: 0px !important;
+}
+input:hover{
+    border: 1px solid rgba(200, 200, 200, 0.8) !important;
+}
+.custom_select:hover {
+    border: 1px solid rgba(200, 200, 200, 0.8) !important;
+}
+.menu_li_select{
+    font-size: 10px !important;
+    background-color: rgba(50, 50, 50, 0.5) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+.menu_li_select_place{
+    font-size: 10px !important;
+    background-color: rgba(50, 50, 50, 0.5) !important;
+    color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .custom_select_wrapper::after {
@@ -1036,4 +1041,8 @@ select:focus {
     font-size: 15px;
     pointer-events: none; /* 화살표를 클릭하면 제대로 동작하도록 */
     /* 원하는 위치와 스타일로 수정 */
+}
+ul{
+    background-color: black !important;
+    border: 1px green !important;
 }

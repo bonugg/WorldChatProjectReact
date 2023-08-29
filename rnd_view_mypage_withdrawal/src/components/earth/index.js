@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect} from "react";
-import {useFrame, useLoader, useThree, extend} from "@react-three/fiber";
+import {useFrame, useLoader, useThree} from "@react-three/fiber";
 import {OrbitControls, Stars} from "@react-three/drei";
 import * as THREE from "three";
 import EarthDayMap from "../../assets/textures/8k_earth_daymap.jpg";
@@ -13,33 +13,33 @@ import {TextureLoader} from "three";
 import MarsMap from "../../assets/textures/mars.jpg";
 import SunMap from "../../assets/textures/sun.jpg";
 
-import UranusMap from "../../assets/textures/uno.jpeg";
-import NeptuneMap from "../../assets/textures/Neptune.jpg";
-import GreenMap from "../../assets/textures/Green.jpeg";
-import YellowMap from "../../assets/textures/yellow.webp";
-import PurpleMap from "../../assets/textures/purple2.webp";
-import SixMap from "../../assets/textures/six.jpeg";
-import SevenMap from "../../assets/textures/seven.png";
-import EightMap from "../../assets/textures/Eight.webp";
-import NineMap from "../../assets/textures/Mercury.jpg";
-import TenMap from "../../assets/textures/silver.jpg";
-import ElevenMap from "../../assets/textures/Mercury.jpg";
-import TwelveMap from "../../assets/textures/12.jpg";
+const Earth = React.memo( ({
+                   mainCamera,
+                   mouseLock,
+                   LoginZoom,
+                   loggedIn,
+                   loggedOut,
+                   isMapageZoom,
+                   isFriendsListZoom,
+                   FriendsNationally,
+                   isLoginZoom,
+                   isSignUpZoom,
+               }) => {
 
-
-export function Earth(props) {
-    const mainCamera = props.mainCamera;
-    const mouseLock = props.mouseLock;
-    const LoginZoom = props.LoginZoom;
-    const loggedIn = props.loggedIn;
-    const loggedOut = props.loggedOut;
-    const isMapageZoom = props.isMapageZoom;
     const objectGroup = useRef();
-    const [twelveMap,elevenMap,tenMap,nineMap,eightMap,sevenMap,sixMap,purpleMap,yellowMap,greenMap,neptuneMap,uranusMap, mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
+    const [mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
         TextureLoader,
-        [TwelveMap,ElevenMap,TenMap,NineMap,EightMap,SevenMap,SixMap,PurpleMap,YellowMap,GreenMap,NeptuneMap,UranusMap,Pluto_MadeMap, CloudsMap, EarthNightMap, EarthDayMap, EarthNormalMap, EarthSpecularMap, EarthCloudsMap, MarsMap, SunMap]
+        [Pluto_MadeMap, CloudsMap, EarthNightMap, EarthDayMap, EarthNormalMap, EarthSpecularMap, EarthCloudsMap, MarsMap, SunMap]
     );
+    //클릭 도시 이름 저장 변수
 
+    const [FriendsNationally2, setFriendsNationally2] = useState('');
+    //onMouseDown잠금 상태 변수
+    const [isOnMouseDownLock, setIsOnMouseDownLock] = useState(false);
+    //onMouseDown잠금 상태 변수
+    const [isOnMouseClickLock, setIsOnMouseClickLock] = useState(false);
+    //도시 클릭 시 근접 상태 값
+    const [isCityZoom, setIsCityZoom] = useState(false);
     //카메라 초기 위치
     const [initialCameraPosition, setInitialCameraPosition] = useState(null);
     //카메라 초기 위치로 돌아갔는지 확인
@@ -55,7 +55,7 @@ export function Earth(props) {
     const [clickedCity, setClickedCity] = useState(null);
     const earthRef = useRef();
     const marsRef = useRef();
-    
+
     const specularRef = useRef();
     const cloudsRefspecular = useRef();
     const sunRef = useRef();
@@ -72,6 +72,14 @@ export function Earth(props) {
     const nomarRef = useRef();
     const cloudsRefnomar = useRef();
 
+    useEffect(() => {
+        if (isCityZoom) {
+            isFriendsListZoom(true);
+            FriendsNationally(FriendsNationally2);
+        } else {
+            isFriendsListZoom(false);
+        }
+    }, [isCityZoom]);
 
     useEffect(() => {
         if (loggedIn) {
@@ -102,57 +110,96 @@ export function Earth(props) {
         // }
     });
 
-    useFrame(({camera}) => {
-        if (selectedCity) {
-            if (zoomIn) {
-                selectedCity.material.color.set("#cb3434");
-            } else if (!zoomIn) {
-                selectedCity.material.color.set("indianred");
-            }
-        }
+    // useRef 추가
+    const previousTime = useRef();
+    const distanceWithinThresholdTime = useRef(0);
+
+
+    useFrame(({camera, clock}) => {
         //로그아웃 시 줌 해제
         if (loggedOut) {
             setZoomIn(false);
         }
         //마이페이지 클릭 시 줌 해제
         if (isMapageZoom) {
+            AllresetCityColors();
             setClickedCity(null);
             setSelectedCity(null);
             setZoomIn(false);
             setTarget(null);
         }
+
+        if (previousTime.current === undefined) {
+            previousTime.current = clock.getElapsedTime();
+        }
+        const currentTime = clock.getElapsedTime();
+        const deltaTime = currentTime - previousTime.current;
+
         // 카메라 위치 변경
         if (zoomIn && target) {
             if (clickedCity) {
-                camera.position.lerp(target, 0.05);
-                camera.lookAt(target);
-                setearthR(true);
-                setZoomInLock(true);
-                setIsAtInitialPosition(false);
+                if (!isCityZoom) {
+                    resetCityColors(); // Add this line
+                    setIsOnMouseClickLock(true);
+                    camera.position.lerp(target, 0.1);
+                    camera.lookAt(target);
+                    let zoomInDistance = 0.41;
+                    let durationThreshold = 1000; // 원하는 시간 설정 (밀리초 단위)
+                    setearthR(true);
+                    setZoomInLock(true);
+                    setIsAtInitialPosition(false);
+
+                    let currentDistance = camera.position.distanceTo(target);
+                    if (currentDistance <= zoomInDistance) {
+                        distanceWithinThresholdTime.current += deltaTime * 1000; // ms로 변환
+
+                        if (distanceWithinThresholdTime.current >= durationThreshold) {
+                            setIsOnMouseClickLock(false);
+                            setIsCityZoom(true);
+                            setearthR(true);
+                            setZoomInLock(true);
+                            distanceWithinThresholdTime.current = 0; // Reset
+                        }
+                    } else {
+                        distanceWithinThresholdTime.current = 0; // Reset
+                        setIsCityZoom(false);
+                    }
+                } else {
+                    camera.position.lerp(target, 0.1);
+                    camera.lookAt(new THREE.Vector3(0, 0, 3));
+                }
             }
         } else {
-            if(isMapageZoom){
+            isFriendsListZoom(false);
+            if (isMapageZoom) {
                 setearthR(false);
                 setZoomInLock(false);
                 setIsAtInitialPosition(true);
-            }else {
+            } else {
                 setearthR(false);
                 setZoomInLock(false);
                 if (initialCameraPosition) {
                     if (!isAtInitialPosition) {
                         setearthR(true);
                         setZoomInLock(true);
-                        camera.position.lerp(initialCameraPosition, 0.03);
+                        camera.position.lerp(initialCameraPosition, 0.06);
                         camera.lookAt(new THREE.Vector3(0, 0, 3));
+
                         if (camera.position.distanceTo(initialCameraPosition) < 0.05) {
                             setIsAtInitialPosition(true);
                         } else {
                             setIsAtInitialPosition(false);
+                            AllresetCityColors();
+                        }
+                        //로그아웃이 돼서 홈화면으로 돌아가는 중에 login또는 signup클릭 시 실행
+                        if (isLoginZoom || isSignUpZoom) {
+                            setIsAtInitialPosition(true);
                         }
                     }
                 }
             }
         }
+        previousTime.current = currentTime;
     });
 
     return (
@@ -161,354 +208,15 @@ export function Earth(props) {
             <pointLight color="white" position={[-200, 50, -100]} intensity={1.2}/>
             <Stars
                 radius={300}
-                depth={60}
-                count={10000}
+                depth={100}
+                count={5000}
                 factor={7}
                 saturation={0}
                 fade={true}
             />
-            {/* 행성추가 시작*/}
-            {/*가로,세로,근접 */}
-            {/* 1. 행성1 */}
-            <mesh ref={cloudsRefnomar} position={[0, -42, 30]}>
-                <sphereGeometry args={[1.2, 47, 47]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
 
-            <group position={[0, -42, 30]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[1, 32, 32]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={uranusMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-            {/* 2. 행성2 */}
-            <mesh ref={cloudsRefnomar} position={[-36, -22, 0]}>
-                <sphereGeometry args={[1.2, 47, 47]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-
-            <group position={[-36, -22, 0]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[1.1, 32, 32]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={neptuneMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-
-            {/* 3. 행성3 */}
-            <mesh ref={cloudsRefnomar} position={[27, -30, 25]}>
-                <sphereGeometry args={[1.3, 47, 47]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-
-            <group position={[27, -30, 25]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[1.7, 32, 32]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={greenMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-
-            {/* 4. 행성4 */}
-            <mesh ref={cloudsRefnomar} position={[80, 10, 1]}>
-                <sphereGeometry args={[1.2, 47, 47]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-
-            <group position={[80, 10, 1]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*크기 가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[1.1, 32, 32]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={yellowMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-
-            {/* 5. 행성5 */}
-            <mesh ref={cloudsRefnomar} position={[120, -20, 120]}>
-                <sphereGeometry args={[1.2, 47, 47]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-
-            <group position={[120, -20, 120]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*크기 가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[1.1, 32, 32]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={purpleMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-
-            {/* 6. 행성6 */}
-            <mesh ref={cloudsRefnomar} position={[31,29, 198]}>
-                <sphereGeometry args={[2.7, 47, 47]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-
-            <group position={[31,29, 198]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*크기 가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[2.7, 32, 32]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={sixMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-
-            {/* 7. 행성7 */}
-            <mesh ref={cloudsRefnomar} position={[-60, 23, -10]}>
-                <sphereGeometry args={[1.2, 47, 47]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-
-            <group position={[-60, 23, -10]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*크기 가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[1.1, 32, 32]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={sevenMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-
-            {/* 8. 행성8 */}
-            <mesh ref={cloudsRefnomar} position={[0, 40, -10]}>
-                <sphereGeometry args={[1.0, 47, 47]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-
-            <group position={[0, 40, -10]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*크기 가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[1.1, 32, 32]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={eightMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-
-            {/* 9. 행성9 */}
-            <mesh ref={cloudsRefnomar} position={[-41, -34, 73]}>
-                <sphereGeometry args={[3, 32, 32]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-
-            <group position={[-41, -34, 73]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*크기 가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[30,32,32]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={nineMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-
-            {/* 10. 행성10 */}
-            <mesh ref={cloudsRefnomar} position={[-170, -9, 70]}>
-                <sphereGeometry args={[3, 47, 47]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-
-            <group position={[-170, -9, 70]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*크기 가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[3, 32, 32]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={tenMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-
-            {/* 11. 행성11 chat*/}
-            <mesh ref={cloudsRefnomar} position={[78, 52, -55]}>
-                <sphereGeometry args={[3.1, 47, 60]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-
-            <group position={[78, 52, -55]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*크기 가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[3, 200, 200]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={elevenMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-
-            {/* 12. 행성12 */}
-            <mesh ref={cloudsRefnomar} position={[39, 41, 40]}>
-                <sphereGeometry args={[5, 47, 47]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-
-            <group position={[39, 41, 40]}>
-                <mesh
-                    ref={nomarRef}
-                >
-                    {/*크기 가로,세로,근접 기본값 30,32,32*/}
-                    <sphereGeometry args={[5, 47, 47]}/>
-                    <meshPhongMaterial specularMap={specularMap}/>
-                    <meshStandardMaterial
-                        map={twelveMap}
-                        normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
-                    />
-                </mesh>
-            </group>
-
-            {/* 행성 추가 끝 */}
-
-            {/* 아래는 구름 이미지 이중 */}
             <mesh ref={cloudsRefMars} position={[-30, 0, -60]}>
-                <sphereGeometry args={[1.253, 47, 47]}/>
+                <sphereGeometry args={[1.21, 47, 47]}/>
                 <meshPhongMaterial
                     map={cloudsMap2}
                     opacity={0.25}
@@ -533,7 +241,7 @@ export function Earth(props) {
             </group>
 
             <mesh ref={cloudsRefSun} position={[30, 0, -60]}>
-                <sphereGeometry args={[1.255, 32, 32]}/>
+                <sphereGeometry args={[1.21, 32, 32]}/>
                 <meshPhongMaterial
                     map={cloudsMap2}
                     opacity={0.4}
@@ -558,7 +266,7 @@ export function Earth(props) {
             </group>
 
             <mesh ref={cloudsRefspecular} position={[0, -60, -30]}>
-                <sphereGeometry args={[1.28, 32, 32]}/>
+                <sphereGeometry args={[1.21, 32, 32]}/>
                 <meshPhongMaterial
                     map={cloudsMap2}
                     opacity={0.3}
@@ -568,10 +276,10 @@ export function Earth(props) {
                 />
             </mesh>
             <mesh position={[0, -60, -30]}>
-                <torusGeometry args={[1.75, 0.18, 16, 100]}/>
+                <torusGeometry args={[1.75, 0.11, 16, 100]}/>
                 <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.3}
+                    color={'white'}
+                    opacity={0.1}
                     depthWrite={true}
                     transparent={true}
                     side={THREE.DoubleSide}
@@ -601,7 +309,7 @@ export function Earth(props) {
             </group>
 
             <mesh ref={cloudsRef} position={[0, 0, 3]}>
-                <sphereGeometry args={[1.055, 32, 32]}/>
+                <sphereGeometry args={[1.01, 32, 32]}/>
                 <meshPhongMaterial
                     map={cloudsMap}
                     opacity={0.4}
@@ -642,6 +350,7 @@ export function Earth(props) {
     );
 
     function onMouseDown(event) {
+        if (isOnMouseClickLock) return;
         event.stopPropagation();
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(earthRef.current.children, true);
@@ -651,12 +360,14 @@ export function Earth(props) {
             const objectUserData = intersects[0].object.userData;
             if (objectUserData) {
                 if (objectUserData.city) {
-                    console.log(objectUserData.city);
+                    setFriendsNationally2(objectUserData.city);
                     const clickedCityObject = earthRef.current.children.find((child) => child.userData.city === objectUserData.city);
                     //도시를 줌인한 상태에서 다른 도시 클릭 시 실행
                     if (selectedCity != null && clickedCityObject.userData.city != selectedCity.userData.city) {
                         // 클릭한 도시의 위치 저장
                         setClickedCity(clickedCityObject.position.clone());
+                        //도시 줌인 카메라 상태 초기화
+                        setIsCityZoom(false);
                         setSelectedCity(clickedCityObject);
                         setZoomIn(zoomIn);
                         setTarget(new THREE.Vector3(clickedCityObject.position.x, clickedCityObject.position.y, clickedCityObject.position.z + 3));//도시를 줌인한 상태에서 다른 도시 클릭 시 실행
@@ -666,6 +377,8 @@ export function Earth(props) {
                         setSelectedCity(intersects[0].object);
                         if (!zoomIn) {
                             setInitialCameraPosition(camera.position.clone());
+                            //도시 줌인 카메라 상태 초기화
+                            setIsCityZoom(false);
                         } else {
                             setSelectedCity(null);
                         }
@@ -698,33 +411,45 @@ export function Earth(props) {
         }
     }
 
+    function resetCityColors() {
+        earthRef.current.children.forEach((child) => {
+            if (child.geometry.type === "SphereGeometry" && child !== selectedCity) {
+                child.material.color.set("white");
+            }
+        });
+    }
+
+    function AllresetCityColors() {
+        earthRef.current.children.forEach((child) => {
+            child.material.color.set("white");
+        });
+    }
+
     function onMouseMove(event) {
+        if (isOnMouseDownLock) return;
         event.stopPropagation();
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(earthRef.current.children, true);
-        intersects.forEach((intersect) => {
-            intersect.object.material.color.set("indianred");
-        });
 
         let isOverCircle = false;
         const currentOverCities = [];
 
         if (intersects.length > 0) {
             intersects.forEach((intersect) => {
-                if (intersect.object.geometry.type === "TorusGeometry") {
+                if (intersect.object.geometry.type === "SphereGeometry" && !isOnMouseDownLock) {
                     isOverCircle = true;
-                    intersect.object.material.color.set("#cb3434");
+                    intersect.object.material.color.set("#a62727");
                     currentOverCities.push(intersect.object);
                 }
             });
         }
         // 상호작용하지 않은 도시의 색을 처음 색상으로 변경
         earthRef.current.children.forEach((child) => {
-            if (child.geometry.type === "TorusGeometry" && !currentOverCities.includes(child) && child !== selectedCity) {
-                child.material.color.set("indianred");
+            if (child.geometry.type === "SphereGeometry" && !currentOverCities.includes(child) && child !== selectedCity) {
+                child.material.color.set("white");
             }
         });
 
@@ -793,12 +518,18 @@ export function Earth(props) {
     }
 
     function addRedCircle(position, city_name) {
-        const geometry = new THREE.TorusGeometry(0.007, 0.007, 10, 10);
-        const material = new THREE.MeshBasicMaterial({color: 'indianred'});
+
+        // const geometry = new THREE.TorusGeometry(0.007, 0.007, 10, 10);
+        // const geometry = new THREE.CircleGeometry(0.007, 32); 원반
+        // const geometry = new THREE.CylinderGeometry(0.01, 0.01, 0.01, 32);
+        // const geometry = new THREE.BoxGeometry(0.02, 0.02, 0.02);
+        const geometry = new THREE.SphereGeometry(0.01, 32, 32);
+        const material = new THREE.MeshBasicMaterial({color: 'white'});
+
 
         const circle = new THREE.Mesh(geometry, material);
 
-        const scaleFactor = 1.007; // 기존 위치에서의 바깥 위치 지정
+        const scaleFactor = 1.057; // 기존 위치에서의 바깥 위치 지정
         circle.position.set(position.x * scaleFactor, position.y * scaleFactor, position.z * scaleFactor);
         circle.lookAt(-position.x, -position.y, -position.z);
 
@@ -842,4 +573,5 @@ export function Earth(props) {
         return {x, y, z}
     }
 
-}
+});
+export default Earth;
