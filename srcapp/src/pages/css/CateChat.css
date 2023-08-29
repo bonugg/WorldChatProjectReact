@@ -625,6 +625,14 @@ input[type='number'] {
     justify-content: center;
     align-items: center;
 }
+.roomList_item_div_3_full{
+    color: indianred;
+    width: 18%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .roomList_item_div_4{
     width: 20%;
     height: 100%;
@@ -782,6 +790,8 @@ input[type='number'] {
     left: 10px;
     font-size: 10px;
     color: white;
+    display: flex;
+    align-items: center;
 }
 
 .message-regdate_other {
@@ -790,6 +800,20 @@ input[type='number'] {
     right: 10px;
     font-size: 10px;
     color: white;
+    display: flex;
+    align-items: center;
+}
+.on{
+    background-color: #07b207;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+.off{
+    background-color: indianred;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
 }
 .left_btn{
     margin-right: 10px !important;

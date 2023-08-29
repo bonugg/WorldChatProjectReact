@@ -4,6 +4,7 @@
     display: flex;
 }
 
+
 .btnDiv_create {
     width: 100px;
     display: flex;
@@ -348,9 +349,9 @@
     position: absolute !important;
     bottom: 15px !important;
     right: 5px !important;
-    width: 25px !important;
-    min-width: 25px !important;
-    height: 25px !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
     background-color: rgba(0, 0, 0, 0.5) !important;
     font-family: 'Russo One', sans-serif !important;
     color: white !important;
@@ -361,9 +362,9 @@
     position: absolute !important;
     bottom: 15px !important;
     right: 15px !important;
-    width: 25px !important;
-    min-width: 25px !important;
-    height: 25px !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
     background-color: rgba(0, 0, 0, 0.5) !important;
     font-family: 'Russo One', sans-serif !important;
     color: white !important;
@@ -384,9 +385,9 @@
     position: absolute !important;
     bottom: 5px !important;
     right: 5px !important;
-    width: 25px !important;
-    min-width: 25px !important;
-    height: 25px !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
     background-color: rgba(0, 0, 0, 0.5) !important;
     font-family: 'Russo One', sans-serif !important;
     color: white !important;
@@ -397,9 +398,9 @@
     position: absolute !important;
     bottom: 5px !important;
     right: 15px !important;
-    width: 25px !important;
-    min-width: 25px !important;
-    height: 25px !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
     background-color: rgba(0, 0, 0, 0.5) !important;
     font-family: 'Russo One', sans-serif !important;
     color: white !important;
