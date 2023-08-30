@@ -64,7 +64,7 @@ const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, shouldIm
             className={shouldImmediatelyEnter ? 'roomList_item_div2' : 'roomList_item_div'}
         >
             <div className={"roomList_item_div_2"}>
-                <span className={"roomList_name_1"}>ROOM NAME :&nbsp;</span>
+                <span className={"roomList_name_1"}>{interest}</span>
                 <span className={"roomList_name_2"}>{cateName}</span>
             </div>
             <div className={cateUserCnt === maxUserCnt ? "roomList_item_div_3_full" : "roomList_item_div_3"}>

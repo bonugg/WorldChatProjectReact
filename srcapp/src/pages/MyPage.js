@@ -7,8 +7,18 @@ import home from "./Home";
 import axios from "axios";
 import FriendsReceivedListItem from "./FriendsReceivedListItem";
 import FriendsRequestedListItem from "./FriendsRequestedListItem";
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
-const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) => {
+import {CSSTransition, TransitionGroup} from 'react-transition-group';
+
+const MyPage = React.memo(({
+                               onRemove,
+                               onPasswordChange,
+                               MyPageDiv,
+                               logoutApi,
+                               homeMyGo,
+                               FriendsReqested,
+                               FriendsReceived,
+                               MyPageG
+                           }) => {
 
         //마이페이지
         const [MypageuserName, setMypageuserName] = useState('');
@@ -22,41 +32,55 @@ const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) =
         const [messageButtonText, setMessageButtonText] = useState("Change Message");
         const [profileButtonText, setProfileButtonText] = useState("Change Picture");
 
-        const [mypageOnClick, setMypageOnClick] = useState(true);
+        const [mypageOnClick, setMypageOnClick] = useState(false);
         const [friendsReceivedOnClick, setFriendsReceivedOnClick] = useState(false);
         const [friendsRequesteddOnClick, setFriendsRequesteddOnClick] = useState(false);
 
         const [receivedList, setReceivedList] = useState([]);
         const [requetedList, setRequestedList] = useState([]);
-        const mypageOn = () => {
-            setMypageOnClick(true);
-            setFriendsReceivedOnClick(false);
-            setFriendsRequesteddOnClick(false);
-        }
-        const friendRecievedOn = () => {
-            setMypageOnClick(false);
-            setFriendsReceivedOnClick(true);
-            setFriendsRequesteddOnClick(false);
-        }
-        const friendRequestedOn = () => {
-            setMypageOnClick(false);
-            setFriendsReceivedOnClick(false);
-            setFriendsRequesteddOnClick(true);
-        }
+
+        useEffect(() => {
+            if (MyPageG) {
+                console.log("마이")
+                setMypageOnClick(true);
+                setFriendsReceivedOnClick(false);
+                setFriendsRequesteddOnClick(false);
+            }
+        }, [MyPageG]);
+        useEffect(() => {
+            if (FriendsReceived) {
+                console.log("리시브")
+                setMypageOnClick(false);
+                setFriendsReceivedOnClick(true);
+                setFriendsRequesteddOnClick(false);
+            }
+        }, [FriendsReceived]);
+        useEffect(() => {
+            if (FriendsReqested) {
+                console.log("리퀘")
+                setMypageOnClick(false);
+                setFriendsReceivedOnClick(false);
+                setFriendsRequesteddOnClick(true);
+            }
+        }, [FriendsReqested]);
+        useEffect(() => {
+            if (homeMyGo) {
+                userInfo();
+            }
+        }, [homeMyGo]);
+
 
         //친구 요청을 승인하거나 거절한 항목 삭제
         const removeItemFromList = (id) => {
-            console.log("아이디 출력 "+id)
             setReceivedList(prevList => prevList.filter(item => item.id != id));
             onRemove(id);
         }
         const removeItemFromList2 = (id) => {
-            console.log("아이디 출력 "+id)
             setRequestedList(prevList => prevList.filter(item => item.id != id));
         }
 
         useEffect(() => {
-            if(friendsReceivedOnClick){
+            if (friendsReceivedOnClick) {
                 const getReceivedListAxios = async () => {
                     try {
                         const response = await axios.get('/friends/received-list', {
@@ -66,7 +90,7 @@ const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) =
                         });
                         console.log(response);
                         console.log(response.data.items);
-                        if(response.data && response.data.items) {
+                        if (response.data && response.data.items) {
                             setReceivedList(() => response.data.items);
                         }
                     } catch (e) {
@@ -75,11 +99,11 @@ const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) =
                 }
                 getReceivedListAxios();
             }
-        },[friendsReceivedOnClick]);
+        }, [friendsReceivedOnClick]);
 
         useEffect(() => {
-            if(friendsRequesteddOnClick){
-                const getRequestedListAxios = async() => {
+            if (friendsRequesteddOnClick) {
+                const getRequestedListAxios = async () => {
                     try {
                         const response = await axios.get('/friends/requested-list', {
                             headers: {
@@ -87,7 +111,7 @@ const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) =
                             }
                         });
                         console.log(response);
-                        if(response.data && response.data.items) {
+                        if (response.data && response.data.items) {
                             setRequestedList(() => response.data.items);
                         }
                     } catch (e) {
@@ -96,8 +120,7 @@ const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) =
                 }
                 getRequestedListAxios();
             }
-        },[friendsRequesteddOnClick]);
-
+        }, [friendsRequesteddOnClick]);
 
 
         const userInfo = async (retry = true) => {
@@ -148,8 +171,7 @@ const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) =
 
         useEffect(() => {
             if (MyPageDiv) {
-                mypageOn();
-                userInfo();
+
             }
         }, [MyPageDiv]);
 
@@ -307,46 +329,14 @@ const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) =
 
         return (
             <div
-                 style={{
-                     position: 'fixed',
-                     top: '50%',
-                     left: '50%',
-                     transform: 'translate(-50%, -50%)',
-                     width: friendsReceivedOnClick || friendsRequesteddOnClick ? '450px ': '600px',
-                     height: friendsReceivedOnClick || friendsRequesteddOnClick ? '550px ': '650px',
-                     borderRadius: '0px 10px 10px 10px',
-                     border: '2px solid rgba(50, 50, 50, 0.9)',
-                     background: 'rgba(50, 50, 50, 0.7)',
-                     transition: 'width 0.25s ease-in-out, height 0.25s ease-in-out'
-                 }}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                }}
             >
-                <Button
-                    type={"button"}
-                    className={mypageOnClick ? "menu_1_clicked" : "menu_1"}
-                    onClick={mypageOn}
-                >
-                    Mypage
-                </Button>
-                <Button
-                    type={"button"}
-                    className={friendsReceivedOnClick ? "menu_2_clicked": "menu_2"}
-                    onClick={friendRecievedOn}
-                >
-                    Friends
-                    Received
-                </Button>
-                <Button
-                    type={"button"}
-                    className={friendsRequesteddOnClick ? "menu_3_clicked" : "menu_3"}
-                    onClick={friendRequestedOn}
-                >
-                    Friends
-                    Requested
-                </Button>
                 {mypageOnClick ? (
-                    <div className={"myPage_clicked"}>
-                        <div className={"myPageDiv2"}>
-                            <div className={"myPageDiv_profile"}>
+                        <div className={"myPage_clicked"}>
+                            <div className={"myPageDiv2"}>
                                 <img
                                     className={"myPageDiv_profile_img"}
                                     src={MypageuserProfileName ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + MypageuserProfileName : previewImage ? previewImage : Profile}
@@ -359,9 +349,6 @@ const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) =
                                     style={{display: "none"}}
                                     onChange={handleImageChange}
                                 />
-
-                            </div>
-                            <div className={"myPageDiv_profile_btn"}>
                                 <Button
                                     className={profileButtonText == 'Change Picture' ? "myPageDiv_profile_btn2" :
                                         profileButtonText == 'Change Success' ? "myPageDiv_profile_btn3" : "myPageDiv_profile_btn4"}
@@ -370,58 +357,53 @@ const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) =
                                     {profileButtonText}
                                 </Button>
                             </div>
-                        </div>
-                        <div className={"myPageDiv3"}>
-                            <div className={"myPageDiv_info_1"}>
-                                <div className={"myPageDiv_info_1_1"}>
+                            <div className={"myPageDiv3"}>
+                                <div className={"myPageDiv_info_1"}>
                                     <h5 className={"myPageDiv_info_1_text"}>ID</h5>
                                     <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
                                            value={MypageuserName}/>
-                                    <h5 className={"myPageDiv_info_2_text"}>NICKNAME</h5>
+                                    <h5 className={"myPageDiv_info_2_text"}>EMAIL</h5>
+                                    <input type={"text"} className={"myPageDiv_info_1_1_input"} readOnly={true}
+                                           value={MypageuserEmail}/>
+                                </div>
+                                <div className={"myPageDiv_info_1"}>
+                                    <h5 className={"myPageDiv_info_1_text"}>NICKNAME</h5>
                                     <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
                                            value={MypageuserNickName}/>
-                                    <h5 className={"myPageDiv_info_3_text"}>NATIONALITY</h5>
-                                    <input type={"text"} className={"myPageDiv_info_1_1_input"} readOnly={true}
-                                           value={MypageuserNationality}/>
-                                </div>
-                            </div>
-                            <div className={"myPageDiv_info_2"}>
-                                <div className={"myPageDiv_info_1_1"}>
-                                    <h5 className={"myPageDiv_info_1_text"}>EMAIL</h5>
-                                    <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
-                                           value={MypageuserEmail}/>
                                     <h5 className={"myPageDiv_info_2_text"}>PHONE</h5>
-                                    <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
+                                    <input type={"text"} className={"myPageDiv_info_1_1_input"} readOnly={true}
                                            value={MypageuserPhone}/>
-                                    <div>
-                                        <Button className={"myPageDiv_info_1_btn"} onClick={passwordChangeDiv}>Change
-                                            Password
-                                        </Button>
-                                    </div>
+                                </div>
+                                <div className={"myPageDiv_info_1"}>
+                                    <h5 className={"myPageDiv_info_1_text"}>PHONE</h5>
+                                    <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
+                                           value={MypageuserNationality}/>
+                                    <Button className={"myPageDiv_info_1_btn"} onClick={passwordChangeDiv}>Change
+                                        Password
+                                    </Button>
                                 </div>
                             </div>
-                        </div>
-                        <div className={"myPageDiv4"}>
-                            <div className={"myPageDiv_Message_div"}>
-                                <div className={"myPageDiv_Message_text"}>
+                            <div className={"myPageDiv4"}>
+                                <div className={"myPageDiv_Message_div"}>
+                                    <div className={"myPageDiv_Message_text"}>
                                         <textarea className={"myPageDiv_Message_textarea"}
                                                   onChange={handleTextAreaChange}
                                                   value={textAreaValue}
                                                   placeholder={"Please enter within 100 characters"}
                                         >
                                         </textarea>
-                                </div>
-                                <div className={"myPageDiv_Message_btn_div"}>
-                                    <Button
-                                        className={messageButtonText == 'Change Message' ? "myPageDiv_Message_btn" : "myPageDiv_Message_btn2"}
-                                        onClick={userMessageChange}>
-                                        {messageButtonText}
-                                    </Button>
+                                    </div>
+                                    <div className={"myPageDiv_Message_btn_div"}>
+                                        <Button
+                                            className={messageButtonText == 'Change Message' ? "myPageDiv_Message_btn" : "myPageDiv_Message_btn2"}
+                                            onClick={userMessageChange}>
+                                            {messageButtonText}
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                ):
+                    ) :
                     friendsReceivedOnClick ? (
                         <div className={"friendRecieved_clicked"}>
                             <div className={"friendRecieved_div"}>
@@ -433,11 +415,12 @@ const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) =
                                         <div className={"friendRecieved_div_3"}>
                                             No Requests Received
                                         </div>
-                                    ):(
+                                    ) : (
                                         <TransitionGroup>
                                             {receivedList && receivedList.map(r => (
                                                 <CSSTransition key={r.id} timeout={500} classNames="item">
-                                                    <FriendsReceivedListItem list={r} onRemove={removeItemFromList}></FriendsReceivedListItem>
+                                                    <FriendsReceivedListItem list={r}
+                                                                             onRemove={removeItemFromList}></FriendsReceivedListItem>
                                                 </CSSTransition>
                                             ))}
                                         </TransitionGroup>
@@ -445,28 +428,27 @@ const MyPage = React.memo(({onRemove, onPasswordChange, MyPageDiv, logoutApi}) =
                                 }
                             </div>
                         </div>
-                    ): (
+                    ) : (
                         <div className={"friendRequested_clicked"}>
-                            <div className={"friendRecieved_clicked"}>
-                                <div className={"friendRecieved_div"}>
-                                    request sent
-                                </div>
-                                <div className={"friendRecieved_div_2"}>
-                                    {requetedList.length === 0 ?
-                                        (
-                                          <div className={"friendRecieved_div_3"}>No Request
-                                          </div>
-                                        ):(
-                                            <TransitionGroup>
-                                                {requetedList && requetedList.map(r => (
-                                                    <CSSTransition key={r.id} timeout={500} classNames="item">
-                                                        <FriendsRequestedListItem list={r} onRemove={removeItemFromList2}></FriendsRequestedListItem>
-                                                    </CSSTransition>
-                                                ))}
-                                            </TransitionGroup>
-                                        )
-                                    }
-                                </div>
+                            <div className={"friendRecieved_div"}>
+                                request sent
+                            </div>
+                            <div className={"friendRecieved_div_2"}>
+                                {requetedList.length === 0 ?
+                                    (
+                                        <div className={"friendRecieved_div_3"}>No Request
+                                        </div>
+                                    ) : (
+                                        <TransitionGroup>
+                                            {requetedList && requetedList.map(r => (
+                                                <CSSTransition key={r.id} timeout={500} classNames="item">
+                                                    <FriendsRequestedListItem list={r}
+                                                                              onRemove={removeItemFromList2}></FriendsRequestedListItem>
+                                                </CSSTransition>
+                                            ))}
+                                        </TransitionGroup>
+                                    )
+                                }
                             </div>
                         </div>
                     )

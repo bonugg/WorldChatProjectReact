@@ -35,13 +35,16 @@ const Earth = React.memo(({
                               isLoginZoom,
                               isSignUpZoom,
                               FrdId,
-                              FrdId2
+                              FrdId2,
+                              NationallyList,
+                              selectedNationallyMove,
+                              resetCityName
                           }) => {
 
     const objectGroup = useRef();
-    const [KR,US,CA,IT,JP,RU,AU,PH,CN,mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
+    const [KR, US, CA, IT, JP, RU, AU, PH, CN, mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
         TextureLoader,
-        [KRMAP,USMAP,CAMAP,ITMAP,JPMAP,RUMAP,AUMAP,PHMAP,CNMAP,Pluto_MadeMap, CloudsMap, EarthNightMap, EarthDayMap, EarthNormalMap, EarthSpecularMap, EarthCloudsMap, MarsMap, SunMap]
+        [KRMAP, USMAP, CAMAP, ITMAP, JPMAP, RUMAP, AUMAP, PHMAP, CNMAP, Pluto_MadeMap, CloudsMap, EarthNightMap, EarthDayMap, EarthNormalMap, EarthSpecularMap, EarthCloudsMap, MarsMap, SunMap]
     );
     //클릭 도시 이름 저장 변수
 
@@ -86,17 +89,17 @@ const Earth = React.memo(({
     const cloudsRefnomar = useRef();
 
     const countryCoordinates = {
-        KR: { lat: 37.541, lng: 126.986 },
-        US: { lat: 40.60857, lng: -74.01559 },
-        CA: { lat: 45.42153, lng: -75.69719 },
-        JP: { lat: 35.652832, lng: 139.839478 },
-        CN: { lat: 39.90469, lng: 116.40717 },
-        PH: { lat: 14.609053, lng: 121.022256 },
-        RU: { lat: 55.755825, lng: 37.617298 },
-        TW: { lat: 25.0330, lng: 121.5654 },
-        UA: { lat: 50.4501, lng: 30.5234 },
-        AU: { lat: -35.2809, lng: 149.1300 },
-        IT: { lat: 41.902782, lng: 12.496366 }
+        KR: {lat: 37.541, lng: 126.986},
+        US: {lat: 40.60857, lng: -74.01559},
+        CA: {lat: 45.42153, lng: -75.69719},
+        JP: {lat: 35.652832, lng: 139.839478},
+        CN: {lat: 39.90469, lng: 116.40717},
+        PH: {lat: 14.609053, lng: 121.022256},
+        RU: {lat: 55.755825, lng: 37.617298},
+        TW: {lat: 25.0330, lng: 121.5654},
+        UA: {lat: 50.4501, lng: 30.5234},
+        AU: {lat: -35.2809, lng: 149.1300},
+        IT: {lat: 41.902782, lng: 12.496366}
     };
     const countryTextures = {
         KR: KR,
@@ -120,22 +123,28 @@ const Earth = React.memo(({
 
     useEffect(() => {
         if (clickedCity) {
-            if(FriendsNationally2 != FriendsNationally3){
+            if (FriendsNationally2 != FriendsNationally3) {
                 FriendListApiOn(true);
                 FriendsNationally(FriendsNationally2);
-            }else {
+            } else {
                 FriendListApiOn(false);
             }
-        }else {
+        } else {
             FriendListApiOn(false);
         }
     }, [clickedCity]);
 
     useEffect(() => {
+        if (selectedNationallyMove !== "") {
+            clickCity(selectedNationallyMove);
+        }
+    }, [selectedNationallyMove]);
+
+    useEffect(() => {
         if (loggedIn) {
             console.log("실행");
             handleEarthClick();
-            if(FrdId2 == 0){
+            if (FrdId2 == 0) {
                 setZoomIn(false);
             }
         } else {
@@ -265,9 +274,9 @@ const Earth = React.memo(({
             <ambientLight intensity={1.2}/>
             <pointLight color="white" position={[-200, 50, -100]} intensity={1.2}/>
             <Stars
-                radius={100}
-                depth={50}
-                count={200}
+                radius={500}
+                depth={10}
+                count={10000}
                 factor={7}
                 saturation={0}
                 fade={true}
@@ -446,23 +455,36 @@ const Earth = React.memo(({
 
 //도시 이름 입력 후 호출 시 클릭이벤트 생성
     function clickCity(cityName) {
+        if (cityName === " "){
+            return;
+        }
+        setFriendsNationally2(cityName);
         const cityObject = earthRef.current.children.find((child) => child.userData.city === cityName);
-        if (cityObject) {
-            const cityPosition = cityObject.position.clone();
 
-            setClickedCity(cityPosition);
+        //도시를 줌인한 상태에서 다른 도시 클릭 시 실행
+        if (selectedCity != null && cityObject.userData.city != selectedCity.userData.city) {
+            // 클릭한 도시의 위치 저장
+            setClickedCity(cityObject.position.clone());
+            //도시 줌인 카메라 상태 초기화
+            setIsCityZoom(false);
+            setSelectedCity(cityObject);
+            setZoomIn(zoomIn);
+            setTarget(new THREE.Vector3(cityObject.position.x, cityObject.position.y, cityObject.position.z + 3));//도시를 줌인한 상태에서 다른 도시 클릭 시 실행
+        } else {
+            //일단 도시 클릭 시 실행
+            setClickedCity(cityObject.position.clone());
             setSelectedCity(cityObject);
             if (!zoomIn) {
                 setInitialCameraPosition(camera.position.clone());
+                //도시 줌인 카메라 상태 초기화
+                setIsCityZoom(false);
             } else {
                 setSelectedCity(null);
             }
             setZoomIn(!zoomIn);
-            setTarget(new THREE.Vector3(cityPosition.x, cityPosition.y, cityPosition.z + 3));
-
-        } else {
-            console.error(`City ${cityName} not found.`);
+            setTarget(new THREE.Vector3(cityObject.position.clone().x, cityObject.position.clone().y, cityObject.position.clone().z + 3));
         }
+        resetCityName(true);
     }
 
     function resetCityColors() {
@@ -551,7 +573,8 @@ const Earth = React.memo(({
                 console.log(data);
                 console.log(data.items);
                 removeAllCircles();
-                if(data && data.items) {
+                if (data && data.items) {
+                    NationallyList(data.items);
                     data.items.forEach((countryCode) => {
                         const coordinates = countryCoordinates[countryCode];
                         if (coordinates) {
@@ -560,7 +583,7 @@ const Earth = React.memo(({
                             console.error(`Coordinates for country code ${countryCode} not found.`);
                         }
                     });
-                }else {
+                } else {
 
                 }
             } catch (error) {
@@ -581,7 +604,7 @@ const Earth = React.memo(({
         //
         // const geometry = new THREE.PlaneGeometry(0.05, 0.05); // Plane geometry 사용
         // const geometry = new THREE.SphereGeometry(0.01, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ map: mapTexture, side: THREE.DoubleSide});
+        const material = new THREE.MeshBasicMaterial({map: mapTexture, side: THREE.DoubleSide});
 
         const circle = new THREE.Mesh(geometry, material);
 
