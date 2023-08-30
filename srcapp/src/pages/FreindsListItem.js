@@ -101,13 +101,13 @@ const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setC
                         </span>
                     <Button
                         onClick={deleteFriend}
-                        className={"friend_del_yes_btn"}
+                        className={"friend_del_btn_1 one"}
                     >
                         Delete
                     </Button>
                     <Button
                         onClick={deleteCancle}
-                        className={"friend_del_cancle_btn"}
+                        className={"friend_del_btn_1"}
                     >
                         Cancle
                     </Button>

@@ -8,10 +8,39 @@ import axios from "axios";
 import FriendsReceivedListItem from "./FriendsReceivedListItem";
 import FriendsRequestedListItem from "./FriendsRequestedListItem";
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
+import PasswordChange from "./PasswordChange";
+import styled, {keyframes} from "styled-components";
+
+const slideDown = keyframes`
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+`;
+const slideUp = keyframes`
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+`;
+const DivStyled = styled.div`
+  visibility: ${props => props.visible === "visible" ? 'visible' : props.visible === "" ? "" : "hidden"};
+  animation: ${props => props.visible === "visible" ? slideDown : props.visible === "" ? slideUp : 'hidden'} 0.35s ease-in-out;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+  z-index: 2;
+  transform: ${props => props.visible === "visible" ? 'translate(-50%, -50%) scaleY(1)' : 'translate(-50%, -50%) scaleY(0)'};
+  /* Add other CSS properties for the loginDiv here */
+`;
 
 const MyPage = React.memo(({
                                onRemove,
-                               onPasswordChange,
                                MyPageDiv,
                                logoutApi,
                                homeMyGo,
@@ -19,7 +48,33 @@ const MyPage = React.memo(({
                                FriendsReceived,
                                MyPageG
                            }) => {
+        //패스워드 수정 버튼 클릭 상태
+        const [isPasswordChangeDiv, setIsPasswordChangeDiv] = useState(false);
+        const [isPasswordChangeDiv2, setIsPasswordChangeDiv2] = useState(false);
+        //패스워드 수정 창 외의 화면 클릭 시 상태
+        const passwordChangeDivRef = useRef(null);
+        //패스워드 수정 창 띄우고 창 밖 클릭 시 창 닫힘
+        useEffect(() => {
+            if (isPasswordChangeDiv) {
+                const onClick = (event) => {
+                    handleOutsideClick(event);
+                }
+                setTimeout(() => document.addEventListener("click", onClick), 0);
 
+                return () => {
+                    document.removeEventListener("click", onClick);
+                };
+            }
+        }, [isPasswordChangeDiv]);
+        const handleOutsideClick = (event) => {
+            if (passwordChangeDivRef.current && !passwordChangeDivRef.current.contains(event.target)) {
+                setIsPasswordChangeDiv(false);
+            }
+        };
+        const isPasswordChangeDivClose = (newValue) => {
+            setIsPasswordChangeDiv(newValue);
+            setIsPasswordChangeDiv2(true);
+        };
         //마이페이지
         const [MypageuserName, setMypageuserName] = useState('');
         const [MypageuserNickName, setMypageuserNickName] = useState('');
@@ -177,8 +232,8 @@ const MyPage = React.memo(({
 
 //패스워드 수정 버튼 클릭 시 동작
         const passwordChangeDiv = () => {
-
-            onPasswordChange(true); // Home.js에 이벤트 전달
+            setIsPasswordChangeDiv(true);
+            setIsPasswordChangeDiv2(true);
         }
 
 //textarea 100자 이내 입력
@@ -334,6 +389,14 @@ const MyPage = React.memo(({
                     height: '100%',
                 }}
             >
+                <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"}
+                           ref={passwordChangeDivRef}>
+                    <PasswordChange
+                        isPasswordChangeDiv={isPasswordChangeDiv}
+                        isPasswordChangeDivClose={isPasswordChangeDivClose}
+                    >
+                    </PasswordChange>
+                </DivStyled>
                 {mypageOnClick ? (
                         <div className={"myPage_clicked"}>
                             <div className={"myPageDiv2"}>
@@ -395,7 +458,7 @@ const MyPage = React.memo(({
                                     </div>
                                     <div className={"myPageDiv_Message_btn_div"}>
                                         <Button
-                                            className={messageButtonText == 'Change Message' ? "myPageDiv_Message_btn" : "myPageDiv_Message_btn2"}
+                                            className={messageButtonText == 'Change Message' ? "myPageDiv_Message_btn" : "myPageDiv_Message_btn one"}
                                             onClick={userMessageChange}>
                                             {messageButtonText}
                                         </Button>

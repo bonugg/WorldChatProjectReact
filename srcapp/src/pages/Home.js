@@ -9,8 +9,10 @@ import {useFrame, useThree, Canvas} from "@react-three/fiber";
 import {Suspense} from "react";
 import * as THREE from "three";
 import {keyframes} from 'styled-components';
-import Logo from "../img/logo.png";
+import Logo from "../img/logo_img.png";
 import Logo_text from "../img/logo_text.png";
+import Login from "../img/login.png";
+import Signup from "../img/signup.png";
 import Earth from "../components/earth/index";
 import MyPage from './MyPage';
 import FreindsList from './FreindsList';
@@ -35,6 +37,8 @@ import China from "../img/flag/CN.png";
 import Italy from "../img/flag/IT.png";
 import Russia from "../img/flag/RU.png";
 import Philippines from "../img/flag/PH.png";
+import PersonIcon from '@mui/icons-material/Person';
+import KeyIcon from '@mui/icons-material/Key';
 
 const CanvasContainer = styled.div`
   flex: 1;
@@ -81,29 +85,6 @@ const DivStyledMenu = styled.div`
   transform: ${props => props.visible ? 'translate(-50%, -50%) scaleY(1)' : 'translate(-50%, -50%) scaleY(0)'};
 `;
 
-
-const slideDownTest = keyframes`
-  0% {
-    visibility: hidden;
-    width: 0px;
-  }
-  100% {
-    visibility: visible;
-    width: 500px;
-  }
-`;
-const DivStyledMenuTest = styled.div`
-  visibility: ${props => props.visible ? 'visible' : 'hidden'};
-  animation: ${props => props.visible ? slideDownTest : ""} 0.35s ease-in-out;
-  display: ${props => props.visible ? "block" : "none"};
-  position: absolute;
-  top: 0;
-  left: ${props => props.visible ? "300px" : "-500px"};
-  z-index: 1;
-  width: ${props => props.visible ? '500px' : '0px'};
-  height: 100%;
-  transform-origin: left;
-`;
 const DivStyledMenu2 = styled.div`
   visibility: ${props => props.visible ? 'visible' : 'hidden'};
   animation: ${props => props.visible ? slideDownFriends : ""} 0.35s ease-in-out;
@@ -112,16 +93,6 @@ const DivStyledMenu2 = styled.div`
   bottom: 20px;
   overflow: hidden; // 새로 추가된 속성
   height: ${props => props.visible ? '650px' : '0'}; // 새로 추가된 속성
-`;
-const DivStyled = styled.div`
-  visibility: ${props => props.visible === "visible" ? 'visible' : props.visible === "" ? "" : "hidden"};
-  animation: ${props => props.visible === "visible" ? slideDown : props.visible === "" ? slideUp : 'hidden'} 0.35s ease-in-out;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform-origin: center;
-  transform: ${props => props.visible === "visible" ? 'translate(-50%, -50%) scaleY(1)' : 'translate(-50%, -50%) scaleY(0)'};
-  /* Add other CSS properties for the loginDiv here */
 `;
 
 
@@ -289,12 +260,6 @@ const Home = React.memo(() => {
             const [phoneCheckError, setPhoneCheckError] = useState(false);
             const [phoneCheckError2, setPhoneCheckError2] = useState(false);
 
-            //패스워드 수정 버튼 클릭 상태
-            const [isPasswordChangeDiv, setIsPasswordChangeDiv] = useState(false);
-            const [isPasswordChangeDiv2, setIsPasswordChangeDiv2] = useState(false);
-            //패스워드 수정 창 외의 화면 클릭 시 상태
-            const passwordChangeDivRef = useRef(null);
-
             // rtc
             const [showRtcChat, setShowRtcChat] = useState(false); // RtcChat 상태를 boolean으로 관리
             const [showRtcVoiceChat, setShowRtcVoiceChat] = useState(false);
@@ -338,15 +303,6 @@ const Home = React.memo(() => {
                     };
                 }
             }, [socket]);
-
-            const onPasswordChange = (newValue) => {
-                setIsPasswordChangeDiv(newValue);
-                setIsPasswordChangeDiv2(true);
-            };
-            const isPasswordChangeDivClose = (newValue) => {
-                setIsPasswordChangeDiv(newValue);
-                setIsPasswordChangeDiv2(true);
-            };
             const isFriendsListZoom = (newValue) => {
                 if (newValue) {
                     setFriendsList(true);
@@ -366,13 +322,6 @@ const Home = React.memo(() => {
                     logout();
                 }
             };
-            const logoutApi2 = (newValue) => {
-                if (newValue) {
-                    setIsPasswordChangeDiv(false);
-                    setIsPasswordChangeDiv2(true);
-                    logout();
-                }
-            };
             const logoutApi3 = (newValue) => {
                 if (newValue) {
                     logout();
@@ -383,25 +332,6 @@ const Home = React.memo(() => {
                     logout();
                 }
             };
-            //패스워드 수정 창 띄우고 창 밖 클릭 시 창 닫힘
-            useEffect(() => {
-                if (isPasswordChangeDiv) {
-                    const onClick = (event) => {
-                        handleOutsideClick(event);
-                    }
-                    setTimeout(() => document.addEventListener("click", onClick), 0);
-
-                    return () => {
-                        document.removeEventListener("click", onClick);
-                    };
-                }
-            }, [isPasswordChangeDiv]);
-            const handleOutsideClick = (event) => {
-                if (passwordChangeDivRef.current && !passwordChangeDivRef.current.contains(event.target)) {
-                    setIsPasswordChangeDiv(false);
-                }
-            };
-
             // 아래는 석이 거
 
             // const [type2, setType2] = useState('');
@@ -561,6 +491,9 @@ const Home = React.memo(() => {
                         };
                     }
 
+                    //열린 메뉴 닫음
+                    setMenutoggle(false);
+                    setMenutoggle2(false);
                     // setSocket(ws);
                     // 페이지 이동
                     setUsername('');
@@ -1099,7 +1032,7 @@ const Home = React.memo(() => {
                         <CateChatDrag cateMax={cateMax} isMinimize={handleIsMinimizedCate}
                                       show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
                         <aside
-                            className={MyPageDiv ? `side-bar one` :`side-bar`}
+                            className={MyPageDiv ? `side-bar one` : `side-bar`}
                         >
                             <div className={"logo_div"}>
                                 <img
@@ -1308,7 +1241,6 @@ const Home = React.memo(() => {
                                 MyPageG={MyPageG}
                                 FriendsReceived={FriendsReceived}
                                 FriendsReqested={FriendsReqested}
-                                onPasswordChange={onPasswordChange}
                                 logoutApi={logoutApi}
                                 onRemove={removeItemFromHomeComponent}
                             />
@@ -1326,21 +1258,11 @@ const Home = React.memo(() => {
                             />
                             {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>
-                        <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"}
-                                   ref={passwordChangeDivRef}>
-                            <PasswordChange
-                                isPasswordChangeDiv={isPasswordChangeDiv}
-                                isPasswordChangeDivClose={isPasswordChangeDivClose}
-                                logoutApi2={logoutApi2}
-                            >
-                            </PasswordChange>
-                        </DivStyled>
-                        <DivStyledMenu visible={LoginDiv ? "visible" : ""}>
-                            {/* Content inside the loginDiv */}
+                        <div className={LoginDiv ? "sub_test3_on" : "sub_test3"}>
                             <div className={"loginDiv"}>
                                 <div className={"loginDiv_2"}>
-                                    <div className={"LogoDiv"}>
-                                        <img className={"LogoImg"} src={Logo}></img>
+                                    <div className={"login_img_div"}>
+                                        <img src={Login} className={"login_img"}/>
                                     </div>
                                     <form onSubmit={handleSubmit}>
                                         <div className={"loginForm2"} id={"id_Login_ID"}>
@@ -1352,6 +1274,7 @@ const Home = React.memo(() => {
                                                 onChange={(e) => setUsername(e.target.value)}
                                                 onFocus={resetButton}
                                             />
+                                            <PersonIcon className={"login_icon"}/>
                                         </div>
                                         <div className={"loginForm2"} id={"id_Login_PWD"}>
                                             <input
@@ -1362,6 +1285,7 @@ const Home = React.memo(() => {
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 onFocus={resetButton}
                                             />
+                                            <KeyIcon className={"pwd_icon"}/>
                                         </div>
                                         <div className={"loginForm_remmember"} id={"id_Remember_Account"}>
                                             <Checkbox
@@ -1376,37 +1300,25 @@ const Home = React.memo(() => {
                                         <div className={"login_btn2"} id={"id_Login_BTN"}>
                                             <Button
                                                 type="submit"
-                                                className={buttonText === "ID OR PASSWORD ERROR" ? "error_text" : "no_error_text"}>
-                                                {buttonText}</Button>
+                                                className={buttonText === "ID OR PASSWORD ERROR" ? "error_text" : "error_text no"}>
+                                                {buttonText}
+                                            </Button>
                                         </div>
                                     </form>
 
                                 </div>
                             </div>
-                        </DivStyledMenu>
-
-                        {/*rtc*/}
-                        <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser}
-                                                           setShowRtcChat={setShowRtcChat} type2={type2}
-                                                           setType2={setType2}/>}
-                        </DivStyledMenu>
-
-                        <DivStyledMenu visible={showRtcVoiceChat}>
-                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser}
-                                                                     setShowRtcVoiceChat={setShowRtcVoiceChat}
-                                                                     type2={type2}
-                                                                     setType2={setType2}/>}
-                        </DivStyledMenu>
-
-                        <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
-                            {/* Content inside the loginDiv */}
+                        </div>
+                        <div className={SignUpDiv ? "sub_test3_on" : "sub_test3"}>
                             <div className={"signDiv"}>
                                 <div className={"signupDiv_2"}>
+                                    <div className={"login_img_div"}>
+                                        <img src={Signup} className={"signup_img"}/>
+                                    </div>
                                     <form onSubmit={handleSubmitSignUp}>
                                         <div className={"loginForm"} id={"id_ID"}>
                                             <input
-                                                className={IdCheckError ? "yesIDinput" : IdCheckError2 ? "noIDinput" : "emptyID"}
+                                                className={IdCheckError ? "emptyID yes" : IdCheckError2 ? "emptyID no" : "emptyID"}
                                                 placeholder={"Please enter your ID"}
                                                 type='text'
                                                 value={SginuserName}
@@ -1424,7 +1336,7 @@ const Home = React.memo(() => {
                                         </div>
                                         <div className={"loginForm"} id={"id_PWD"}>
                                             <input
-                                                className={"inputFromText"}
+                                                className={"inputFromText_pwd"}
                                                 placeholder={"Please enter your PASSWORD"}
                                                 type='password'
                                                 value={SignuserPwd}
@@ -1447,7 +1359,7 @@ const Home = React.memo(() => {
                                         </div>
                                         <div className={"loginForm"} id={"id_NINKNAME"}>
                                             <input
-                                                className={NickNameCheckError ? "yesIDinput2" : NickNameCheckError2 ? "noIDinput2" : "emptyID2"}
+                                                className={NickNameCheckError ? "emptyID yes" : NickNameCheckError2 ? "emptyID no" : "emptyID"}
                                                 placeholder={"Please enter your NICKNAME"}
                                                 type='text'
                                                 value={SignuserNickName}
@@ -1513,7 +1425,22 @@ const Home = React.memo(() => {
 
                                 </div>
                             </div>
+                        </div>
+
+                        {/*rtc*/}
+                        <DivStyledMenu visible={showRtcChat}>
+                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser}
+                                                           setShowRtcChat={setShowRtcChat} type2={type2}
+                                                           setType2={setType2}/>}
                         </DivStyledMenu>
+
+                        <DivStyledMenu visible={showRtcVoiceChat}>
+                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser}
+                                                                     setShowRtcVoiceChat={setShowRtcVoiceChat}
+                                                                     type2={type2}
+                                                                     setType2={setType2}/>}
+                        </DivStyledMenu>
+
                         {/* 드래그 채팅창 사이드 밖 영역 */}
                     </div>
                 </Suspense>
