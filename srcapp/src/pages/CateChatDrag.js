@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState, useCallback} from "react";
-import { Rnd } from "react-rnd";
+import {Rnd} from "react-rnd";
 
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -15,7 +15,7 @@ import CateChatListItem from './CateChatListItem';
 import styled, {keyframes} from "styled-components";
 import axios from "axios";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import Logo from "../img/logo_no_text.png";
+import Logo from "../img/logo_img.png";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 const MessageStyled = styled.p`
@@ -105,14 +105,17 @@ const UserListPanel = styled.div`
   animation: ${props => props.visible === "visible" ? slideDownUserList : props.visible === "" ? slideUpUserList : "hidden"} 0.25s ease-in-out;
   position: absolute;
   top: 0;
-  right: 450px; // 수정된 부분
+  right: 100%; // 수정된 부분
   z-index: 1;
-  width: ${props => props.visible ? '200px' : '0px'}; // 기존 속성
+  width: ${props => props.visible ? '200px' : '0px'};
   max-height: 70%;
   height: ${props => props.height};
-  border-bottom-left-radius: 15px;
-  border-top-left-radius: 15px;
-  background-color: rgba(50, 50, 50, 0.8);
+  border-bottom-left-radius: 4px;
+  border-top-left-radius: 4px;
+  background-color: rgba(11, 11, 14, 0.8);
+  border: 1px solid #222526;
+  border-right-width: 0px;
+  border-left-width: ${props => props.visible ? '1px' : '0px'};
   overflow-y: auto;
   overflow-x: hidden;
   transition: all 0.25s ease-in-out;
@@ -188,6 +191,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
         const [CateName, setCateName] = useState('Select Category');
         const [CateRoom, setCateRoom] = useState({});
         const [isChatDiv, setIsChatDiv] = useState(false);
+        const [activeButton, setActiveButton] = useState(null);
 
         //채팅을 치고 있는지 안 치고 있는지 확인하는 상태 변수
         const [isTyping, setIsTyping] = useState("");
@@ -249,16 +253,16 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
             "fr": "French (Français)"
 
         };
-        const [size, setSize] = useState({ width: "450px", height: "600px"});
+        const [size, setSize] = useState({width: "450px", height: "600px"});
         //rnd
         const [resizing, setResizing] = useState(false);
-        const handleResizeStart  = () => {
+        const handleResizeStart = () => {
             // 사이즈 결정
             setResizing(true);
         };
         const handleResizeStop = (e, direction, ref) => {
             // 사이즈 결정
-            setSize({ width: ref.style.width, height: ref.style.height });
+            setSize({width: ref.style.width, height: ref.style.height});
             setResizing(false); // resizing 상태 업데이트
         };
 
@@ -284,7 +288,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
             if (stompClient !== null) {
                 if (isTyping === "y") {
                     sendTypingMessage();
-                } else if(isTyping === "n"){
+                } else if (isTyping === "n") {
                     removeTypingMessage();
                 }
             }
@@ -304,7 +308,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
             }
 
         }, [Typing]);
-
         const toggleUserListPanel = () => {
             setIsUserListVisible((prevIsUserListVisible) => !prevIsUserListVisible);
             setIsUserListVisible2(true);
@@ -410,18 +413,14 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                     cateId: CateRoom.cateId,
                 }));
                 stompClient.disconnect();
-
-                setSelectedLanguage(" ");
-                setMenuDiv(false);
-                setMenuDiv2(false);
-                setSendMessage('');
-                setMessages([]);
-                setIsUserListVisible(false);
-                setIsUserListVisible2(false);
-                setIsChatReadOnly(false);
-                setStompClient(null);
             }
             console.log('Disconnected');
+
+            setSelectedLanguage(" ");
+            setSendMessage('');
+            setMessages([]);
+            setIsChatReadOnly(false);
+            setStompClient(null);
         };
 
         //--------------번역----------------------
@@ -489,9 +488,10 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
 
         useEffect(() => {
             if (!show) {
-                setSize({ width: "450px", height: "600px"});
+                setSize({width: "450px", height: "600px"});
                 setIsClosed(false);
                 setIsChatDiv(false);
+                setActiveButton(null);
             }
         }, [show]);
 
@@ -503,9 +503,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                 connect();
             } else {
                 disconnect();
-                if (isUserListVisible) {
-                    setIsUserListVisible2(true);
-                }
             }
         }, [isChatDiv]);
 
@@ -547,14 +544,10 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
             setCreatRoom(false);
             setCreatRoom2(false);
             setIsChatDiv(false);
-            setIsChatReadOnly(false);
-            setSendMessage('');
-            setMessages([]);
             setRoomList([]);
             setCateName("Select Category");
             setIsClosed(true);
             setPosition(initialPosition);
-
 
             disconnect();
             if (onClose) {
@@ -628,8 +621,12 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
 
 
         const exitChatDiv = (interest) => {
+            setMenuDiv(false);
+            setMenuDiv2(false);
+            setIsUserListVisible(false);
             setIsChatDiv(false);
         };
+
 
         // 카테고리 룸 등록 후 div 업데이트 합니다
         const setCateRoomAndHandleChatDivUpdate = (chatDivUpdateValue, cateRoomValue) => {
@@ -918,7 +915,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                             disabled={!cateMax}
                             onResizeStop={handleResizeStop}
                             onResizeStart={handleResizeStart}
-                            default={{ x: position.x, y: position.y }}
+                            default={{x: position.x, y: position.y}}
                             enableResizing={{
                                 top: false,
                                 right: true,
@@ -930,14 +927,13 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                                 topLeft: false,
                             }}
                             style={{
-                                borderRadius: "15px",
-                                zIndex: "2",
+                                zIndex: "3",
                                 position: "fixed",
                                 display: !cateMax ? "none" : "block",
                                 transition: resizing ? 'none' : 'width 0.25s ease-in-out, height 0.25s ease-in-out'
                             }}
-                            dragHandleClassName="headerChat"
-                            >
+                            dragHandleClassName="headerCate"
+                        >
                             <div
                                 className="box"
                                 style={{
@@ -948,20 +944,20 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                                     color: 'black',
                                     width: '100%',
                                     height: '100%',
-                                    borderRadius: '15px',
-                                    borderTopLeftRadius: isUserListVisible ? '0px' : '15px',
-                                    borderBottomLeftRadius: '15px',
+                                    borderRadius: '4px',
+                                    borderTopLeftRadius: isUserListVisible ? '0px' : '4px',
+                                    borderBottomLeftRadius: '4px',
                                     padding: '0px',
                                     margin: 'auto',
                                     userSelect: 'none',
-                                    zIndex: '2',
+                                    zIndex: '3',
                                     transition: isUserListVisible ? 'border-top-left-radius 0s ease-in-out, border-bottom-left-radius 0s ease-in-out' : 'border-top-left-radius 1s ease-in-out, border-bottom-left-radius 1s ease-in-out'
                                 }}
                             >
                                 <UserListPanel visible={isUserListVisible ? "visible" : isUserListVisible2 ? "" : "hidden"}
                                 >
                                     <div className={"userList_title"}>
-                                        <span className={"userList_title_2"}>User List&nbsp;
+                                        <span className={"userList_title_2"}>User&nbsp;
                                             <span className={"userList_title_cnt"}>{userList.length}</span>
                                         </span>
 
@@ -978,16 +974,24 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                                            ref={createRoomRef}>
                                     <div className={"creatRoom_Div"}>
                                         <div className={"creatRoom_Div_2"}>
-                                            <Button
-                                                className={"CreateClose"}
-                                                onClick={CloseCreateRoom}
-                                            >
+                                            <div className={"creatRoom_Div_2_1"}>
 
-                                            </Button>
+                                            </div>
+                                            <div className={"creatRoom_Div_2_2"}>
+                                                Room Create
+
+                                            </div>
+                                            <div className={"creatRoom_Div_2_3"}>
+                                                <Button
+                                                    className={"close"}
+                                                    onClick={CloseCreateRoom}
+                                                >
+                                                </Button>
+                                            </div>
+
                                         </div>
                                         <div className={"creatRoom_Div_3"}>
                                             <form onSubmit={handleSubmit} className={"creatRoom_Div_form"}>
-                                                <div className={"creatRoom_Div_4"}>
                                                     <input
                                                         style={{marginLeft: '0px'}}
                                                         placeholder={"Please enter Roomname"}
@@ -998,8 +1002,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                                                         value={formValues.cateName}
                                                         onChange={handleChange}
                                                     />
-                                                </div>
-                                                <div className={"creatRoom_Div_5"}>
                                                     <input
                                                         type="number"
                                                         name="maxUserCnt"
@@ -1010,8 +1012,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                                                         value={formValues.maxUserCnt}
                                                         onChange={handleChange}
                                                     />
-                                                </div>
-                                                <div className={"creatRoom_Div_6"}>
                                                     <Select
                                                         name="interest"
                                                         required
@@ -1049,394 +1049,443 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                                                         <MenuItem className={"menu_li_select"} value="Pets">Pets</MenuItem>
                                                         {/* 이탈리아 추가 */}
                                                     </Select>
-                                                </div>
-                                                <div className={"creatRoom_Div_7"}>
                                                     <Button
                                                         className={"roomCreate2"}
                                                         type="submit"
                                                     >CREATE
                                                     </Button>
-                                                </div>
                                             </form>
                                         </div>
                                     </div>
                                 </DivStyled>
-                                <div className={"headerChat"}>
-                                    <div className={"btnDiv_create"}>
-                                        <img
-                                            className={"logo_img"}
-                                            src={Logo}
-                                        ></img>
-                                        {isChatDiv ? (
+                                <div className={"headerCate"}>
+                                    <div className={isUserListVisible ? "headerChatCate_true" : "headerChatCate"}
+                                    >
+                                        <div className={"btnDiv_create"}>
+                                            <img
+                                                className={"logo_img"}
+                                                src={Logo}
+                                            ></img>
+                                            {isChatDiv ? (
+                                                <Button
+                                                    type={'button'}
+                                                    className={"userList"}
+                                                    onClick={toggleUserListPanel}
+                                                    disabled={!isChatReadOnly}
+                                                >USER LIST
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    className={"roomCreate"}
+                                                    onClick={CreateRoom}
+                                                >CREATE
+                                                </Button>
+                                            )}
+                                        </div>
+                                        <div className={"title_cate"}>
+                                            Category Chat
+
+                                        </div>
+                                        <div className={"btnDiv"}>
                                             <Button
-                                                type={'button'}
-                                                className={"userList"}
-                                                onClick={toggleUserListPanel}
-                                                disabled={!isChatReadOnly}
-                                            >USER LIST
+                                                onClick={handleMinimizeClick}
+                                                className={"minimum"}
+                                            >
                                             </Button>
-                                        ) : (
                                             <Button
-                                                className={"roomCreate"}
-                                                onClick={CreateRoom}
-                                            >CREATE
+                                                onClick={handleCloseClick}
+                                                className={"close"}
+                                            >
                                             </Button>
-                                        )}
-                                    </div>
-                                    <div className={"title_cate"}>
-                                        Category Chat
+                                        </div>
 
                                     </div>
-                                    <div className={"btnDiv"}>
-                                        <Button
-                                            onClick={handleMinimizeClick}
-                                            className={"minimum"}
-                                        >
-                                        </Button>
-                                        <Button
-                                            onClick={handleCloseClick}
-                                            className={"close"}
-                                        >
-                                        </Button>
-                                    </div>
-
                                 </div>
+
                                 {/* 밑으로 컨텐츠 들어갈 부분*/}
-                                <div className={isChatDiv ? "contentChat_true" : "contentChat"}>
-                                {isChatDiv ? (
-                                    <div className={"chatR"}>
-                                        <div className={"EnterRoom"}>
-                                            <div className={"EnterRoom_2"}>
-                                                <div className={"EnterRoomNameCate"}>
+                                <div className={isChatDiv ? "contentChat_true" : "CatecontentChat"}>
+                                    {isChatDiv ? (
+                                        <div className={"chatR"}>
+                                            <div className={"EnterRoom"}>
+                                                <div className={"EnterRoom_2"}>
+                                                    <div className={"EnterRoomNameCate"}>
                                                     <span className={"EnterRoomName_2"}>
                                                         {CateRoom.cateName}
                                                     </span>
-                                                </div>
-                                                <div className={"EnterRoomClose"}>
-                                                    <div className={"EnterRoomCate_text"}>
-                                                        {CateRoom.interest}</div>
-                                                    <Button
-                                                        className={"Close_btn"}
-                                                        onClick={() => exitChatDiv(CateRoom.interest)}
-                                                    >
-                                                        <LogoutIcon style={{fontSize : 'small'}}/>
-                                                    </Button>
+                                                    </div>
+                                                    <div className={"EnterRoomClose"}>
+                                                        <div className={"EnterRoomCate_text"}>
+                                                            {CateRoom.interest}</div>
+                                                        <Button
+                                                            className={"Close_btn"}
+                                                            onClick={() => exitChatDiv(CateRoom.interest)}
+                                                        >
+                                                            <LogoutIcon style={{fontSize: 'small'}}/>
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className={"EnterRoomChat"}>
-                                            <div className={"EnterRoomChat_2"}>
-                                                <div className={"EnterRoomChat_content"}>
-                                                    <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
-                                                        {messages.map((message, index) => {
-                                                            const isMyMessage = message.sender === userNickNameRef.current;
-                                                            return (
-                                                                <MessageStyled
-                                                                    key={index}
-                                                                    className={message.type !== 'CHAT' ? "userJoin" : isMyMessage ? "userY" : "userX"}
-                                                                >
-                                                                    {message.type !== 'CHAT' ? (
-                                                                        <div>
+                                            <div className={"EnterRoomChat"}>
+                                                <div className={"EnterRoomChat_2"}>
+                                                    <div className={"EnterRoomChat_content"}>
+                                                        <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
+                                                            {messages.map((message, index) => {
+                                                                const isMyMessage = message.sender === userNickNameRef.current;
+                                                                return (
+                                                                    <MessageStyled
+                                                                        key={index}
+                                                                        className={message.type !== 'CHAT' ? "userJoin" : isMyMessage ? "userY" : "userX"}
+                                                                    >
+                                                                        {message.type !== 'CHAT' ? (
+                                                                            <div>
                                                                             <span
                                                                                 className="content_join">{message.cateChatContent}</span>
-                                                                            <p className="message-regdate_Join">{message.cateChatRegdate}</p>
-                                                                        </div>
-                                                                    ) : isMyMessage ? (
-                                                                        <div>
-                                                                            <div className={"message-user"}>
-                                                                                <img className={"message-user-profile"}
-                                                                                     src={message.userProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + message.userProfile : Profile}
-                                                                                />
-                                                                                <span
-                                                                                    className="userName">{message.sender}</span>
+                                                                                <p className="message-regdate_Join">{message.cateChatRegdate}</p>
                                                                             </div>
-                                                                            {message.s3DataUrl && (
-                                                                                <div className={"down_div"}>
-                                                                                    {message.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
-                                                                                        ? <img src={message.s3DataUrl}
-                                                                                               alt="uploaded"
-                                                                                               className={"message_img"}/>
-                                                                                        : message.fileName.match(/\.(mp4|webm|ogg)$/i)
-                                                                                            ? <video src={message.s3DataUrl}
-                                                                                                     controls
-                                                                                                     className={"message_img"}/> // 동영상 렌더링
-                                                                                            : <div
-                                                                                                className={"message_other"}>
+                                                                        ) : isMyMessage ? (
+                                                                            <div>
+                                                                                <div className={"message-user"}>
+                                                                                    <img className={"message-user-profile"}
+                                                                                         src={message.userProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + message.userProfile : Profile}
+                                                                                    />
+                                                                                    <span
+                                                                                        className="userName">{message.sender}</span>
+                                                                                </div>
+                                                                                {message.s3DataUrl && (
+                                                                                    <div className={"down_div"}>
+                                                                                        {message.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
+                                                                                            ? <img src={message.s3DataUrl}
+                                                                                                   alt="uploaded"
+                                                                                                   className={"message_img"}/>
+                                                                                            : message.fileName.match(/\.(mp4|webm|ogg)$/i)
+                                                                                                ? <video
+                                                                                                    src={message.s3DataUrl}
+                                                                                                    controls
+                                                                                                    className={"message_img"}/> // 동영상 렌더링
+                                                                                                : <div
+                                                                                                    className={"message_other"}>
                                                                                             <span
                                                                                                 className={"message_other_text"}>
                                                                                                      {message.fileName}
                                                                                             </span>
-                                                                                            </div> // 파일 이름 렌더링
-                                                                                    }
-                                                                                    <Button
-                                                                                        onClick={() => downloadFile(message.fileName, message.fileDir)}
-                                                                                        className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn" : "downBtn2"}
-                                                                                    >
-                                                                                        <FileDownloadIcon/>
-                                                                                    </Button> {/* 다운로드 버튼 */}
-                                                                                </div>
-                                                                            )}
-                                                                            <span
-                                                                                className="content_user">{message.cateChatContent}</span>
-                                                                            <span
-                                                                                className="message-regdate">{message.cateChatRegdate}</span>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div>
-                                                                            <div className={"message-other"}>
-                                                                                <img className={"message-other-profile"}
-                                                                                     src={message.userProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + message.userProfile : Profile}
-                                                                                />
+                                                                                                </div> // 파일 이름 렌더링
+                                                                                        }
+                                                                                        <Button
+                                                                                            onClick={() => downloadFile(message.fileName, message.fileDir)}
+                                                                                            className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn" : "downBtn2"}
+                                                                                        >
+                                                                                            <FileDownloadIcon/>
+                                                                                        </Button> {/* 다운로드 버튼 */}
+                                                                                    </div>
+                                                                                )}
                                                                                 <span
-                                                                                    className="userName">{message.sender}</span>
+                                                                                    className="content_user">{message.cateChatContent}</span>
+                                                                                <span
+                                                                                    className="message-regdate">{message.cateChatRegdate}</span>
                                                                             </div>
-                                                                            {message.s3DataUrl && (
-                                                                                <div className={"down_div"}>
-                                                                                    {message.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
-                                                                                        ? <img src={message.s3DataUrl}
-                                                                                               alt="uploaded"
-                                                                                               className={"message_img2"}/>
-                                                                                        : message.fileName.match(/\.(mp4|webm|ogg)$/i)
-                                                                                            ? <video src={message.s3DataUrl}
-                                                                                                     controls
-                                                                                                     className={"message_img2"}/> // 동영상 렌더링
-                                                                                            : <div
-                                                                                                className={"message_other2"}>
+                                                                        ) : (
+                                                                            <div>
+                                                                                <div className={"message-other"}>
+                                                                                    <img className={"message-other-profile"}
+                                                                                         src={message.userProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + message.userProfile : Profile}
+                                                                                    />
+                                                                                    <span
+                                                                                        className="userName">{message.sender}</span>
+                                                                                </div>
+                                                                                {message.s3DataUrl && (
+                                                                                    <div className={"down_div"}>
+                                                                                        {message.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
+                                                                                            ? <img src={message.s3DataUrl}
+                                                                                                   alt="uploaded"
+                                                                                                   className={"message_img2"}/>
+                                                                                            : message.fileName.match(/\.(mp4|webm|ogg)$/i)
+                                                                                                ? <video
+                                                                                                    src={message.s3DataUrl}
+                                                                                                    controls
+                                                                                                    className={"message_img2"}/> // 동영상 렌더링
+                                                                                                : <div
+                                                                                                    className={"message_other2"}>
                                                                                             <span
                                                                                                 className={"message_other_text2"}>
                                                                                                      {message.fileName}
                                                                                             </span>
-                                                                                            </div> // 파일 이름 렌더링
-                                                                                    }
-                                                                                    <Button
-                                                                                        onClick={() => downloadFile(message.fileName, message.fileDir)}
-                                                                                        className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn_other" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn_other" : "downBtn_other2"}
-                                                                                    >
-                                                                                        <FileDownloadIcon/>
-                                                                                    </Button> {/* 다운로드 버튼 */}
-                                                                                </div>
-                                                                            )}
-                                                                            {message.translatedMessage ?
+                                                                                                </div> // 파일 이름 렌더링
+                                                                                        }
+                                                                                        <Button
+                                                                                            onClick={() => downloadFile(message.fileName, message.fileDir)}
+                                                                                            className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn_other" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn_other" : "downBtn_other2"}
+                                                                                        >
+                                                                                            <FileDownloadIcon/>
+                                                                                        </Button> {/* 다운로드 버튼 */}
+                                                                                    </div>
+                                                                                )}
+                                                                                {message.translatedMessage ?
+                                                                                    <span
+                                                                                        className="content_other_trans"
+                                                                                    >(translate) {message.translatedMessage}</span>
+                                                                                    :
+                                                                                    <>
+                                                                                    </>
+                                                                                }
                                                                                 <span
-                                                                                    className="content_other_trans"
-                                                                                >(translate) {message.translatedMessage}</span>
-                                                                                :
-                                                                                <>
-                                                                                </>
-                                                                            }
-                                                                            <span
-                                                                                className="content_other">{message.cateChatContent}</span>
-                                                                            <span
-                                                                                className="message-regdate_other">{message.cateChatRegdate}</span>
-                                                                        </div>
-                                                                    )}
-                                                                </MessageStyled>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                    <div className="EnterRoomChat_content_typing">
-                                                        {Typing.length == 0 ? Typing[0] : Typing[Typing.length - 1]}{dots}
-                                                    </div>
-                                                </div>
-                                                <div className={"EnterRoomChat_input_one"}>
-                                                    <form className={"EnterRoomChat_input_form_one"}
-                                                          onSubmit={handleSendMessage}>
-                                                        <MenuPanel
-                                                            visible={menuDiv ? "visible" : menuDiv2 ? "" : "hidden"}
-                                                        >
-                                                            <div className={"menu_div"}>
-                                                                <div className={"file"}>
-                                                                    <Button
-                                                                        className={"menu_btn"}
-                                                                        type="button"
-                                                                        onClick={handleFileButtonClick}
-                                                                    >
-                                                                        <FolderIcon style={{fontSize : 'small'}}/>
-                                                                    </Button>
-                                                                </div>
-                                                                <div className={"trans"}>
-                                                                    <Select className={"trans_select"}
-                                                                            onChange={handleLanguageChange}
-                                                                            value={selectedLanguage}
-                                                                    >
-                                                                        <MenuItem className={"trans_li_select"} value={" "}>Not
-                                                                            translated</MenuItem>
-                                                                        {Object.entries(languages).map(([code, name]) => (
-                                                                            <MenuItem className={"trans_li_select"}
-                                                                                      key={code}
-                                                                                      value={code}>{name}</MenuItem>
-                                                                        ))}
-                                                                    </Select>
-                                                                </div>
-                                                            </div>
-                                                        </MenuPanel>
-                                                        <div className={"input_menu"}>
-                                                            <input
-                                                                placeholder={!isChatReadOnly ? "Connecting, please wait" : "Please enter your message"}
-                                                                type="text"
-                                                                className={inputChange ? "inputchat_one2" : "inputchat_one"}
-                                                                required
-                                                                value={sendMessage}
-                                                                onClick={handleInputChange}
-                                                                readOnly={!isChatReadOnly} // isChatDiv가 false일 때 readOnly를 true로 변경
-                                                                onChange={handleMessageChange}
-                                                            />
-                                                            <input
-                                                                type="file"
-                                                                id="file"
-                                                                ref={inputFileRef}
-                                                                onChange={handleFileChange}
-                                                                multiple
-                                                                style={{display: 'none'}}
-                                                            />
-                                                            <Button
-                                                                className={menuDiv ? "add_now" : "add"}
-                                                                type="button"
-                                                                onClick={handleMenuOpen}
-                                                            >{menuDiv ? "-" : "+"}
-                                                            </Button>
+                                                                                    className="content_other">{message.cateChatContent}</span>
+                                                                                <span
+                                                                                    className="message-regdate_other">{message.cateChatRegdate}</span>
+                                                                            </div>
+                                                                        )}
+                                                                    </MessageStyled>
+                                                                );
+                                                            })}
                                                         </div>
+                                                        <div className="EnterRoomChat_content_typing">
+                                                            {Typing.length == 0 ? Typing[0] : Typing[Typing.length - 1]}{dots}
+                                                        </div>
+                                                    </div>
+                                                    <div className={"EnterRoomChat_input_cate"}>
+                                                        <form className={"EnterRoomChat_input_form_one"}
+                                                              onSubmit={handleSendMessage}>
+                                                            <MenuPanel
+                                                                visible={menuDiv ? "visible" : menuDiv2 ? "" : "hidden"}
+                                                            >
+                                                                <div className={"menu_div"}>
+                                                                    <div className={"file"}>
+                                                                        <Button
+                                                                            className={"menu_btn"}
+                                                                            type="button"
+                                                                            onClick={handleFileButtonClick}
+                                                                        >
+                                                                            <FolderIcon style={{fontSize: 'small'}}/>
+                                                                        </Button>
+                                                                    </div>
+                                                                    <div className={"trans"}>
+                                                                        <Select className={"trans_select"}
+                                                                                onChange={handleLanguageChange}
+                                                                                value={selectedLanguage}
+                                                                        >
+                                                                            <MenuItem className={"trans_li_select"}
+                                                                                      value={" "}>Not
+                                                                                translated</MenuItem>
+                                                                            {Object.entries(languages).map(([code, name]) => (
+                                                                                <MenuItem className={"trans_li_select"}
+                                                                                          key={code}
+                                                                                          value={code}>{name}</MenuItem>
+                                                                            ))}
+                                                                        </Select>
+                                                                    </div>
+                                                                </div>
+                                                            </MenuPanel>
+                                                            <div className={"input_menu"}>
+                                                                <input
+                                                                    placeholder={!isChatReadOnly ? "Connecting, please wait" : "Please enter your message"}
+                                                                    type="text"
+                                                                    className={inputChange ? "inputchat_one2" : "inputchat_one"}
+                                                                    required
+                                                                    value={sendMessage}
+                                                                    onClick={handleInputChange}
+                                                                    readOnly={!isChatReadOnly} // isChatDiv가 false일 때 readOnly를 true로 변경
+                                                                    onChange={handleMessageChange}
+                                                                />
+                                                                <input
+                                                                    type="file"
+                                                                    id="file"
+                                                                    ref={inputFileRef}
+                                                                    onChange={handleFileChange}
+                                                                    multiple
+                                                                    style={{display: 'none'}}
+                                                                />
+                                                                <Button
+                                                                    className={menuDiv ? "add_now" : "add"}
+                                                                    type="button"
+                                                                    onClick={handleMenuOpen}
+                                                                >{menuDiv ? "-" : "+"}
+                                                                </Button>
+                                                            </div>
 
-                                                        {inputChange ? (
-                                                            <Button
-                                                                className={"btnSend2"}
-                                                                type="button"
-                                                                onClick={uploadFiles}
-                                                            >UPLOAD
-                                                            </Button>
-                                                        ) : (
-                                                            <Button
-                                                                className={"btnSend"}
-                                                                type="submit"
-                                                                onClick={handleSendMessage}
-                                                            >SEND
-                                                            </Button>
-                                                        )}
+                                                            {inputChange ? (
+                                                                <Button
+                                                                    className={"btnSend2"}
+                                                                    type="button"
+                                                                    onClick={uploadFiles}
+                                                                >UPLOAD
+                                                                </Button>
+                                                            ) : (
+                                                                <Button
+                                                                    className={"btnSend"}
+                                                                    type="submit"
+                                                                    onClick={handleSendMessage}
+                                                                >SEND
+                                                                </Button>
+                                                            )}
 
 
-                                                    </form>
+                                                        </form>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className={"select"}>
-
-                                        <div className={"CateChat_Room_List"}>
-                                            <div className={"CateChat_Room_category_2"}>
-                                                <Button id="scrollLeft" type="button" onClick={handleScrollLeftClick}
-                                                        className={"left_btn"}
-                                                >
-                                                    L
-                                                </Button>
-                                                <div className={"CateChat_Room_category"} ref={catescroll}>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('ALL')}
-                                                    >
-                                                        ALL
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('romantic')}
-                                                    >
-                                                        romantic relationship
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('friendship')}
-                                                    >
-                                                        friendship
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('sports')}
-                                                    >
-                                                        sports
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('music')}
-                                                    >
-                                                        music
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('movie')}
-                                                    >
-                                                        movie
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('photo')}
-                                                    >
-                                                        photo
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('food')}
-                                                    >
-                                                        food
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('trip')}
-                                                    >
-                                                        trip
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('interior')}
-                                                    >
-                                                        interior
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('game')}
-                                                    >
-                                                        game
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn"}
-                                                        onClick={() => roomListLoad('knowledge')}
-                                                    >
-                                                        knowledge
-                                                    </Button>
-                                                    <Button
-                                                        className={"Cate_btn_R"}
-                                                        onClick={() => roomListLoad('Pets')}
-                                                    >
-                                                        Pets
-                                                    </Button>
-                                                </div>
-                                                <Button id="scrollLeft" type="button" onClick={handleScrollRightClick}
-                                                        className={"right_btn"}
-                                                >
-                                                    R
-                                                </Button>
-                                            </div>
+                                    ) : (
+                                        <div className={"selectR"}>
                                             <div className={"roomCate"}>
                                                 {CateName}
                                             </div>
-                                            <div className={"RoomList"}>
-                                                <div className={"RoomList_2"}>
-                                                    {roomList && roomList.length === 0 ? (
-                                                        <div className={"noRoom"}>No Room</div>
-                                                    ) : (
-                                                        roomList.map((room) => (
-                                                            <CateChatListItem
-                                                                key={room.cateId}
-                                                                room={room}
-                                                                onCateRoomAndChatDivUpdate={setCateRoomAndHandleChatDivUpdate}
-                                                                shouldImmediatelyEnter={room.cateId === createRoomId}
-                                                            ></CateChatListItem>
-                                                        ))
-                                                    )}
+                                            <div className={"selectC"}>
+
+                                                <div className={"CateChat_Room_List"}>
+
+                                                    <div className={"CateChat_Room_category_2"}>
+                                                        <Button id="scrollLeft" type="button"
+                                                                onClick={handleScrollLeftClick}
+                                                                className={"left_btn"}
+                                                        >
+                                                            L
+                                                        </Button>
+                                                        <div className={"CateChat_Room_category"} ref={catescroll}>
+                                                            <Button
+                                                                className={`Cate_btn one ${activeButton === 'ALL' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('ALL');
+                                                                    setActiveButton('ALL');
+                                                                }}
+
+                                                            >
+                                                                ALL
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn two ${activeButton === 'romantic' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('romantic');
+                                                                    setActiveButton('romantic');
+                                                                }}
+                                                            >
+                                                                romantic relationship
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn one ${activeButton === 'friendship' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('friendship');
+                                                                    setActiveButton('friendship');
+                                                                }}
+                                                            >
+                                                                friendship
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn two ${activeButton === 'sports' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('sports');
+                                                                    setActiveButton('sports');
+                                                                }}
+                                                            >
+                                                                sports
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn one ${activeButton === 'music' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('music');
+                                                                    setActiveButton('music');
+                                                                }}
+                                                            >
+                                                                music
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn two ${activeButton === 'movie' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('movie');
+                                                                    setActiveButton('movie');
+                                                                }}
+                                                            >
+                                                                movie
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn one ${activeButton === 'photo' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('photo');
+                                                                    setActiveButton('photo');
+                                                                }}
+                                                            >
+                                                                photo
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn two ${activeButton === 'food' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('food');
+                                                                    setActiveButton('food');
+                                                                }}
+                                                            >
+                                                                food
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn one ${activeButton === 'trip' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('trip');
+                                                                    setActiveButton('trip');
+                                                                }}
+                                                            >
+                                                                trip
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn two ${activeButton === 'interior' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('interior');
+                                                                    setActiveButton('interior');
+                                                                }}
+                                                            >
+                                                                interior
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn one ${activeButton === 'game' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('game');
+                                                                    setActiveButton('game');
+                                                                }}
+                                                            >
+                                                                game
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn two ${activeButton === 'knowledge' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('knowledge');
+                                                                    setActiveButton('knowledge');
+                                                                }}
+                                                            >
+                                                                knowledge
+                                                            </Button>
+                                                            <Button
+                                                                className={`Cate_btn_R ${activeButton === 'Pets' ? 'active' : ''}`}
+                                                                onClick={() => {
+                                                                    roomListLoad('Pets');
+                                                                    setActiveButton('Pets');
+                                                                }}
+                                                            >
+                                                                Pets
+                                                            </Button>
+                                                        </div>
+                                                        <Button id="scrollLeft" type="button"
+                                                                onClick={handleScrollRightClick}
+                                                                className={"right_btn"}
+                                                        >
+                                                            R
+                                                        </Button>
+                                                    </div>
+                                                    <div className={"RoomList"}>
+                                                        <div className={"RoomList_2"}>
+                                                            {roomList && roomList.length === 0 ? (
+                                                                <div className={"noRoom"}>No Room</div>
+                                                            ) : (
+                                                                roomList.map((room) => (
+                                                                    <CateChatListItem
+                                                                        key={room.cateId}
+                                                                        room={room}
+                                                                        onCateRoomAndChatDivUpdate={setCateRoomAndHandleChatDivUpdate}
+                                                                        shouldImmediatelyEnter={room.cateId === createRoomId}
+                                                                    ></CateChatListItem>
+                                                                ))
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
                                 </div>
                             </div>
                         </Rnd>

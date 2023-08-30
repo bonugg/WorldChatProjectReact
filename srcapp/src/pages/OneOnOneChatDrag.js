@@ -9,14 +9,14 @@ import axios from "axios";
 import {Stomp, Client} from "@stomp/stompjs";
 import * as SockJS from "sockjs-client";
 import Profile from "../img/profile.png"
-
+import FolderIcon from '@mui/icons-material/Folder';
 import "./css/OneOnOneChat.css";
-import CateChatListItem from './CateChatListItem';
 import styled, {keyframes} from "styled-components";
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 import Picker from '@emoji-mart/react'  // <-- 추가
 import data from '@emoji-mart/data'
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import Logo from "../img/logo_img.png";
 
 const MessageStyled = styled.p`
 `;
@@ -27,13 +27,13 @@ const slideDownUserList = keyframes`
   }
   100% {
     width: 330px;
-    height: 70px;
+    height: 50px;
   }
 `;
 const slideUpUserList = keyframes`
   0% {
     width: 330px;
-    height: 70px
+    height: 50px;
   }
   100% {
     width: 0px;
@@ -48,12 +48,12 @@ const MenuPanel = styled.div`
   left: 10px; // 수정된 부분
   z-index: 1;
   width: ${props => props.visible ? '330px' : '0px'}; // 기존 속성
-  height: ${props => props.visible ? '70px' : '0px'}; // 기존 속성
+  height: ${props => props.visible ? '50px' : '0px'}; // 기존 속성
   overflow-y: hidden;
   overflow-x: hidden;
   transition: all 0.25s ease-in-out;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  background: rgba(130, 130, 130, 0.7);
 `;
 
 const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId, oneOnOneUserNickName, friendMax, isMinimize}) => {
@@ -765,14 +765,14 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                             }}
                             style={{
                                 borderRadius: "15px",
-                                zIndex: "9999",
+                                zIndex: "3",
                                 position: "fixed",
                                 left: position.x,
                                 top: position.y,
                                 display: !friendMax ? "none" : "block",
                                 transition: resizing ? 'none' : 'width 0.25s ease-in-out, height 0.25s ease-in-out'
                             }}
-                            dragHandleClassName="header"
+                            dragHandleClassName="headerChat"
                         >
                             <div
                                 className="box"
@@ -787,20 +787,23 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                     borderRadius: '15px',
                                     borderTopLeftRadius: '15px',
                                     borderBottomLeftRadius: '15px',
-                                    padding: '1em',
+                                    padding: '0px',
                                     margin: 'auto',
                                     userSelect: 'none',
-                                    zIndex: '10',
-                                    background: 'rgb(50, 50, 50,0.8)',
+                                    zIndex: '3',
                                     transition: 'height 0.25s ease-in-out'
                                 }}
                             >
-                                <div className={"header"}>
+                                <div className={"headerChat"}>
                                     <div className={"btnDiv_create"}>
-
+                                        <img
+                                            className={"logo_img"}
+                                            src={Logo}
+                                        ></img>
                                     </div>
                                     <div className={"title_cate"}>
                                         {userNickNameOther}
+
                                     </div>
                                     <div className={"btnDiv"}>
                                         <Button
@@ -814,15 +817,12 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                         >
                                         </Button>
                                     </div>
-
                                 </div>
                                 <div className={"chat_one"}>
                                     <div className={"EnterRoomChat_one"}>
                                         <div className={"EnterRoomChat_2"}>
                                             <div className={"EnterRoomChat_content_one"}>
-                                                <div className="EnterRoomChat_content_typing">
-                                                    {Typing.length == 0 ? Typing[0] : Typing[Typing.length - 1]}{dots}
-                                                </div>
+
                                                 <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
                                                     {messages.map((message, index) => {
                                                         const isMyMessage = message.sender === userNickNameRef.current;
@@ -922,6 +922,9 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                         );
                                                     })}
                                                 </div>
+                                                <div className="EnterRoomChat_content_typing">
+                                                    {Typing.length == 0 ? Typing[0] : Typing[Typing.length - 1]}{dots}
+                                                </div>
                                             </div>
                                             <div className={"EnterRoomChat_input_one"}>
                                                 <form className={"EnterRoomChat_input_form_one"}
@@ -935,7 +938,8 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                                     className={"menu_btn"}
                                                                     type="button"
                                                                     onClick={handleFileButtonClick}
-                                                                >FILE
+                                                                >
+                                                                    <FolderIcon style={{fontSize : 'small'}}/>
                                                                 </Button>
                                                             </div>
                                                             <div className={"trans"}>

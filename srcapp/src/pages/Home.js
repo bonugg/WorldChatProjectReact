@@ -22,18 +22,26 @@ import RandomChatDrag from "./RandomChatDrag";
 import OneOnOneChatDrag from "./OneOnOneChatDrag";
 import GroupsIcon from '@mui/icons-material/Groups';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
+import SearchIcon from '@mui/icons-material/Search';
 import VideoChatIcon from '@mui/icons-material/VideoChat';
 import PhoneIcon from '@mui/icons-material/Phone';
 import GroupIcon from '@mui/icons-material/Group';
+import Korea from "../img/flag/KR.png";
+import UnitedStates from "../img/flag/US.png";
+import Japan from "../img/flag/JP.png";
+import Canada from "../img/flag/CA.png";
+import Australia from "../img/flag/AU.png";
+import China from "../img/flag/CN.png";
+import Italy from "../img/flag/IT.png";
+import Russia from "../img/flag/RU.png";
+import Philippines from "../img/flag/PH.png";
 
 const CanvasContainer = styled.div`
-  width: calc(100% - 300px);
+  flex: 1;
   height: 100%;
 
   overflow: hidden;
-  background-image: url('//unpkg.com/three-globe/example/img/night-sky.png');
-  background-repeat: no-repeat;
-  background-size: cover;
+  transition: all 0.5s ease-in-out;
 `;
 
 const slideDown = keyframes`
@@ -72,6 +80,30 @@ const DivStyledMenu = styled.div`
   transform-origin: center;
   transform: ${props => props.visible ? 'translate(-50%, -50%) scaleY(1)' : 'translate(-50%, -50%) scaleY(0)'};
 `;
+
+
+const slideDownTest = keyframes`
+  0% {
+    visibility: hidden;
+    width: 0px;
+  }
+  100% {
+    visibility: visible;
+    width: 500px;
+  }
+`;
+const DivStyledMenuTest = styled.div`
+  visibility: ${props => props.visible ? 'visible' : 'hidden'};
+  animation: ${props => props.visible ? slideDownTest : ""} 0.35s ease-in-out;
+  display: ${props => props.visible ? "block" : "none"};
+  position: absolute;
+  top: 0;
+  left: ${props => props.visible ? "300px" : "-500px"};
+  z-index: 1;
+  width: ${props => props.visible ? '500px' : '0px'};
+  height: 100%;
+  transform-origin: left;
+`;
 const DivStyledMenu2 = styled.div`
   visibility: ${props => props.visible ? 'visible' : 'hidden'};
   animation: ${props => props.visible ? slideDownFriends : ""} 0.35s ease-in-out;
@@ -107,6 +139,58 @@ const Home = React.memo(() => {
 
             const [FrdId, setFrdId] = useState('');
             const [FrdId2, setFrdId2] = useState('');
+
+            const [selectedNationally, setSelectedNationally] = useState(" ");
+            const [selectedNationallyMove, setSelectedNationallyMove] = useState("");
+            const [nationallyList, setNationallyList] = useState([]);
+
+            // 국적 이미지 대응
+            const flagImage = {
+                KR: Korea,
+                US: UnitedStates,
+                CA: Canada,
+                JP: Japan,
+                CN: China,
+                PH: Philippines,
+                RU: Russia,
+                AU: Australia,
+                IT: Italy,
+            };
+
+            const [menutoggle, setMenutoggle] = useState(false);
+            const [menutoggle2, setMenutoggle2] = useState(false);
+
+            const toggleMenu = () => {
+                setMenutoggle((prevmenutoggle) => !prevmenutoggle);
+            };
+            const toggleMenu2 = () => {
+                setMenutoggle2((prevmenutoggle) => !prevmenutoggle);
+            };
+
+            const getNationalityFlag = (nationality) => {
+                if (nationality == '') {
+
+                }
+                return flagImage[nationality] || null;
+            };
+
+            const handleNationallyChange = (e) => {
+                setSelectedNationally(e.target.value);
+                console.log("언어선택 했어요. 진짜로 했어요");
+                console.log(e.target.value);
+            };
+
+            const handleNationallyList = (data) => {
+                setNationallyList(data);
+            };
+            const handleResetCityName = (data) => {
+                if (data) {
+                    setSelectedNationallyMove(" ");
+                }
+            }
+            const handleSearchNationally = () => {
+                setSelectedNationallyMove(selectedNationally);
+            };
             //드래그 이벤트
             const handleShowDrag = () => {
                 setShowDrag(true);
@@ -160,7 +244,7 @@ const Home = React.memo(() => {
             const [targetPosition, setTargetPosition] = useState(null);
             const [cameraPosition, setCameraPosition] = useState(null);
             //카메라 초기 위치로 돌아갔는지 확인
-            const [isAtInitialPosition, setIsAtInitialPosition] = useState(false);
+            const [isAtInitialPosition, setIsAtInitialPosition] = useState(true);
 
             //도시 클릭 시 친구목록 띄우기
             const [FriendsList, setFriendsList] = useState(false);
@@ -172,6 +256,10 @@ const Home = React.memo(() => {
             const [LoginDiv, setLoginDiv] = useState(false);
             const [SignUpDiv, setSignUpDiv] = useState(false);
             const [MyPageDiv, setMyPageDiv] = useState(false);
+            const [homeMyGo, setHomeMyGo] = useState(false);
+            const [MyPageG, setMyPageG] = useState(false);
+            const [FriendsReceived, setFriendsReceived] = useState(false);
+            const [FriendsReqested, setFriendsReqested] = useState(false);
             //로그인
             const [loggedIn, setLoggedIn] = useState(false); //로그인 상태확인
             const [username, setUsername] = useState('');
@@ -479,6 +567,12 @@ const Home = React.memo(() => {
                     setPassword('');
                     setLoggedIn(true);
                     setLoggedOut(false);
+                    setRandomChatDrag(false);
+                    setShowDrag(false);
+                    setOneononeChatDrag(false);
+                    setRandomMax(true);
+                    setCateMax(true);
+                    setFriendMax(true);
                     if (rememberAccount) {
                         localStorage.setItem('savedUsername', username);
                         localStorage.setItem('savedPassword', password);
@@ -767,7 +861,9 @@ const Home = React.memo(() => {
                             if (!response.ok) {
                                 throw new Error(`Logout failed with status: ${response.status}`);
                             }
-
+                            setRandomChatDrag(false);
+                            setShowDrag(false);
+                            setOneononeChatDrag(false);
                             console.log("Logout successful");
                         } catch (error) {
                             console.error("Error during logout:", error);
@@ -916,7 +1012,23 @@ const Home = React.memo(() => {
                 setLoginDiv(false);
                 setMyPageDiv(false);
             };
-            const mypage = () => {
+            const mypage = (data) => {
+                if (data == "MyPage") {
+                    setMyPageG(true);
+                    setFriendsReqested(false);
+                    setFriendsReceived(false);
+                    setHomeMyGo(true);
+                } else if (data == "Received") {
+                    setMyPageG(false);
+                    setFriendsReqested(false);
+                    setFriendsReceived(true);
+                    setHomeMyGo(true);
+                } else if (data == "Requested") {
+                    setMyPageG(false);
+                    setFriendsReqested(true);
+                    setFriendsReceived(false);
+                    setHomeMyGo(true);
+                }
                 if (isMapageZoom) {
                     return null;
                 }
@@ -953,14 +1065,6 @@ const Home = React.memo(() => {
                 setLoginDiv(false);
                 setShowRtcChat(false);
             };
-
-            //로딩 전 메뉴바 숨기기
-            const [isLoading, setIsLoading] = useState(true);
-            useEffect(() => {
-                setTimeout(() => {
-                    setIsLoading(false);
-                }, 500);
-            }, []);
             const RandomHandleMinimizeClick = () => {
                 setRandomMax(true);
             }
@@ -983,84 +1087,148 @@ const Home = React.memo(() => {
             }
 
             return (
-                <div className={"full"}>
-                    <Suspense fallback={<Fallback/>}>
-                        <div className={"fullScreen"}>
-                            <RandomChatDrag randomMax={randomMax} isMinimize={handleIsMinimized} show={randomChatDrag}
-                                            logoutApiCate={logoutApiCate}
-                                            onClose={handleRandomShowDragClose}/>
-                            <OneOnOneChatDrag friendMax={friendMax} isMinimize={handleIsMinimizedFriend}
-                                              show={oneononeChatDrag} oneOnOneUserId={oneOnOneUserId}
-                                              oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
-                                              onClose={handleOneOnOneShowDragClose}/>
-                            <CateChatDrag cateMax={cateMax} isMinimize={handleIsMinimizedCate}
-                                          show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
-                            <aside
-                                className={`side-bar`}
-                                style={isLoading ? {display: "none"} : {}}
-                            >
-                                <div className={"logo_div"}>
-                                    <img
-                                        onClick={home}
-                                        className={`logo_main_text`}
-                                        style={isLoading ? {display: "none"} : {}}
-                                        src={Logo_text}
-                                    ></img>
-                                </div>
+                <Suspense fallback={<Fallback/>}>
+                    <div className={"fullScreen"}>
+                        <RandomChatDrag randomMax={randomMax} isMinimize={handleIsMinimized} show={randomChatDrag}
+                                        logoutApiCate={logoutApiCate}
+                                        onClose={handleRandomShowDragClose}/>
+                        <OneOnOneChatDrag friendMax={friendMax} isMinimize={handleIsMinimizedFriend}
+                                          show={oneononeChatDrag} oneOnOneUserId={oneOnOneUserId}
+                                          oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
+                                          onClose={handleOneOnOneShowDragClose}/>
+                        <CateChatDrag cateMax={cateMax} isMinimize={handleIsMinimizedCate}
+                                      show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
+                        <aside
+                            className={MyPageDiv ? `side-bar one` :`side-bar`}
+                        >
+                            <div className={"logo_div"}>
+                                <img
+                                    onClick={home}
+                                    className={`logo_main_text`}
+                                    src={Logo_text}
+                                ></img>
+                            </div>
 
-                                <section className="side-bar__icon-box">
-                                    <section className="side-bar__icon-1">
-                                        <div></div>
-                                        <div></div>
-                                        <div></div>
-                                    </section>
+                            <section className="side-bar__icon-box">
+                                <section className="side-bar__icon-1">
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
                                 </section>
-                                <ul>
-                                    <li className="menu_li"
-                                        onClick={home}
-                                        style={{marginTop: '10px', border: '0px solid #222526', borderTopWidth: '1px'}}
-                                    >
-                                        <span style={{color: '#FFBD1F'}}>H</span>ome
-                                    </li>
-                                    {loggedIn ? (
-                                        <>
-                                            <li className="menu_li" onClick={mypage}>
+                            </section>
+                            <ul>
+                                <li className="menu_li"
+                                    onClick={home}
+                                    style={{marginTop: '10px', border: '0px solid #222526', borderTopWidth: '1px'}}
+                                >
+                                    <span style={{color: '#FFBD1F'}}>H</span>ome
+                                </li>
+                                {loggedIn ? (
+                                    <>
+                                        <div className="menu_group2">
+                                            <li className="menu_li one" onClick={toggleMenu}>
                                                 <span style={{color: '#FFBD1F'}}>M</span>yPage
                                             </li>
-                                            <li className="menu_li">
+                                            <div className={menutoggle ? "sub_test2_on" : "sub_test2"}>
+                                                <li
+                                                    onClick={() => {
+                                                        mypage('MyPage');
+                                                    }}
+                                                    className={"menu_li_sub"}>MyPage
+                                                </li>
+                                                <li
+                                                    onClick={() => {
+                                                        mypage('Received');
+                                                    }}
+                                                    className={"menu_li_sub"}>Friends Received
+                                                </li>
+                                                <li
+                                                    onClick={() => {
+                                                        mypage('Requested');
+                                                    }}
+                                                    className={"menu_li_sub"}>Friends Requested
+                                                </li>
+                                            </div>
+                                        </div>
+                                        <div className="menu_group">
+                                            <li className="menu_li one" onClick={toggleMenu2}>
                                                 <span style={{color: '#FFBD1F'}}>C</span>hat
-                                                <ul className="menu_li">
-                                                    <li onClick={handleRandomShowDrag}
-                                                        className={"menu_li_sub"}
-                                                    >Random Chat
-                                                    </li>
-                                                    <li onClick={handleShowDrag}
-                                                        className={"menu_li_sub"}
-                                                    >Category Chat
-                                                    </li>
-                                                </ul>
                                             </li>
-                                            <li className="menu_li"
-                                                onClick={logout}
-                                            >
-                                                <span style={{color: '#FFBD1F'}}>L</span>ogout
-                                            </li>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <li className="menu_li" onClick={login}>
-                                                <span style={{color: '#FFBD1F'}}>L</span>ogin
-                                            </li>
-                                            <li className="menu_li"
-                                                onClick={signup}
-                                            >
-                                                <span style={{color: '#FFBD1F'}}>S</span>ignUp
-                                            </li>
-                                        </>
-                                    )}
-                                </ul>
-                                <div className={"foot"}>
-                                    {loggedIn ? (
+                                            <div className={menutoggle2 ? "sub_test_on" : "sub_test"}>
+                                                <li onClick={handleRandomShowDrag} className={"menu_li_sub"}>Random Chat
+                                                </li>
+                                                <li onClick={handleShowDrag} className={"menu_li_sub"}>Category Chat</li>
+                                            </div>
+                                        </div>
+                                        <li className="menu_li"
+                                            onClick={logout}
+                                        >
+                                            <span style={{color: '#FFBD1F'}}>L</span>ogout
+                                        </li>
+                                    </>
+                                ) : (
+                                    <>
+                                        <li className="menu_li" onClick={login}>
+                                            <span style={{color: '#FFBD1F'}}>L</span>ogin
+                                        </li>
+                                        <li className="menu_li"
+                                            onClick={signup}
+                                        >
+                                            <span style={{color: '#FFBD1F'}}>S</span>ignUp
+                                        </li>
+                                    </>
+                                )}
+                            </ul>
+                            <div className={"foot"}>
+                                {loggedIn ? (
+                                    <>
+                                        <div className={"friend_search"}>
+                                            <div className={"friend_search_2"}>
+                                                {isMapageZoom || !isAtInitialPosition ?
+                                                    (
+                                                        // <input className={"select_search_friend_disabled"}
+                                                        //        value={"Please go home"}
+                                                        //        readOnly={true}
+                                                        // >
+                                                        // </input>
+                                                        <Select className={"select_search_friend"}
+                                                                value={" "}
+                                                        >
+
+                                                            <MenuItem className={"select_search_friend_li"}
+                                                                      value={" "}>Please go home</MenuItem>
+                                                        </Select>
+                                                    ) : (
+                                                        <Select className={"select_search_friend"}
+                                                                onChange={handleNationallyChange}
+                                                                value={selectedNationally}
+                                                        >
+
+                                                            <MenuItem className={"select_search_friend_li"}
+                                                                      value={" "}>Search Nationally</MenuItem>
+                                                            {Object.entries(nationallyList).map(([code, name]) => (
+                                                                <MenuItem className={"select_search_friend_li"}
+                                                                          key={code}
+                                                                          value={name}>
+                                                                    <img src={
+                                                                        getNationalityFlag(name)}
+                                                                         alt="Nationality flag"
+                                                                         className={"flag_list_select"}
+                                                                    />
+                                                                    {name}</MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                    )
+                                                }
+                                                <Button
+                                                    type={'submit'}
+                                                    className={"move_nationally"}
+                                                    onClick={handleSearchNationally}
+                                                >
+                                                    <SearchIcon fontSize="small"/>
+                                                </Button>
+                                            </div>
+                                        </div>
                                         <div className="foot_3">
                                             <Button
                                                 type={'submit'}
@@ -1068,7 +1236,7 @@ const Home = React.memo(() => {
                                                 onClick={RandomHandleMinimizeClick}
                                                 className={"R_maximum_btn"}
                                             >
-                                                <QuestionMarkIcon fontSize="small" />
+                                                <QuestionMarkIcon fontSize="small"/>
                                             </Button>
                                             <Button
                                                 type={'submit'}
@@ -1076,7 +1244,7 @@ const Home = React.memo(() => {
                                                 onClick={CateHandleMinimizeClick}
                                                 className={"R_maximum_btn"}
                                             >
-                                                <GroupsIcon fontSize="small" />
+                                                <GroupsIcon fontSize="small"/>
                                             </Button>
                                             <Button
                                                 disabled={friendMax}
@@ -1084,267 +1252,271 @@ const Home = React.memo(() => {
                                                 type={'submit'}
                                                 className={"R_maximum_btn"}
                                             >
-                                                <GroupIcon fontSize="small" />
+                                                <GroupIcon fontSize="small"/>
                                             </Button>
                                             <Button
                                                 type={'submit'}
                                                 className={"R_maximum_btn"}
                                             >
-                                                <VideoChatIcon fontSize="small" />
+                                                <VideoChatIcon fontSize="small"/>
                                             </Button>
                                             <Button
                                                 type={'submit'}
                                                 className={"R_maximum_btn"}
                                             >
-                                                <PhoneIcon fontSize="small" />
+                                                <PhoneIcon fontSize="small"/>
                                             </Button>
                                         </div>
-                                    ) : (
-                                        <></>)
-                                    }
-                                    <div className={"foot_2"}>
-                                        <span className={"foot_text"}>@2023 WWC, Inc</span>
-                                    </div>
+                                    </>
+                                ) : (
+                                    <></>)
+                                }
+                                <div className={"foot_2"}>
+                                    <span className={"foot_text"}>@2023 WWC, Inc</span>
                                 </div>
-                            </aside>
-                            {/*<div style={{width : '300px', height: '100%'}}>*/}
-
-                            {/*</div>*/}
-                            <CanvasContainer>
-                                <Canvas>
-                                    <CameraControl targetPosition={targetPosition} cameraPosition={cameraPosition}/>
-                                    <Earth
-                                        mainCamera={mainCamera}
-                                        isLoginZoom={isLoginZoom}
-                                        isSignUpZoom={isSignUpZoom}
-                                        LoginZoom={LoginZoom}
-                                        mouseLock={mouseLock}
-                                        loggedIn={loggedIn}
-                                        loggedOut={loggedOut}
-                                        isMapageZoom={isMapageZoom}
-                                        FriendsList={FriendsList}
-                                        isFriendsListZoom={isFriendsListZoom}
-                                        FriendsNationally={FriendsNationally}
-                                        FriendListApiOn={FriendListApiOn}
-                                        FrdId={FrdId}
-                                        FrdId2={FrdId2}
-                                    />
-                                </Canvas>
-                            </CanvasContainer>
-
-                            <DivStyledMenu visible={MyPageDiv ? "visible" : ""}>
-                                <MyPage
-                                    MyPageDiv={MyPageDiv}
-                                    onPasswordChange={onPasswordChange}
-                                    logoutApi={logoutApi}
-                                    onRemove={removeItemFromHomeComponent}
-                                />
-                            </DivStyledMenu>
-                            <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
-                                <FreindsList
-                                    onData={handleGrandchildData}
-                                    setChatType={setChatType}
+                            </div>
+                        </aside>
+                        <CanvasContainer
+                        >
+                            <Canvas>
+                                <CameraControl targetPosition={targetPosition} cameraPosition={cameraPosition}/>
+                                <Earth
+                                    mainCamera={mainCamera}
+                                    isLoginZoom={isLoginZoom}
+                                    isSignUpZoom={isSignUpZoom}
+                                    LoginZoom={LoginZoom}
+                                    mouseLock={mouseLock}
+                                    loggedIn={loggedIn}
+                                    loggedOut={loggedOut}
+                                    isMapageZoom={isMapageZoom}
                                     FriendsList={FriendsList}
-                                    FriendNationally={FriendNationally}
-                                    FriendListApi={FriendListApi}
-                                    logoutApi3={logoutApi3}
-                                    isOneOnOneChatDiv={isOneOnOneChatDiv}
-                                    onRemove={removeItemFromHomeComponent2}
+                                    isFriendsListZoom={isFriendsListZoom}
+                                    FriendsNationally={FriendsNationally}
+                                    FriendListApiOn={FriendListApiOn}
+                                    FrdId={FrdId}
+                                    FrdId2={FrdId2}
+                                    NationallyList={handleNationallyList}
+                                    selectedNationallyMove={selectedNationallyMove}
+                                    resetCityName={handleResetCityName}
                                 />
-                                {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
-                            </DivStyledMenu2>
-                            <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"}
-                                       ref={passwordChangeDivRef}>
-                                <PasswordChange
-                                    isPasswordChangeDiv={isPasswordChangeDiv}
-                                    isPasswordChangeDivClose={isPasswordChangeDivClose}
-                                    logoutApi2={logoutApi2}
-                                >
-                                </PasswordChange>
-                            </DivStyled>
-                            <DivStyledMenu visible={LoginDiv ? "visible" : ""}>
-                                {/* Content inside the loginDiv */}
-                                <div className={"loginDiv"}>
-                                    <div className={"loginDiv_2"}>
-                                        <div className={"LogoDiv"}>
-                                            <img className={"LogoImg"} src={Logo}></img>
-                                        </div>
-                                        <form onSubmit={handleSubmit}>
-                                            <div className={"loginForm2"} id={"id_Login_ID"}>
-                                                <input
-                                                    className={"inputFromText"}
-                                                    placeholder={"Please enter your ID"}
-                                                    type='text'
-                                                    value={username}
-                                                    onChange={(e) => setUsername(e.target.value)}
-                                                    onFocus={resetButton}
-                                                />
-                                            </div>
-                                            <div className={"loginForm2"} id={"id_Login_PWD"}>
-                                                <input
-                                                    className={"inputFromText"}
-                                                    placeholder={"Please enter your PASSWORD"}
-                                                    type='password'
-                                                    value={password}
-                                                    onChange={(e) => setPassword(e.target.value)}
-                                                    onFocus={resetButton}
-                                                />
-                                            </div>
-                                            <div className={"loginForm_remmember"} id={"id_Remember_Account"}>
-                                                <Checkbox
-                                                    className={"rememberAccountCheckbox"}
-                                                    type="checkbox"
-                                                    checked={rememberAccount}
-                                                    onChange={() => setRememberAccount(!rememberAccount)}
-                                                />
-                                                <label className={"label_remmember"} htmlFor={"rememberAccount"}>Remember
-                                                    Account</label>
-                                            </div>
-                                            <div className={"login_btn2"} id={"id_Login_BTN"}>
-                                                <Button
-                                                    type="submit"
-                                                    className={buttonText === "ID OR PASSWORD ERROR" ? "error_text" : "no_error_text"}>
-                                                    {buttonText}</Button>
-                                            </div>
-                                        </form>
-
-                                    </div>
-                                </div>
-                            </DivStyledMenu>
-
-                            {/*rtc*/}
-                            <DivStyledMenu visible={showRtcChat}>
-                                {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser}
-                                                               setShowRtcChat={setShowRtcChat} type2={type2}
-                                                               setType2={setType2}/>}
-                            </DivStyledMenu>
-
-                            <DivStyledMenu visible={showRtcVoiceChat}>
-                                {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser}
-                                                                         setShowRtcVoiceChat={setShowRtcVoiceChat}
-                                                                         type2={type2}
-                                                                         setType2={setType2}/>}
-                            </DivStyledMenu>
-
-                            <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
-                                {/* Content inside the loginDiv */}
-                                <div className={"signDiv"}>
-                                    <div className={"signupDiv_2"}>
-                                        <form onSubmit={handleSubmitSignUp}>
-                                            <div className={"loginForm"} id={"id_ID"}>
-                                                <input
-                                                    className={IdCheckError ? "yesIDinput" : IdCheckError2 ? "noIDinput" : "emptyID"}
-                                                    placeholder={"Please enter your ID"}
-                                                    type='text'
-                                                    value={SginuserName}
-                                                    onChange={handleUsernameChange}
-                                                />
-                                                <Button
-                                                    className={"checkbtn"}
-                                                    disabled={isIdCheckDisabled}
-                                                    type={"button"}
-                                                    onClick={idCheck}>Check
-                                                </Button>
-                                                <p className={"Text_sign"}>7 to 10 characters consisting of English letters
-                                                    and
-                                                    numbers</p>
-                                            </div>
-                                            <div className={"loginForm"} id={"id_PWD"}>
-                                                <input
-                                                    className={"inputFromText"}
-                                                    placeholder={"Please enter your PASSWORD"}
-                                                    type='password'
-                                                    value={SignuserPwd}
-                                                    onChange={handlePasswordChange}
-                                                />
-                                                <p className={PasswordCheck === 'At least 8 characters consisting of English and numbers, including 2 special characters' ?
-                                                    "Text_sign" : PasswordCheck === "Available PASSWORD" ?
-                                                        "Text_sign" : "Text_sign_Error_sign"
-                                                }>{PasswordCheck}</p>
-                                            </div>
-                                            <div className={"loginForm"} id={"id_EMAIL"}>
-                                                <input
-                                                    className={emailCheckError ? "inputFromText2" : emailCheckError2 ? "NoinputFromText"
-                                                        : "emptyFromText"}
-                                                    placeholder={"Please enter your EMAIL"}
-                                                    type='text'
-                                                    value={SignuserEmail}
-                                                    onChange={handleEmailChange}
-                                                />
-                                            </div>
-                                            <div className={"loginForm"} id={"id_NINKNAME"}>
-                                                <input
-                                                    className={NickNameCheckError ? "yesIDinput2" : NickNameCheckError2 ? "noIDinput2" : "emptyID2"}
-                                                    placeholder={"Please enter your NICKNAME"}
-                                                    type='text'
-                                                    value={SignuserNickName}
-                                                    onChange={handleNickNameChange}
-                                                />
-                                                <Button
-                                                    className={"checkbtn"}
-                                                    disabled={isNickNameCheckError}
-                                                    type={"button"}
-                                                    onClick={NickNameCheck}>Check
-                                                </Button>
-                                                <p className={"Text_sign"}>
-                                                    Consists of 10 characters or less, with or without English or
-                                                    numbers</p>
-                                            </div>
-                                            <div className={"loginForm"} id={"id_NATIONALITY"}>
-                                                <div className="custom_select_wrapper">
-                                                    <Select className={"custom_select"}
-                                                            onChange={handleCountryChange}
-                                                            id="demo-simple-select"
-                                                            value={SignuserNationality || ' '}
-
-                                                    >
-                                                        <MenuItem className={"menu_li_select"} value={" "} disabled>Please
-                                                            select a COUNTRY</MenuItem>
-                                                        <MenuItem className={"menu_li_select"} value={"KR"}>KR</MenuItem>
-                                                        <MenuItem className={"menu_li_select"} value={"US"}>US</MenuItem>
-                                                        <MenuItem className={"menu_li_select"} value="CA">CA</MenuItem>
-                                                        {/* 캐나다 추가 */}
-                                                        <MenuItem className={"menu_li_select"} value="JP">JP</MenuItem>
-                                                        <MenuItem className={"menu_li_select"} value="CN">CN</MenuItem>
-                                                        <MenuItem className={"menu_li_select"} value="PH">PH</MenuItem>
-                                                        {/* 필리핀 추가 */}
-                                                        <MenuItem className={"menu_li_select"} value="RU">RU</MenuItem>
-                                                        {/* 러시아 추가 */}
-                                                        <MenuItem className={"menu_li_select"} value="AU">AU</MenuItem>
-                                                        {/* 호주 추가 */}
-                                                        <MenuItem className={"menu_li_select"} value="IT">IT</MenuItem>
-                                                        {/* 이탈리아 추가 */}
-                                                    </Select>
-                                                </div>
-                                            </div>
-                                            <div className={"loginForm"} id={"id_PHONE"}>
-                                                <input
-                                                    className={phoneCheckError ? "inputFromText3" : phoneCheckError2 ? "NoinputFromText2"
-                                                        : "emptyFromText2"}
-                                                    placeholder={"Please enter your PHONE"}
-                                                    type='text'
-                                                    value={SignuserPhone}
-                                                    onChange={handlePhoneChange}
-                                                />
-                                            </div>
-                                            <div className={"login_btn"} id={"id_SignUp_BTN"}>
-                                                <Button
-                                                    className={"SignUpBtn"}
-                                                    type='submit'
-                                                    disabled={PasswordCheck !== "Available PASSWORD"
-                                                        || !IdCheckError || !emailCheckError || !NickNameCheckError || SignuserNationality == "" || !phoneCheckError
-                                                    }>SignUp
-                                                </Button>
-                                            </div>
-                                        </form>
-
-                                    </div>
-                                </div>
-                            </DivStyledMenu>
-                            {/* 드래그 채팅창 사이드 밖 영역 */}
+                            </Canvas>
+                        </CanvasContainer>
+                        <div className={MyPageDiv ? "sub_test3_on" : "sub_test3"}>
+                            <MyPage
+                                MyPageDiv={MyPageDiv}
+                                homeMyGo={homeMyGo}
+                                MyPageG={MyPageG}
+                                FriendsReceived={FriendsReceived}
+                                FriendsReqested={FriendsReqested}
+                                onPasswordChange={onPasswordChange}
+                                logoutApi={logoutApi}
+                                onRemove={removeItemFromHomeComponent}
+                            />
                         </div>
-                    </Suspense>
-                </div>
+                        <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
+                            <FreindsList
+                                onData={handleGrandchildData}
+                                setChatType={setChatType}
+                                FriendsList={FriendsList}
+                                FriendNationally={FriendNationally}
+                                FriendListApi={FriendListApi}
+                                logoutApi3={logoutApi3}
+                                isOneOnOneChatDiv={isOneOnOneChatDiv}
+                                onRemove={removeItemFromHomeComponent2}
+                            />
+                            {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
+                        </DivStyledMenu2>
+                        <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"}
+                                   ref={passwordChangeDivRef}>
+                            <PasswordChange
+                                isPasswordChangeDiv={isPasswordChangeDiv}
+                                isPasswordChangeDivClose={isPasswordChangeDivClose}
+                                logoutApi2={logoutApi2}
+                            >
+                            </PasswordChange>
+                        </DivStyled>
+                        <DivStyledMenu visible={LoginDiv ? "visible" : ""}>
+                            {/* Content inside the loginDiv */}
+                            <div className={"loginDiv"}>
+                                <div className={"loginDiv_2"}>
+                                    <div className={"LogoDiv"}>
+                                        <img className={"LogoImg"} src={Logo}></img>
+                                    </div>
+                                    <form onSubmit={handleSubmit}>
+                                        <div className={"loginForm2"} id={"id_Login_ID"}>
+                                            <input
+                                                className={"inputFromText"}
+                                                placeholder={"Please enter your ID"}
+                                                type='text'
+                                                value={username}
+                                                onChange={(e) => setUsername(e.target.value)}
+                                                onFocus={resetButton}
+                                            />
+                                        </div>
+                                        <div className={"loginForm2"} id={"id_Login_PWD"}>
+                                            <input
+                                                className={"inputFromText"}
+                                                placeholder={"Please enter your PASSWORD"}
+                                                type='password'
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                onFocus={resetButton}
+                                            />
+                                        </div>
+                                        <div className={"loginForm_remmember"} id={"id_Remember_Account"}>
+                                            <Checkbox
+                                                className={"rememberAccountCheckbox"}
+                                                type="checkbox"
+                                                checked={rememberAccount}
+                                                onChange={() => setRememberAccount(!rememberAccount)}
+                                            />
+                                            <label className={"label_remmember"} htmlFor={"rememberAccount"}>Remember
+                                                Account</label>
+                                        </div>
+                                        <div className={"login_btn2"} id={"id_Login_BTN"}>
+                                            <Button
+                                                type="submit"
+                                                className={buttonText === "ID OR PASSWORD ERROR" ? "error_text" : "no_error_text"}>
+                                                {buttonText}</Button>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </DivStyledMenu>
+
+                        {/*rtc*/}
+                        <DivStyledMenu visible={showRtcChat}>
+                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser}
+                                                           setShowRtcChat={setShowRtcChat} type2={type2}
+                                                           setType2={setType2}/>}
+                        </DivStyledMenu>
+
+                        <DivStyledMenu visible={showRtcVoiceChat}>
+                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser}
+                                                                     setShowRtcVoiceChat={setShowRtcVoiceChat}
+                                                                     type2={type2}
+                                                                     setType2={setType2}/>}
+                        </DivStyledMenu>
+
+                        <DivStyledMenu visible={SignUpDiv ? "visible" : ""}>
+                            {/* Content inside the loginDiv */}
+                            <div className={"signDiv"}>
+                                <div className={"signupDiv_2"}>
+                                    <form onSubmit={handleSubmitSignUp}>
+                                        <div className={"loginForm"} id={"id_ID"}>
+                                            <input
+                                                className={IdCheckError ? "yesIDinput" : IdCheckError2 ? "noIDinput" : "emptyID"}
+                                                placeholder={"Please enter your ID"}
+                                                type='text'
+                                                value={SginuserName}
+                                                onChange={handleUsernameChange}
+                                            />
+                                            <Button
+                                                className={"checkbtn"}
+                                                disabled={isIdCheckDisabled}
+                                                type={"button"}
+                                                onClick={idCheck}>Check
+                                            </Button>
+                                            <p className={"Text_sign"}>7 to 10 characters consisting of English letters
+                                                and
+                                                numbers</p>
+                                        </div>
+                                        <div className={"loginForm"} id={"id_PWD"}>
+                                            <input
+                                                className={"inputFromText"}
+                                                placeholder={"Please enter your PASSWORD"}
+                                                type='password'
+                                                value={SignuserPwd}
+                                                onChange={handlePasswordChange}
+                                            />
+                                            <p className={PasswordCheck === 'At least 8 characters consisting of English and numbers, including 2 special characters' ?
+                                                "Text_sign" : PasswordCheck === "Available PASSWORD" ?
+                                                    "Text_sign" : "Text_sign_Error_sign"
+                                            }>{PasswordCheck}</p>
+                                        </div>
+                                        <div className={"loginForm"} id={"id_EMAIL"}>
+                                            <input
+                                                className={emailCheckError ? "inputFromText2" : emailCheckError2 ? "NoinputFromText"
+                                                    : "emptyFromText"}
+                                                placeholder={"Please enter your EMAIL"}
+                                                type='text'
+                                                value={SignuserEmail}
+                                                onChange={handleEmailChange}
+                                            />
+                                        </div>
+                                        <div className={"loginForm"} id={"id_NINKNAME"}>
+                                            <input
+                                                className={NickNameCheckError ? "yesIDinput2" : NickNameCheckError2 ? "noIDinput2" : "emptyID2"}
+                                                placeholder={"Please enter your NICKNAME"}
+                                                type='text'
+                                                value={SignuserNickName}
+                                                onChange={handleNickNameChange}
+                                            />
+                                            <Button
+                                                className={"checkbtn"}
+                                                disabled={isNickNameCheckError}
+                                                type={"button"}
+                                                onClick={NickNameCheck}>Check
+                                            </Button>
+                                            <p className={"Text_sign"}>
+                                                Consists of 10 characters or less, with or without English or
+                                                numbers</p>
+                                        </div>
+                                        <div className={"loginForm"} id={"id_NATIONALITY"}>
+                                            <div className="custom_select_wrapper">
+                                                <Select className={"custom_select"}
+                                                        onChange={handleCountryChange}
+                                                        id="demo-simple-select"
+                                                        value={SignuserNationality || ' '}
+
+                                                >
+                                                    <MenuItem className={"menu_li_select"} value={" "} disabled>Please
+                                                        select a COUNTRY</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value={"KR"}>KR</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value={"US"}>US</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value="CA">CA</MenuItem>
+                                                    {/* 캐나다 추가 */}
+                                                    <MenuItem className={"menu_li_select"} value="JP">JP</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value="CN">CN</MenuItem>
+                                                    <MenuItem className={"menu_li_select"} value="PH">PH</MenuItem>
+                                                    {/* 필리핀 추가 */}
+                                                    <MenuItem className={"menu_li_select"} value="RU">RU</MenuItem>
+                                                    {/* 러시아 추가 */}
+                                                    <MenuItem className={"menu_li_select"} value="AU">AU</MenuItem>
+                                                    {/* 호주 추가 */}
+                                                    <MenuItem className={"menu_li_select"} value="IT">IT</MenuItem>
+                                                    {/* 이탈리아 추가 */}
+                                                </Select>
+                                            </div>
+                                        </div>
+                                        <div className={"loginForm"} id={"id_PHONE"}>
+                                            <input
+                                                className={phoneCheckError ? "inputFromText3" : phoneCheckError2 ? "NoinputFromText2"
+                                                    : "emptyFromText2"}
+                                                placeholder={"Please enter your PHONE"}
+                                                type='text'
+                                                value={SignuserPhone}
+                                                onChange={handlePhoneChange}
+                                            />
+                                        </div>
+                                        <div className={"login_btn"} id={"id_SignUp_BTN"}>
+                                            <Button
+                                                className={"SignUpBtn"}
+                                                type='submit'
+                                                disabled={PasswordCheck !== "Available PASSWORD"
+                                                    || !IdCheckError || !emailCheckError || !NickNameCheckError || SignuserNationality == "" || !phoneCheckError
+                                                }>SignUp
+                                            </Button>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </DivStyledMenu>
+                        {/* 드래그 채팅창 사이드 밖 영역 */}
+                    </div>
+                </Suspense>
             );
         }
     )

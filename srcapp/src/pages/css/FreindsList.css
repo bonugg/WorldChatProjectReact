@@ -3,8 +3,8 @@
 .friendsListDiv {
     width: 450px;
     height: 650px;
-    border-radius: 5px;
-    background-color: rgba(50, 50, 50, 0.5);
+    border-radius: 4px;
+    background-color: rgba(11, 11, 14, 0.5);
     /*box-shadow: 0px 0px 10px 4px rgba(100, 100, 100, 0.7);*/
 }
 .nationally{
@@ -15,9 +15,11 @@
     box-sizing: border-box;
     justify-content: flex-start;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-top-right-radius: 5px;
-    border-top-left-radius: 5px;
+    background-color: rgba(18, 20, 24, 1);
+    border: 0px solid #222526;
+    border-top-width: 1px;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
 }
 .nationally_text{
     margin-left: 15px;
@@ -72,19 +74,20 @@
     height: 100%;
     display: flex;
     margin-bottom: 10px;
-    border-radius: 10px;
+    border-radius: 4px;
     justify-content: center;
     align-items: center;
     z-index: 2;
     transition: all 0.25s ease-in-out;
 }
 .friendsList_delete_div2{
-    background-color: rgba(50, 50, 50, 1);
+    background-color: rgba(11, 11, 14, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
     height: 100%;
     display: flex;
     margin-bottom: 10px;
-    border-radius: 10px;
+    border-radius: 4px;
     justify-content: center;
     align-items: center;
     z-index: 2;
@@ -102,12 +105,14 @@
     position: relative;
 }
 .friendsList_item_div3{
-    background-color: rgba(50, 50, 50, 0.8);
+    background-color: rgba(50, 50, 50, 0.5);
     width: 100%;
     height: 100%;
     display: flex;
     margin-bottom: 10px;
-    border-radius: 10px;
+    border-radius: 4px;
+    border: 0px solid rgba(255, 255, 255, 0.1);
+    border-top-width: 1px;
     opacity: 1;
     transition: all 0.5s ease-in-out;
     position: relative;
@@ -120,7 +125,7 @@
 .myPageDiv_profile_img2{
     width: 100%;
     height: 100%;
-    border-radius: 7px;
+    border-radius: 4px;
     opacity: 0.8;
 }
 .friendsList_item_nickname{
@@ -181,10 +186,10 @@
 .friendsList_item_btn2:hover{
     background-color: rgba(17, 126, 0, 0.3) !important;
     border: 1px solid rgba(17, 126, 0, 0.5) !important;
-    color: rgba(255, 255, 255, 1);
+    color: rgba(255, 255, 255, 1) !important;
 }
 .friend_del_text{
-    font-size: 16px;
+    font-size: 14px;
     color: white;
     margin-right: 14px;
     white-space: nowrap;
@@ -206,8 +211,8 @@
     padding-left: 0px !important;
     box-sizing: border-box !important;
     border-radius: 0px !important;
-    border-top-right-radius: 5px !important;
-    border-bottom-left-radius: 5px !important;
+    border-top-right-radius: 4px !important;
+    border-bottom-left-radius: 100% !important;
 }
 
 .friend_del_btn:hover {
@@ -220,7 +225,7 @@
     height: 40px !important;
     min-height: 40px !important;
     max-height: 40px !important;
-    background-color: rgba(205, 92, 92, 0.5) !important;
+    background-color: rgba(205, 92, 92, 0.6) !important;
     color: white !important;
     font-family: 'Russo One', sans-serif !important;
     padding-right: 0px !important;
@@ -235,7 +240,7 @@
     height: 40px !important;
     min-height: 40px !important;
     max-height: 40px !important;
-    background-color: rgba(255, 255, 255, 0.3) !important;
+    background-color: rgba(150, 150, 150, 0.6) !important;
     color: white !important;
     font-family: 'Russo One', sans-serif !important;
     padding-right: 0px !important;

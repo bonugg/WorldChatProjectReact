@@ -19,7 +19,7 @@
     height: calc(100% - 40px);
     padding: 0px 10px 10px;
     box-sizing: border-box;
-    background-color: rgba(150, 150, 150, 0.5);
+    background-color: rgba(11, 11, 14, 0.8);
     border: 1px solid #222526;
     border-top-width: 0px;
     border-bottom-right-radius: 3px;
@@ -30,7 +30,17 @@
     height: calc(100% - 40px);
     padding: 20px;
     box-sizing: border-box;
-    background-color: rgba(150, 150, 150, 0.5);
+    background-color: rgba(11, 11, 14, 0.8);
+    border: 1px solid #222526;
+    border-top-width: 0px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+.CatecontentChat{
+    width: 100%;
+    height: calc(100% - 40px);
+    box-sizing: border-box;
+    background-color: rgba(11, 11, 14, 0.8);
     border: 1px solid #222526;
     border-top-width: 0px;
     border-bottom-right-radius: 3px;

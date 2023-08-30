@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState, useCallback} from "react";
 import { Rnd } from "react-rnd";
-import Logo from "../img/logo_no_text.png";
+import Logo from "../img/logo_img.png";
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -14,8 +14,6 @@ import styled, {keyframes} from "styled-components";
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import Logo_text from "../img/logo_text.png";
-
 
 const MessageStyled = styled.p`
 `;
@@ -208,6 +206,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
             if (!show) {
                 setMenuDiv(false);
                 setMenuDiv2(false);
+                setIsChatDiv(false);
                 setIsClosed(false);
             }
         }, [show]);
@@ -745,7 +744,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                             }}
                             style={{
                                 borderRadius: "15px",
-                                zIndex: "2",
+                                zIndex: "3",
                                 position: "fixed",
                                 display: !randomMax ? "none" : "block",
                                 transition: resizing ? 'none' : 'width 0.25s ease-in-out, height 0.25s ease-in-out'
@@ -768,7 +767,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                                     padding: '0px',
                                     margin: 'auto',
                                     userSelect: 'none',
-                                    zIndex: '2',
+                                    zIndex: '3',
                                     transition: 'height 0.25s ease-in-out'
                                 }}
                             >
@@ -795,7 +794,6 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                                         >
                                         </Button>
                                     </div>
-
                                 </div>
                                 <div className={isChatDiv ? "contentChat_true" : "contentChat"}>
                                 {isChatDiv ? (
@@ -806,9 +804,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
 
                                                 </div>
                                                 <div className={"EnterRoomName"}>
-                                                    <span className={"EnterRoomName_2"}>
 
-                                                    </span>
                                                 </div>
                                                 <div className={"EnterRoomClose"}>
                                                     {otherUserId.current !== null ?(
