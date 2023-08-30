@@ -1,10 +1,10 @@
-import React, {useEffect,useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import Button from "@mui/material/Button";
 import "./css/CateChat.css";
 
 
-const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChatList, shouldImmediatelyEnter}) => {
+const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, shouldImmediatelyEnter}) => {
     const {cateId, cateName, cateUserCnt, maxUserCnt, interest} = room;
 
     useEffect(() => {
@@ -34,23 +34,25 @@ const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChat
             console.log(response);
             if (response.ok) {
                 const data = await response.json(); // 응답본문을 JSON 객체로 변환
-                const isFull = data.isFull;
-
-                if (isFull) {
-                    // alert("The chat room is full.");
+                if (data.noRoom) {
+                    alert("This room doesn't exist");
+                    onCateRoomAndChatDivUpdate(false, "");
+                    return;
+                }
+                if (data.isFull) {
+                    alert("The chat room is full.");
                     onCateRoomAndChatDivUpdate(false, "");
                 } else {
                     // 이 곳에 성공적으로 입장한 경우 수행할 작업을 추가하세요.
                     // alert("SUCCESS.");
                     onCateRoomAndChatDivUpdate(true, data.cateRoom);
-                    cateChatList(data.cateChatList);
                 }
             } else {
                 if (retry) {
                     await cateRoomEnter(false);
                 }
             }
-        }catch (error){
+        } catch (error) {
             if (retry) {
                 await cateRoomEnter(false);
             }
@@ -65,8 +67,8 @@ const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, cateChat
                 <span className={"roomList_name_1"}>ROOM NAME :&nbsp;</span>
                 <span className={"roomList_name_2"}>{cateName}</span>
             </div>
-            <div className={"roomList_item_div_3"}>
-
+            <div className={cateUserCnt === maxUserCnt ? "roomList_item_div_3_full" : "roomList_item_div_3"}>
+                {cateUserCnt === 0 ? 1 : cateUserCnt}/{maxUserCnt}
             </div>
             <div className={"roomList_item_div_4"}>
                 <Button

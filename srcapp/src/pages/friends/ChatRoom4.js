@@ -105,9 +105,12 @@ const ChatRoom4 = () => {
                     console.log("Message received. Should detect language:", shouldDetectLanguageRef.current);  // 이 부분 추가
 
                     const receivedMessage = JSON.parse(body);
+                    console.log("여기서 타입을 어떻게 지정했지?")
                     console.log(receivedMessage);
+                    //상대가 들어오면 이벤트 리스너를 통해 들어옴을 받는다.
                     if (receivedMessage.type === "status") {
                         if (receivedMessage.content === "online") {
+                            //들어왔으면 읽음을 업데이트 시킨다.
                             updateReads();
                         }
                     } else {

@@ -30,7 +30,7 @@ const RandomStart = () => {
             if (!result) {
                 return console.error(result.errorMessage);
             }
-            
+
             console.log(`Created random room name: ${result.randomRoomName}`);
             navigate(`/random/${result.randomRoomId}`, { state: { room: result } });
             return result;

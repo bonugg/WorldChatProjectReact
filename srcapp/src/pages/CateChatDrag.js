@@ -12,8 +12,29 @@ import Profile from "../img/profile.png"
 import "./css/CateChat.css";
 import CateChatListItem from './CateChatListItem';
 import styled, {keyframes} from "styled-components";
+import axios from "axios";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 
 const MessageStyled = styled.p`
+`;
+const slideDownMenu = keyframes`
+  0% {
+    width: 0;
+    height: 0px;
+  }
+  100% {
+    width: 330px;
+    height: 70px;
+  }
+`;
+const slideUpMenu = keyframes`
+  0% {
+    width: 330px;
+    height: 70px
+  }
+  100% {
+    width: 0px;
+  }
 `;
 const slideDownUserList = keyframes`
   0% {
@@ -47,6 +68,22 @@ const slideUp = keyframes`
     transform: scale(0);
   }
 `;
+const MenuPanel = styled.div`
+  visibility: ${props => props.visible === "visible" ? 'visible' : props.visible === "" ? "" : "hidden"};
+  animation: ${props => props.visible === "visible" ? slideDownMenu : props.visible === "" ? slideUpMenu : "hidden"} 0.25s ease-in-out;
+  position: absolute;
+  top: 95%;
+  left: 10px; // 수정된 부분
+  z-index: 1;
+  width: ${props => props.visible ? '330px' : '0px'}; // 기존 속성
+  height: ${props => props.visible ? '70px' : '0px'}; // 기존 속성
+  overflow-y: hidden;
+  overflow-x: hidden;
+  transition: all 0.25s ease-in-out;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.5);
+`;
+
 const DivStyled = styled.div`
   visibility: ${props => props.visible === "visible" ? 'visible' : props.visible === "" ? "" : "hidden"};
   animation: ${props => props.visible === "visible" ? slideDown : props.visible === "" ? slideUp : 'hidden'} 0.25s ease-in-out;
@@ -143,14 +180,14 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const [isMinimized, setIsMinimized] = useState(false);
         const [isClosed, setIsClosed] = useState(false);
 
-        const [UserNickName, setUserNickName] = useState('');
+        const userNickNameRef = useRef(null);
 
         const [roomList, setRoomList] = useState([]);
         const [CateName, setCateName] = useState('Select Category');
-        const [CateChatList, setCateChatList] = useState([]);
         const [CateRoom, setCateRoom] = useState({});
         const [isChatDiv, setIsChatDiv] = useState(false);
-
+        //현재 선택중인 카테고리
+        const currentCate = useRef(null);
         // stompClient를 useState로 관리합니다.
         const [stompClient, setStompClient] = useState(null);
         //인풋창 비활성화 상태 변수
@@ -164,14 +201,60 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
 
         //현재 스크롤바의 위치를 담는 상태 변수
         const [scroll, setScroll] = useState('');
+        const scrollRef = useRef(scroll);
         const [isScroll, setIsScroll] = useState('');
+        const isScrollRef = useRef(isScroll);
         const [previousScrollbarState, setPreviousScrollbarState] = useState(false);
+        const previousScrollbarStateRef = useRef(previousScrollbarState);
 
         const [formValues, setFormValues] = useState({
             cateName: '',
             maxUserCnt: 2,
             interest: ' ',
         });
+
+        //메뉴창 비활성화 상태 변수
+        const [menuDiv, setMenuDiv] = useState(false);
+        const [menuDiv2, setMenuDiv2] = useState(false);
+        //인풋창 파일 및 텍스트 타입 전환
+        const [inputChange, setInputChange] = useState(false);
+        //파일 버튼 클릭 시 인풋 파일로 값 전달
+        const inputFileRef = useRef(null);
+        const [selectedFiles, setSelectedFiles] = useState([]);
+
+        //번역 상태 변수
+        const [selectedLanguage, setSelectedLanguage] = useState(" ");
+        const selectedLanguageRef = useRef(selectedLanguage);
+        const languages = {
+            "en": "English",
+            "ko": "Korean (한국어)",
+            "ja": "Japanese (日本語)",
+            "zh-CN": "Chinese Simplified (简体中文)",
+            "zh-TW": "Chinese Traditional (中國傳統語言)",
+            "vi": "Vietnamese (Tiếng Việt)",
+            "id": "Indonesian (bahasa Indonésia)",
+            "th": "Thai (ภาษาไทย)",
+            "de": "German (das Deutsche)",
+            "ru": "Russian (Русский язык)",
+            "es": "Spanish (español)",
+            "it": "Italian (Italia)",
+            "fr": "French (Français)"
+
+        };
+
+        useEffect(() => {
+            selectedLanguageRef.current = selectedLanguage;
+        }, [selectedLanguage]);
+
+        useEffect(() => {
+            scrollRef.current = scroll;
+        }, [scroll]);
+        useEffect(() => {
+            previousScrollbarStateRef.current = previousScrollbarState;
+        }, [previousScrollbarState]);
+        useEffect(() => {
+            isScrollRef.current = isScroll;
+        }, [isScroll]);
 
         const toggleUserListPanel = () => {
             setIsUserListVisible((prevIsUserListVisible) => !prevIsUserListVisible);
@@ -202,8 +285,8 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                     if (response.ok) {
                         const responseBody = await response.text();
                         const responseBodyObject = JSON.parse(responseBody);
-                        const userNickName = responseBodyObject.user.userNickName;
-                        setUserNickName(userNickName);
+                        userNickNameRef.current = responseBodyObject.user.userNickName;
+
                     } else {
                         if (retry) {
                             await tokenCheck(false);
@@ -228,9 +311,18 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                 setIsChatReadOnly(true);
                 console.log("Connected: " + frame);
 
-                client.subscribe("/cateSub/" + CateRoom.cateId, (messageOutput) => {
+                client.subscribe("/cateSub/" + CateRoom.cateId, async(messageOutput) => {
                     const responseData = JSON.parse(messageOutput.body);
                     console.log(responseData);
+
+                    if (responseData.sender !== userNickNameRef.current && selectedLanguageRef.current != " ") {
+                        console.log(responseData);
+                        const translatedText = await detectAndTranslate(responseData.cateChatContent);
+                        if (translatedText) {
+                            responseData.translatedMessage = translatedText;
+                        }
+                    }
+
                     if (responseData.hasOwnProperty('cateUserList')) {
                         // responseData에 cateUserList가 있는 경우
                         showMessageOutput(responseData.cateChatDTO);
@@ -269,15 +361,82 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                     cateId: CateRoom.cateId,
                 }));
                 stompClient.disconnect();
+
+                setSelectedLanguage(" ");
+                setMenuDiv(false);
+                setMenuDiv2(false);
                 setSendMessage('');
-                setIsChatReadOnly(false);
                 setMessages([]);
                 setIsUserListVisible(false);
                 setIsUserListVisible2(false);
+                setIsChatReadOnly(false);
                 setStompClient(null);
             }
             console.log('Disconnected');
         };
+
+        //--------------번역----------------------
+        const detectAndTranslate = async (text) => {
+
+            console.log(text);
+            console.log("선택된 언어 제발요");
+            console.log(selectedLanguage);
+            const targetLanguage = selectedLanguageRef.current;
+            console.log(targetLanguage);
+
+            try {
+                const detectResponse = await axios.post("/language/detect", {query: text}, {
+                    headers: {
+                        Authorization: `${localStorage.getItem('Authorization')}`
+                    }
+                });
+
+                console.log(detectResponse);
+                console.log(detectResponse.data);
+
+                console.log("여기에 문제가 있을거같긴해 나도. 이게 제일 못미더워");
+
+                if (detectResponse.data && detectResponse.data.langCode) {
+                    const detectedLanguage = detectResponse.data.langCode;
+
+                    const translateResponse = await axios.post("/language/translate", {
+                        text: text,
+                        sourceLanguage: detectedLanguage,
+                        targetLanguage: targetLanguage
+                    }, {
+                        headers: {
+                            Authorization: `${localStorage.getItem('Authorization')}`
+                        }
+                    });
+
+                    console.log("번역해주세여~~~~");
+                    console.log(translateResponse);
+                    console.log(translateResponse.data.message.result.translatedText)
+
+                    if (translateResponse.data && translateResponse.data.message.result.translatedText) {
+                        return translateResponse.data.message.result.translatedText;
+                    } else {
+                        console.error("Error translating text");
+                        return null;
+                    }
+
+                } else {
+                    console.error("Error detecting language");
+                    return null;
+                }
+
+            } catch (error) {
+                console.error("Error in detectAndTranslate:", error);
+                return null;
+            }
+        };
+
+        const handleLanguageChange = (e) => {
+            setSelectedLanguage(e.target.value);
+            console.log("언어선택 했어요. 진짜로 했어요");
+            console.log(e.target.value);
+        };
+//--------------번역----------------------
 
         useEffect(() => {
             if (!show) {
@@ -291,10 +450,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                 setCreateRoomId('');
                 connect();
             } else {
-                setSendMessage('');
-                setMessages([]);
-                setIsUserListVisible(false);
-                setIsUserListVisible2(false);
                 disconnect();
                 if (isUserListVisible) {
                     setIsUserListVisible2(true);
@@ -308,15 +463,12 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             if (scrollElement) {
                 const hasScrollbar = scrollElement.scrollHeight > scrollElement.clientHeight;
 
-                if (!previousScrollbarState && hasScrollbar) {
+                if (!previousScrollbarStateRef.current && hasScrollbar) {
                     scrollElement.scrollTop = scrollElement.scrollHeight;
-                } else if (isScroll) {
-
+                } else if (isScrollRef.current) {
                     scrollElement.scrollTop = scrollElement.scrollHeight;
-                } else if (!isScroll) {
-
+                } else if (!isScrollRef.current) {
                 }
-
                 // 스크롤바 상태 업데이트
                 setPreviousScrollbarState(hasScrollbar);
             }
@@ -327,26 +479,31 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         };
 
         const handleMinimizeClick = () => {
+            setMenuDiv(false);
+            setMenuDiv2(false);
             setCreatRoom(false);
             setCreatRoom2(false);
+            setIsUserListVisible2(false);
             setIsMinimized(!isMinimized);
         };
 
         const handleCloseClick = () => {
+            setMenuDiv(false);
+            setMenuDiv2(false);
             setIsUserListVisible(false);
             setIsUserListVisible2(false);
             setCreatRoom(false);
             setCreatRoom2(false);
-
-            setIsClosed(true);
-            setPosition(initialPosition);
-
             setIsChatDiv(false);
             setIsChatReadOnly(false);
             setSendMessage('');
             setMessages([]);
             setRoomList([]);
             setCateName("Select Category");
+            setIsClosed(true);
+            setPosition(initialPosition);
+
+
             disconnect();
             if (onClose) {
                 onClose();
@@ -392,9 +549,14 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const showUserListOutput = (messageOutput) => {
             setuserList((prevUserList) => [...messageOutput]);
         };
+        const roomListAdd = (roomListadd) => {
+            setRoomList((prevroomList) => [...roomListadd]);
+        };
         const isScrollbarAtBottom = (element) => {
             // 현재 스크롤 위치 + 클라이언트 높이가 스크롤 영역의 전체 높이와 동일한지 확인
-            return scroll + element.clientHeight === element.scrollHeight;
+            const scrollThreshold = 199; // 스크롤 바가 바닥에 있는 것으로 판단할 수 있는 임계 값
+            return element.scrollHeight - element.scrollTop - element.clientHeight <= scrollThreshold;
+
         };
         //현재스크롤바 위치 구하기
         const handleScroll = (event) => {
@@ -403,31 +565,15 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         };
 
 
-        const exitChatDiv = () => {
+        const exitChatDiv = (interest) => {
             setIsChatDiv(false);
         };
-
-
-        // useEffect(() => {
-        //     // isChatDiv가 true가 될 때 접속하고 false가 될 때 끊습니다.
-        //     if (!CateChatDiv) {
-        //         setIsChatDiv(false);
-        //     }
-        // }, [CateChatDiv]);
-        //
-        // useEffect(() => {
-        //     if (CateChatDiv) {
-        //         roomListLoad();
-        //     }
-        // }, [CateChatDiv]);
 
         // 카테고리 룸 등록 후 div 업데이트 합니다
         const setCateRoomAndHandleChatDivUpdate = (chatDivUpdateValue, cateRoomValue) => {
             setCateRoom(cateRoomValue)
             setIsChatDiv(chatDivUpdateValue);
-        };
-        const handleCateChatList = (value) => {
-            setCateChatList(value);
+            roomListLoad(currentCate.current);
         };
         const handleChange = (event) => {
             const {name, value} = event.target;
@@ -437,21 +583,13 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
         const handleSubmit = (event) => {
             event.preventDefault();
             cateRoomCreate();
-            // if (validateForm()) {
-            //     // 여기서 formValues를 서버에 전송하거나 처리
-            //     cateRoomCreate();
-            // }
         };
-
-        // const validateForm = () => {
-        //     // 여기에서 유효성 검사를 수행하고, 결과에 따라 true 또는 false를 반환
-        //     return true;
-        // };
 
         const roomListLoad = async (category, retry = true) => {
             if (category === undefined) {
                 category = "ALL";
             }
+            currentCate.current = category;
             try {
                 const response = await fetch(`/api/v1/cateChat/roomList/${category}`, {
                     method: 'GET',
@@ -471,6 +609,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                 }
                 const data = await response.json();
                 if (data) {
+                    console.log(data.items);
                     if (data.items.length == 0) {
                         setRoomList(() => []);
                         setCateName(category);
@@ -512,7 +651,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                 if (rs_cateRoom.cateId) {
                     CloseCreateRoom();
                     setCreateRoomId(rs_cateRoom.cateId);
-                    roomListLoad(formValues.interest);
+                    roomListAdd([rs_cateRoom]);
                 } else {
                     console.log("cateRoomCreate 재시도")
                     if (retry) {
@@ -566,6 +705,108 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
             });
         };
 
+//--------------파일 버튼 클릭 시 동작----------------------
+        const handleFileButtonClick = () => {
+            setSendMessage("");
+            setInputChange(true);
+            inputFileRef.current.click();
+        };
+//--------------파일 버튼 클릭 시 동작----------------------
+//--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환----------------------
+        const handleInputChange = (e) => {
+            setSendMessage('');
+            setInputChange(false);
+        };
+//--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환----------------------
+//--------------텍스트 채팅 시 입력 메시지 보여주기----------------------
+        const handleMessageChange = (e) => {
+            setSendMessage(e.target.value);
+
+        };
+//--------------텍스트 채팅 시 입력 메시지 보여주기----------------------
+//--------------파일 버튼 클릭 후 파일 첨부 시에 파일 명 인풋창에 표시----------------------
+        const handleFileChange = (e) => {
+            setSelectedFiles(e.target.files);
+
+            // 파일 이름 및 경로를 저장하는 로직을 추가
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                const fileNames = Array.from(files).map(file => file.name).join(', ');
+                setSendMessage(fileNames);
+            }
+        };
+//--------------파일 버튼 클릭 후 파일 첨부 시에 파일 명 인풋창에 표시----------------------
+//--------------메뉴 오픈-----------------------
+        const handleMenuOpen = () => {
+            setMenuDiv((prevIsUserListVisible) => !prevIsUserListVisible);
+            setMenuDiv2(true);
+        };
+//--------------메뉴 오픈-----------------------
+//--------------업로드 파일----------------------
+        const uploadFiles = () => {
+            if (!selectedFiles || selectedFiles.length === 0) return;
+
+            // 각 파일을 순회하며 업로드합니다.
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("roomId", CateRoom.cateId);
+
+                axios.post('/cateChat/upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
+                    .then((response) => {
+                        const data = response.data;
+                        console.log(data);
+                        console.log("---");
+                        const chatMessage = {
+                            type: "CHAT",
+                            cateId: CateRoom.cateId,
+                            cateChatContent: "File upload",
+                            "s3DataUrl": data.s3DataUrl,
+                            "fileName": file.name,
+                            "fileDir": data.fileDir
+                        };
+                        stompClient.send(
+                            `/catePub/categoryChat/${CateRoom.cateId}/sendMessage`,
+                            {},
+                            JSON.stringify(chatMessage)
+                        );
+                    })
+                    .catch((error) => {
+                        alert(error);
+                    });
+                setSendMessage("");
+            }
+        };
+//--------------업로드 파일----------------------
+//--------------다운로드 파일----------------------
+        const downloadFile = (name, dir) => {
+            console.log(name);
+            console.log(dir);
+            const url = `/catechat/download/${name}`;
+
+            axios({
+                method: 'get',
+                url: url,
+                params: {"fileDir": dir},
+                responseType: 'blob'
+            })
+                .then((response) => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(new Blob([response.data]));
+                    link.download = name;
+                    link.click();
+                })
+                .catch((error) => {
+                    console.error("Download error", error);
+                });
+        };
+//--------------다운로드 파일----------------------
         return (
             <div className="Drag">
                 {!isClosed && (
@@ -746,13 +987,13 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                     </span>
                                                 </div>
                                                 <div className={"EnterRoomClose"}>
-                                                    <Button
-                                                        className={"Close_btn"}
-                                                        onClick={exitChatDiv}
-                                                    >
-                                                        Back
-                                                    </Button>
-                                                </div>
+                                                <Button
+                                                    className={"Close_btn"}
+                                                    onClick={() => exitChatDiv(CateRoom.interest)}
+                                                >
+                                                    Back
+                                                </Button>
+                                            </div>
                                             </div>
                                         </div>
                                         <div className={"EnterRoomChat"}>
@@ -760,7 +1001,10 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                 <div className={"EnterRoomChat_content"}>
                                                     <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
                                                         {messages.map((message, index) => {
-                                                            const isMyMessage = message.sender === UserNickName;
+                                                            const isMyMessage = message.sender === userNickNameRef.current;
+                                                            console.log(message.s3DataUrl)
+                                                            console.log(message.fileName)
+                                                            console.log(message.fileDir)
                                                             return (
                                                                 <MessageStyled
                                                                     key={index}
@@ -781,6 +1025,31 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                 <span
                                                                                     className="userName">{message.sender}</span>
                                                                             </div>
+                                                                            {message.s3DataUrl && (
+                                                                                <div className={"down_div"}>
+                                                                                    {message.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
+                                                                                        ? <img src={message.s3DataUrl}
+                                                                                               alt="uploaded"
+                                                                                               className={"message_img"}/>
+                                                                                        : message.fileName.match(/\.(mp4|webm|ogg)$/i)
+                                                                                            ? <video src={message.s3DataUrl}
+                                                                                                     controls
+                                                                                                     className={"message_img"}/> // 동영상 렌더링
+                                                                                            : <div className={"message_other"}>
+                                                                                            <span
+                                                                                                className={"message_other_text"}>
+                                                                                                     {message.fileName}
+                                                                                            </span>
+                                                                                            </div> // 파일 이름 렌더링
+                                                                                    }
+                                                                                    <Button
+                                                                                        onClick={() => downloadFile(message.fileName, message.fileDir)}
+                                                                                        className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn" : "downBtn2"}
+                                                                                    >
+                                                                                        <FileDownloadIcon/>
+                                                                                    </Button> {/* 다운로드 버튼 */}
+                                                                                </div>
+                                                                            )}
                                                                             <span
                                                                                 className="content_user">{message.cateChatContent}</span>
                                                                             <span
@@ -795,6 +1064,39 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                 <span
                                                                                     className="userName">{message.sender}</span>
                                                                             </div>
+                                                                            {message.s3DataUrl && (
+                                                                                <div className={"down_div"}>
+                                                                                    {message.fileName.match(/\.(jpg|jpeg|png|gif)$/i)
+                                                                                        ? <img src={message.s3DataUrl}
+                                                                                               alt="uploaded"
+                                                                                               className={"message_img2"}/>
+                                                                                        : message.fileName.match(/\.(mp4|webm|ogg)$/i)
+                                                                                            ? <video src={message.s3DataUrl}
+                                                                                                     controls
+                                                                                                     className={"message_img2"}/> // 동영상 렌더링
+                                                                                            : <div className={"message_other2"}>
+                                                                                            <span
+                                                                                                className={"message_other_text2"}>
+                                                                                                     {message.fileName}
+                                                                                            </span>
+                                                                                            </div> // 파일 이름 렌더링
+                                                                                    }
+                                                                                    <Button
+                                                                                        onClick={() => downloadFile(message.fileName, message.fileDir)}
+                                                                                        className={message.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn_other" : message.fileName.match(/\.(mp4|webm|ogg)$/i) ? "downBtn_other" : "downBtn_other2"}
+                                                                                    >
+                                                                                        <FileDownloadIcon/>
+                                                                                    </Button> {/* 다운로드 버튼 */}
+                                                                                </div>
+                                                                            )}
+                                                                            {message.translatedMessage ?
+                                                                                <span
+                                                                                    className="content_other_trans"
+                                                                                >(translate) {message.translatedMessage}</span>
+                                                                                :
+                                                                                <>
+                                                                                </>
+                                                                            }
                                                                             <span
                                                                                 className="content_other">{message.cateChatContent}</span>
                                                                             <span
@@ -806,30 +1108,79 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                         })}
                                                     </div>
                                                 </div>
-                                                <div className={"EnterRoomChat_input"}>
-                                                    <form className={"EnterRoomChat_input_form"}
+                                                <div className={"EnterRoomChat_input_one"}>
+                                                    <form className={"EnterRoomChat_input_form_one"}
                                                           onSubmit={handleSendMessage}>
-                                                        <Button
-                                                            className={"btnSend"}
-                                                            type="submit"
-                                                            onClick={handleSendMessage}
-                                                        >+
-                                                        </Button>
-                                                        <input
-                                                            placeholder={!isChatReadOnly ? "Connecting, please wait" : "Please enter your message"}
-                                                            type="text"
-                                                            className={"inputchat"}
-                                                            required
-                                                            value={sendMessage}
-                                                            readOnly={!isChatReadOnly} // isChatDiv가 false일 때 readOnly를 true로 변경
-                                                            onChange={(e) => setSendMessage(e.target.value)}
-                                                        />
-                                                        <Button
-                                                            className={"btnSend"}
-                                                            type="submit"
-                                                            onClick={handleSendMessage}
-                                                        >SEND
-                                                        </Button>
+                                                        <MenuPanel
+                                                            visible={menuDiv ? "visible" : menuDiv2 ? "" : "hidden"}
+                                                        >
+                                                            <div className={"menu_div"}>
+                                                                <div className={"file"}>
+                                                                    <Button
+                                                                        className={"menu_btn"}
+                                                                        type="button"
+                                                                        onClick={handleFileButtonClick}
+                                                                    >FILE
+                                                                    </Button>
+                                                                </div>
+                                                                <div className={"trans"}>
+                                                                    <Select className={"trans_select"}
+                                                                            onChange={handleLanguageChange}
+                                                                            value={selectedLanguage}
+                                                                    >
+                                                                        <MenuItem className={"trans_li_select"} value={" "}>Not translated</MenuItem>
+                                                                        {Object.entries(languages).map(([code, name]) => (
+                                                                            <MenuItem className={"trans_li_select"} key={code}
+                                                                                      value={code}>{name}</MenuItem>
+                                                                        ))}
+                                                                    </Select>
+                                                                </div>
+                                                            </div>
+                                                        </MenuPanel>
+                                                        <div className={"input_menu"}>
+                                                            <input
+                                                                placeholder={!isChatReadOnly ? "Connecting, please wait" : "Please enter your message"}
+                                                                type="text"
+                                                                className={inputChange ? "inputchat_one2" : "inputchat_one"}
+                                                                required
+                                                                value={sendMessage}
+                                                                onClick={handleInputChange}
+                                                                readOnly={!isChatReadOnly} // isChatDiv가 false일 때 readOnly를 true로 변경
+                                                                onChange={handleMessageChange}
+                                                            />
+                                                            <input
+                                                                type="file"
+                                                                id="file"
+                                                                ref={inputFileRef}
+                                                                onChange={handleFileChange}
+                                                                multiple
+                                                                style={{display: 'none'}}
+                                                            />
+                                                            <Button
+                                                                className={menuDiv ? "add_now" : "add"}
+                                                                type="button"
+                                                                onClick={handleMenuOpen}
+                                                            >{menuDiv ? "-" : "+"}
+                                                            </Button>
+                                                        </div>
+
+                                                        {inputChange ? (
+                                                            <Button
+                                                                className={"btnSend2"}
+                                                                type="button"
+                                                                onClick={uploadFiles}
+                                                            >UPLOAD
+                                                            </Button>
+                                                        ) : (
+                                                            <Button
+                                                                className={"btnSend"}
+                                                                type="submit"
+                                                                onClick={handleSendMessage}
+                                                            >SEND
+                                                            </Button>
+                                                        )}
+
+
                                                     </form>
                                                 </div>
                                             </div>
@@ -944,7 +1295,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                 key={room.cateId}
                                                                 room={room}
                                                                 onCateRoomAndChatDivUpdate={setCateRoomAndHandleChatDivUpdate}
-                                                                cateChatList={handleCateChatList}
                                                                 shouldImmediatelyEnter={room.cateId === createRoomId}
                                                             ></CateChatListItem>
                                                         ))
@@ -964,7 +1314,8 @@ const Drag = React.memo(({show, onClose, logoutApiCate}) => {
                                     position: 'absolute',
                                     left: '50%',
                                     bottom: '80px',
-                                    transform: 'translateX(-50%)',
+                                    transform: 'translateX(calc(-50% + 150px))', // 수정된 부분
+                                    zIndex: '2',
                                 }}
                                 className={"maximum_btn"}
                             >

@@ -95,6 +95,7 @@ body {
     height: 100vh;
     position: relative;
     overflow: hidden;
+    display: flex;
 }
 @media (max-width: 1000px) {
     .fullScreen{
@@ -114,24 +115,24 @@ body {
 
     }
 }
-
-
-.logo_main {
-    position: absolute;
-    top: 30px;
-    right: 80px;
-    width: 60px;
-    height: 60px;
-    z-index: 0;
-    cursor: pointer;
+.logo_div{
+    margin-top: 1px;
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #121418;
+    border: 0px solid #222526;
+    border-top-width: 1px;
+    box-shadow: 0 4px 4px -4px black;
 }
 
 .logo_main_text {
-    position: absolute;
-    top: 50px;
-    right: 30px;
-    width: 160px;
-    height: 20px;
+    width: 80%;
+    height:60%;
     z-index: 1;
     cursor: pointer;
 }
@@ -148,21 +149,24 @@ a {
 
 /* 사이드바의 너비와 높이를 변수를 통해 통제 */
 :root {
-    --side-bar-width: 270px;
+    --side-bar-width: 300px;
     --side-bar-height: calc(100vh - 70px);
 }
 
 .side-bar {
-    z-index: 0;
-    position: fixed; /* 스크롤을 따라오도록 지정 */
-    left: 0;
-    top: 10%;
-    background-color: rgba(5, 5, 5, 0.5);
-    border: 0px solid rgba(128, 128, 128, 0.2);
-    border-top-width: 4px;
-    border-bottom-width: 4px;
-    width: var(--side-bar-width);
-    height: 80vh; /* 사이드바의 높이를 전체 화면 높이의 90%로 지정 */
+    z-index:1;
+    /*position: fixed; !* 스크롤을 따라오도록 지정 *!*/
+    /*left: 0;*/
+    /*top: 0;*/
+    position: relative;
+    width: 300px;
+    background-color: #0b0b0e;
+    /*background-image: url("../../assets/textures/495862558257741.jpg");*/
+    /*opacity: 0.7;*/
+    /*background-size: cover;*/
+    /*background-repeat: no-repeat;*/
+    height: 100vh; /* 사이드바의 높이를 전체 화면 높이의 90%로 지정 */
+    box-shadow: 5px 0px 5px -2px rgba(45, 45, 47, 0.5);
 }
 .side-bar ul{
     background-color: rgba(0, 0, 0, 0) !important;
@@ -178,7 +182,7 @@ a {
 .side-bar__icon-1 {
     position: relative;
     width: 23px;
-    height: 17px;
+    height: 12px;
     margin: 20px 15px 15px;
     transition: .5s;
 }
@@ -190,7 +194,7 @@ a {
 .side-bar__icon-1 > div {
     position: absolute;
     width: 100%;
-    height: 20%;
+    height: 2px;
     background-color: white;
     transition: all var(--side-bar__icon);
 }
@@ -217,32 +221,47 @@ a {
 
 
 .side-bar:hover .side-bar__icon-1 {
-    transform: translate(-148px, 0);
+    transform: translate(-218px, 0);
 }
 
 .side-bar:hover .side-bar__icon-1 > div:nth-of-type(2) {
     transform: rotate(45deg);
     width: 70.5%;
-    height: 25%;
+    height: 2px;
 }
 
 .side-bar:hover .side-bar__icon-1 > div:nth-of-type(3) {
     top: 40%;
     transform: rotate(-45deg);
     width: 70.5%;
-    height: 25%;
+    height: 2px;
 }
 
 .side-bar:hover .side-bar__icon-1 > div:nth-of-type(1) {
-    left: 41%;
+    left: 45.7%;
     right: 41%;
-    height: 100%;
+    width: 2px;
+    height: 140%;
     transition: all var(--side-bar__icon), left calc(var(--side-bar__icon) / 2) 0s, right calc(var(--side-bar__icon) / 2) 0s, height calc(var(--side-bar__icon) / 2) calc(var(--side-bar__icon) / 2);
 }
 
 /* 아이콘 끝 */
 .menu_li {
     cursor: pointer;
+    border: 0px solid #222526;
+    border-top-width: 1px;
+    box-shadow: 0 4px 4px -4px black;
+    height: 50px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 30px;
+    box-sizing: border-box;
+
+    color: white;
+    font-size: 13px;
+    font-weight: normal;
+    margin-bottom: 5px;
 }
 
 .menu_li:hover {
@@ -257,19 +276,23 @@ a {
     display: flex;
 }
 
+.side-bar ul {
+    padding-left: 0px !important;
 
+}
 /* 모든 메뉴의 a에 속성값 부여 */
 .side-bar ul > li > a {
     display: block;
     color: white;
-    font-size: 20px;
+    font-size: 13px;
     font-weight: normal;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    padding-left: 50px;
+    /*padding-top: 20px;*/
+    /*padding-bottom: 20px;*/
+    /*padding-left: 50px;*/
+    width: 100%;
+    height: 100%;
     transition: .5s;
 }
-
 .menu_text {
     padding-top: 15px !important;
     padding-bottom: 15px !important;
@@ -298,27 +321,30 @@ a {
 
 /* 모든 메뉴가 마우스 인식 시 반응 */
 .side-bar ul > li:hover > a {
-    background-color: rgba(30, 30, 30, 1);
+    /*background-color: rgba(30, 30, 30, 1);*/
 }
 .menu_li_sub{
-    height: 70px !important;
+    font-size: 13px;
+    background-color: #0b0b0e;
+    height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(30, 30, 30, 1);
+    /*background-color: rgba(30, 30, 30, 1);*/
     color: white;
     transition: all 0.25s ease-in-out;
 }
 .menu_li_sub:hover{
-    background-color: rgba(50, 50, 50, 0.2);
+    background-color: rgba(50, 50, 50, 0.5);
 }
 /* 1차 메뉴의 항목이 마우스 인식 시에 2차 메뉴 등장 */
 .side-bar > ul > li:hover > ul {
     display: block;
     position: absolute;
-    top: 0; /* 2차 메뉴의 상단을 1차 메뉴의 상단에 고정 */
-    left: 86.5%; /* 2차 메뉴를 1차 메뉴의 너비만큼 이동 */
-    width: 100%; /* 1차 메뉴의 너비를 상속 */
+    top: -1px; /* 2차 메뉴의 상단을 1차 메뉴의 상단에 고정 */
+    left: 100%; /* 2차 메뉴를 1차 메뉴의 너비만큼 이동 */
+    width: 80%; /* 1차 메뉴의 너비를 상속 */
+    z-index: 2;
 }
 
 .menu_li_li:hover {
@@ -326,18 +352,27 @@ a {
 }
 
 /* 사이드바 너비의 80%만큼 왼쪽으로 이동 */
-.side-bar {
-    border-bottom-right-radius: 10px;
-    border-top-right-radius: 10px;
-    transform: translate(calc(var(--side-bar-width) * -0.7), 0);
-    transition: transform 0.5s;
-}
+/*.side-bar {*/
+/*    !*transform: translate(calc(var(--side-bar-width) * -0.7), 0);*!*/
+/*    !*transition: transform 0.5s;*!*/
+/*}*/
 
 /* 마우스 인식 시 원래의 위치로 이동 */
-.side-bar:hover {
-    transform: translate(-40px, 0); /* 둥근 모서리의 너비만큼 숨겨주기 */
+/*.side-bar:hover {*/
+/*    transform: translate(-40px, 0); !* 둥근 모서리의 너비만큼 숨겨주기 *!*/
+/*}*/
+.foot{
+    position: absolute;
+    bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }
-
+.foot_text{
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.2);
+}
 .myPageDiv {
     position: fixed;
     top: 50%;
@@ -345,7 +380,7 @@ a {
     transform: translate(-50%, -50%);
     width: 600px;
     height: 650px;
-    border-radius: 10px;
+    border-radius: 0px 10px 10px 10px;
     background-color: rgba(50, 50, 50, 0.7);
     border: 2px solid rgba(50, 50, 50, 0.9);
 }
@@ -644,7 +679,7 @@ a {
     background-color: rgba(28, 28, 28, 0.8) !important;
 }
 
-input[type=text], input[type=password] {
+input[type=text], input[type=password], input[type=file] {
     width: 100%;
     height: 50px;
     padding-left: 20px;
@@ -697,7 +732,7 @@ input[type=text], input[type=password] {
     transition: all 0.25s ease-in-out;
 }
 
-input[type=text]:focus, input[type=password]:focus {
+input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
     border: 1px solid rgba(220, 220, 220, 0.8);
 }
 
@@ -786,7 +821,7 @@ input[type=text]:focus, input[type=password]:focus {
 button[type=submit] {
     width: 90%;
     height: 50px !important;
-    padding-left: 20px !important;
+    padding-left: 20px;
     box-sizing: border-box !important;
     border-radius: 10px !important;
     margin-right: 0px !important;

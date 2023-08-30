@@ -5,6 +5,7 @@ import "./App.css";
 import RandomStart from './pages/random/RandomStart';
 import RandomChat from './pages/random/RandomChat';
 import Friends from "./pages/friends/Friends";
+import Test from "./pages/Test";
 import Accept from "./pages/friends/Accept";
 import ReceivedList from "./pages/friends/ReceivedList";
 import RequestedList from "./pages/friends/RequestedList";
@@ -18,6 +19,7 @@ const App = () => {
     return (
             <Routes>
                 <Route index element={<Home />} />
+                <Route path='/test' element={<Test/>}/>
                 <Route path='/friends' element={<Friends/>}/>
                 <Route path='/accept' element={<Accept/>}/>
                 <Route path='/received-list' element={<ReceivedList/>}/>
