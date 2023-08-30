@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import Draggable from 'react-draggable';
 import Button from "@mui/material/Button";
 
-function Drag({show, onClose, remoteVideo, localVideo, localRoom, toggleVideo, toggleAudio, exitRoom}) {
+function Drag({show, onClose, remoteVideo, localVideo, localRoom, toggleVideo, toggleAudio, toggleMike, exitRoom}) {
     const [position, setPosition] = useState({x: -183, y: -286});
     const [isMinimized, setIsMinimized] = useState(false);
     const [isClosed, setIsClosed] = useState(false);
@@ -12,6 +12,17 @@ function Drag({show, onClose, remoteVideo, localVideo, localRoom, toggleVideo, t
     const [button2Active, setButton2Active] = useState(false);
     const [button3Active, setButton3Active] = useState(false);
     const [changeVideo, setChangeVideo] = useState(true);
+
+    // useEffect(() => {
+    //     if (localVideo.current && localVideo.current.srcObject) {
+    //         const stream = localVideo.current.srcObject;
+    //         const audioTracks = stream.getAudioTracks();
+    //         if (audioTracks.length > 0) {
+    //             stream.removeTrack(audioTracks[0]);
+    //         }
+    //     }
+    // }, [localVideo]);
+
 
     useEffect(() => {
         if (!show) {
@@ -111,6 +122,7 @@ function Drag({show, onClose, remoteVideo, localVideo, localRoom, toggleVideo, t
                                 ></video>
 
                                 <video
+                                    muted
                                     id="local_video"
                                     ref={localVideo}
                                     onClick={()=>{setChangeVideo(!changeVideo)}}
@@ -142,7 +154,7 @@ function Drag({show, onClose, remoteVideo, localVideo, localRoom, toggleVideo, t
                                     video {button1Active ? 'OFF' : 'ON'}
                                 </Button>
                                 <Button
-                                    onClick={() => {setButton2Active(!button2Active);}}
+                                    onClick={() => {setButton2Active(!button2Active); toggleMike()}}
                                     style={{
                                         backgroundColor: button2Active ? '#f05650' : '',
                                         transition: 'background-color 0.3s',
