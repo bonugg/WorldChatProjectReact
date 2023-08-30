@@ -11,6 +11,7 @@ import RtcChatDrag from "./RtcChatDrag";
 const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     const [rtcChatDrag, setRtcChatDrag] = useState(false);
     const [socket,setSocket] = useState(null);
+
     const handleRtcShowDrag = () => {
         setRtcChatDrag(true);
     };
@@ -89,7 +90,6 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     let localVideoTracks;
     let myPeerConnection;
 
-    // const localVideo = document.getElementById('local_video');
     const localVideo = useRef(null);
     useEffect(() => {
         console.log("stream test1");
@@ -99,13 +99,13 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     }, [localStream]);
 
     const remoteVideo = useRef(null);
-    useEffect(() => {
-        console.log("stream test2");
-        if (remoteVideo.current && localStream) {
-            // console.log("상대 스트림");
-            remoteVideo.current.srcObject = localStream;
-        }
-    }, [remoteVideo])
+    // useEffect(() => {
+    //     if (remoteVideo.current && localStream) {
+    //         console.log("상대 스트림????????????????????");
+    //     console.log("stream test2");
+    //         remoteVideo.current.srcObject = localStream;
+    //     }
+    // }, [remoteVideo])
     
 
     if(socket){
@@ -138,21 +138,36 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
             const enabled = localVideo.current.srcObject.getVideoTracks()[0].enabled;
             console.log("카메라 토글2");
             localVideo.current.srcObject.getVideoTracks()[0].enabled = !enabled;
-            socket.send(JSON.stringify({
-                type: 'video-toggle',
-                enabled: !enabled
-            }));
-
+            // socket.send(JSON.stringify({
+            //     type: 'video-toggle',
+            //     enabled: !enabled
+            // }));
         }
     };
 
     // 오디오 켜기/끄기 함수
-    const toggleAudio = () => {
+    const toggleMike = () => {
         if (localVideo.current && localVideo.current.srcObject) {
-            const audioTracks = localVideo.current.srcObject.getAudioTracks();
+            const audioTracks = localVideo.current.srcObject.getAudioTracks()
             if (audioTracks.length > 0) {
                 const enabled = audioTracks[0].enabled;
-                console.log("오디오 토글");
+                console.log("마이크 토글: " + enabled);
+                audioTracks[0].enabled = !enabled;
+            } else {
+                console.error("No audio track found in the stream");
+            }
+        } else {
+            console.error("No local video or stream found");
+        }
+    };
+
+//마이크 켜기/끄기 함수
+    const toggleAudio = () => {
+        if (remoteVideo.current && remoteVideo.current.srcObject) {
+            const audioTracks = remoteVideo.current.srcObject.getAudioTracks()
+            if (audioTracks.length > 0) {
+                const enabled = audioTracks[0].enabled;
+                console.log("오디오 토글: " + enabled);
                 audioTracks[0].enabled = !enabled;
             } else {
                 console.error("No audio track found in the stream");
@@ -180,9 +195,9 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
 
         switch (message.type) {
             case 'video-toggle':
-                if (remoteVideo.current.srcObject) {
-                    remoteVideo.current.srcObject.getVideoTracks()[0].enabled = message.enabled;
-                }
+                // if (remoteVideo.current.srcObject) {
+                //     remoteVideo.current.srcObject.getVideoTracks()[0].enabled = message.enabled;
+                // }
                 break;
 
             case "offer":
@@ -214,6 +229,13 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
                 //alert(message.message);  // "상대방과 연결이 끊겼습니다"를 알림으로 표시
                 stop();
                 break;
+
+                case "decline":
+                    console.log("Received decline message");
+                    console.log("디클라인@@@@@@@@@@@@@@@@@@@@@@@@");
+                    socket.close();
+                    stop();
+                    break;
 
             default:
                 handleErrorMessage('Wrong type message received from server');
@@ -321,6 +343,12 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
         if (myPeerConnection) {
             log('Close the RTCPeerConnection');
 
+            sendToServer({
+                from: localUserName,
+                type: 'leave',
+                data: localRoom
+            });
+
             // disconnect all our event listeners
             myPeerConnection.onicecandidate = null;
             myPeerConnection.ontrack = null;
@@ -349,17 +377,13 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
             // myPeerConnection 초기화
             myPeerConnection.close();
             myPeerConnection = null;
-            
+            localStream = null;
 
             setShowRtcChat(false);
             //alert("상대방과 연결을 종료하시겠습니까?");
 
             log("Send 'leave' message to server");
-            sendToServer({
-                from: localUserName,
-                type: 'leave',
-                data: localRoom
-            });
+
 
             
 
@@ -469,6 +493,8 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
         if (remoteVideo.current) { // remoteVideoRef가 null이 아닌지 확인
             remoteVideo.current.srcObject = event.streams[0];
         }
+        console.log("트랙이 찍히는가?: "+event.streams[0].getAudioTracks());
+        console.log("트랙이 찍히는가?: "+event.streams[0].getVideoTracks());
         // remoteVideo.srcObject = event.streams[0];
     }
 
@@ -568,7 +594,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
 
     return (
         <main role="main" className="container-fluid text-center">
-            <RtcChatDrag onClose={handleDragClose} localVideo={localVideo} remoteVideo={remoteVideo} show={rtcChatDrag} localRoom={localRoom} toggleVideo={toggleVideo} toggleAudio={toggleAudio} exitRoom={exitRoom}></RtcChatDrag>
+            <RtcChatDrag onClose={handleDragClose} localVideo={localVideo} remoteVideo={remoteVideo} show={rtcChatDrag} localRoom={localRoom} toggleVideo={toggleVideo} toggleAudio={toggleAudio} toggleMike={toggleMike} exitRoom={exitRoom}></RtcChatDrag>
             {/*<h1>ChatForYOU with WebRTC</h1>*/}
             {/*<div className="col-lg-12 mb-3">*/}
             {/*    <div className="mb-3">Local User Id</div>*/}
