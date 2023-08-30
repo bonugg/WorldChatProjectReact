@@ -200,13 +200,19 @@ const Home = React.memo(() => {
         const [rtcUserName, setRtcUserName] = useState(null);
         const [sendUser, setSendUser] = useState(null);
         const [receiverUser, setReceiverUser] = useState(null);
+        const [closeVideoModal, setCloseVideoModal] = useState(false);
+        const [closeVoiceModal, setCloseVoiceModal] = useState(false);
+
         // let rtcUserName = "";
         // const Rtc = () => {
         //     console.log("Rtc실행됨");
         //     setShowRtcChat(true); // RtcChat 상태를 true로 설정
         // }
         const [socket, setSocket] = useState(null);
-
+        const [modalSocket, setModalSocket] = useState(null);
+        const handleSetSocket = (newSocket) => {
+            setModalSocket(newSocket);
+        };
         //friendList Context API
         const [userList, setUserList] = useState([]);
 
@@ -215,9 +221,11 @@ const Home = React.memo(() => {
         const [modalContent, setModalContent] = useState("");
 
         const handleModalConfirm = () => {
+            console.log("안들어오쥬?");
             setShowModal(false);
-            setSendUser(modalContent.split("님이")[0]);
-            setReceiverUser(rtcUserName);
+            // setSendUser(modalContent.split("님이")[0]);
+            console.log("샌드유저1: " + sendUser);
+            // setReceiverUser(rtcUserName);
 
             if (modalContent.includes("영상통화")) {
                 setShowRtcChat(true);
@@ -229,27 +237,51 @@ const Home = React.memo(() => {
         };
 
         const handleModalDecline = () => {
-            //setSendUser(modalContent.split("님이")[0]);
+            // setSendUser(modalContent.split("님이")[0]);
             handleDecline();
 
         }
 
         const handleSendDeclineModal = () => {
-            setShowRtcVoiceChat(false);
-            setShowDeclineModal(false);
+            console.log("타입 확인: "+modalType);
+            // 일단 여기
+            if(modalType == "video") {
+                // setCloseVideoModal(true);
+                if(modalSocket) {
+                    modalSocket.close();
+                    setModalSocket(null);
+                }
+                // setCloseVoiceModal(true);
+                setShowRtcVoiceChat(false);
+                setShowModal(false);
+                setShowDeclineModal(false);
+            }
+            if(modalType == 'voice') {
+                console.log("voice는 들어오겠지")
+                if(modalSocket) {
+                    modalSocket.close();
+                    setModalSocket(null);
+                }
+                // setCloseVoiceModal(true);
+                setShowRtcVoiceChat(false);
+                setShowModal(false);
+                setShowDeclineModal(false);
+            }
         }
-        
+        // useEffect(()=>{
+        //     console.log(closeVoiceModal+"모달상태")
+        // },[closeVoiceModal,closeVideoModal])
+
         
         // let socket;
         useEffect(() => {
             if (socket) {
                 socket.onmessage = function (event) {
                     const receivedMessage = event.data;
-                    
+                    console.log("모달이 어디서열림2")
                     console.log("receivedMessage ::::" + receivedMessage );
                     setModalContent(receivedMessage);
                     setShowModal(true);
-
                 };
             }
         }, [socket]);
@@ -317,11 +349,13 @@ const Home = React.memo(() => {
 
         const [dataFromChild, setDataFromChild] = useState(null);
         const [type2, setType2] = useState('');
+        const [modalType, setModalType2] = useState('');
 
 useEffect(() => {
     if (type2) {
         sendRequestToServer();
         console.log('유즈이펙트' + type2);
+        setModalType2(type2);
     }
 }, [type2]); 
 
@@ -371,9 +405,8 @@ const handleDecline = async () => {
             },
             body: JSON.stringify({
                 sender: localStorage.getItem('userName'),  // 현재 유저 (거절한 사람)
-                receiver: sendUser, // 통화를 요청한 사람
-                roomId:localRoom,
-                
+                receiver: receiverUser, // 통화를 요청한 사람
+                roomId: localRoom,
             })
         });    
 
@@ -401,7 +434,9 @@ useEffect(() => {
     if (socket) {
         socket.onmessage = function (event) {
             const receivedMessage = event.data;
-
+            setSendUser(localStorage.getItem("userName"));
+            setReceiverUser(receivedMessage.split("님이 ")[0]);
+            console.log("이름 sender: " + receivedMessage.split("님이 ")[0] + "receiver: " + localStorage.getItem("userName"))
             if (receivedMessage.includes("거절")) {
                 // 거절 메시지를 받았을 때의 로직
                 setShowRtcChat(false);
@@ -468,6 +503,8 @@ const handleGrandchildData = (data) => {
     setDataFromChild(data);
     setReceiverUser(data);
     setSendUser(rtcUserName);
+    console.log(sendUser+rtcUserName);
+
 };
 
 
@@ -1159,12 +1196,12 @@ const handleGrandchildData = (data) => {
 
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat} type2={type2} setType2={setType2} onClose={handleRtcShowDragClose}/>}
+                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat} type2={type2} setType2={setType2} onClose={handleRtcShowDragClose} modalSocket={handleSetSocket}/>}
                         </DivStyledMenu>
 
                         <UserListContext.Provider value={{ userList, setUserList }}>
                             <DivStyledMenu visible={showRtcVoiceChat}>
-                                {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcVoiceChat={setShowRtcVoiceChat} type2={type2} setType2={setType2}/>}
+                                {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcVoiceChat={setShowRtcVoiceChat} type2={type2} setType2={setType2} modalSocket={handleSetSocket}/>}
                             </DivStyledMenu>
                         </UserListContext.Provider>
 

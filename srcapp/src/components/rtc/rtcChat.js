@@ -8,9 +8,10 @@ import RtcChatDrag from "./RtcChatDrag";
 
 // const addr = "localhost:3001"
 
-const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
+const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2, modalSocket}) => {
     const [rtcChatDrag, setRtcChatDrag] = useState(false);
     const [socket,setSocket] = useState(null);
+
     const handleRtcShowDrag = () => {
         setRtcChatDrag(true);
     };
@@ -31,6 +32,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
         console.log("wss://" + host + "9002" + "/signal");
         let sockets = new WebSocket("wss://" + host + "9002" + "/signal");
         setSocket(sockets);
+        modalSocket(sockets);
     },[]);
 
     let localUserName = "";

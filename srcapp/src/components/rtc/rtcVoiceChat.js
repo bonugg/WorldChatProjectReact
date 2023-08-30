@@ -10,7 +10,7 @@ import RtcVoiceChatDrag from "./RtcVoiceChatDrag";
 
 // const addr = "localhost:3001"
 
-const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setType2}) => {
+const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setType2, modalSocket}) => {
     const [senderIsTalking, setSenderIsTalking] = useState(false);
     const [receiverIsTalking, setReceiverIsTalking] = useState(false);
     const [socket, setSocket] = useState(null);
@@ -19,6 +19,15 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     const [rtcChatDrag, setRtcChatDrag] = useState(false);
     const [disconnect, setDisconnect] = useState(false);
     const [disconnect2, setDisconnect2] = useState(false);
+
+    // console.log("voiceChat 모달 상태"+modal);
+    //모달창 거절 시 소켓 종료
+    // useEffect(()=>{
+    //     if(modal){
+    //         socket.close();
+    //     }
+    // },[modal])
+    
     // const [isSender, setIsSender] = useState(null);
     // let isSender = useRef(false);
     const handleRtcVoiceShowDrag = () => {
@@ -65,6 +74,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         console.log("wss://" + host + "9002" + "/voice")
         const ws = new WebSocket("wss://" + host + "9002" + "/voice");
         setSocket(ws);
+        modalSocket(ws);
 
         updateUserList();
 
