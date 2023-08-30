@@ -16,6 +16,12 @@
 *::-webkit-scrollbar-track {
     background-color: rgba(50, 50, 50, 0.5);
 }
+button{
+    font-family: 'Orbit', sans-serif !important;
+}
+button[type=submit]{
+    transition: all 0.25s ease-in-out !important;
+}
 
 
 body {
@@ -62,6 +68,7 @@ body {
 }
 
 .spinner {
+    color: white;
     min-width: 150px !important;
     height: 150px !important;
     border-radius: 50%;
@@ -119,7 +126,8 @@ body {
     margin-top: 1px;
     width: 100%;
     height: 100px;
-    padding: 10px;
+    min-height: 100px;
+    padding: 20px 25px;
     box-sizing: border-box;
     display: flex;
     justify-content: center;
@@ -131,8 +139,8 @@ body {
 }
 
 .logo_main_text {
-    width: 80%;
-    height:60%;
+    width: 100%;
+    height:100%;
     z-index: 1;
     cursor: pointer;
 }
@@ -154,7 +162,7 @@ a {
 }
 
 .side-bar {
-    z-index:1;
+    z-index: 2;
     /*position: fixed; !* 스크롤을 따라오도록 지정 *!*/
     /*left: 0;*/
     /*top: 0;*/
@@ -165,8 +173,14 @@ a {
     /*opacity: 0.7;*/
     /*background-size: cover;*/
     /*background-repeat: no-repeat;*/
-    height: 100vh; /* 사이드바의 높이를 전체 화면 높이의 90%로 지정 */
-    box-shadow: 5px 0px 5px -2px rgba(45, 45, 47, 0.5);
+    height: 100%; /* 사이드바의 높이를 전체 화면 높이의 90%로 지정 */
+    box-shadow: 4px 2px 5px -2px rgba(45, 45, 47, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+.side-bar.one {
+    box-shadow: 0px 0px 0px 0px;
+    transition: box-shadow 0.5s ease-in-out;
 }
 .side-bar ul{
     background-color: rgba(0, 0, 0, 0) !important;
@@ -262,6 +276,7 @@ a {
     font-size: 13px;
     font-weight: normal;
     margin-bottom: 5px;
+    transition: all 0.25s ease-in-out;
 }
 
 .menu_li:hover {
@@ -323,10 +338,11 @@ a {
 .side-bar ul > li:hover > a {
     /*background-color: rgba(30, 30, 30, 1);*/
 }
+
 .menu_li_sub{
-    font-size: 13px;
-    background-color: #0b0b0e;
-    height: 50px;
+    font-size: 10px;
+    background-color: rgba(24, 24, 31, 1);
+    height: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -335,39 +351,222 @@ a {
     transition: all 0.25s ease-in-out;
 }
 .menu_li_sub:hover{
-    background-color: rgba(50, 50, 50, 0.5);
+    cursor: pointer;
+    background-color: rgba(24, 24, 31, 0.7);
 }
 /* 1차 메뉴의 항목이 마우스 인식 시에 2차 메뉴 등장 */
-.side-bar > ul > li:hover > ul {
-    display: block;
+.sub_test{
+    width: 100%;
+    height: 0px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s ease-in-out;
+}
+.sub_test2{
+    width: 100%;
+    height: 0px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s ease-in-out;
+}
+.sub_test3 {
     position: absolute;
-    top: -1px; /* 2차 메뉴의 상단을 1차 메뉴의 상단에 고정 */
-    left: 100%; /* 2차 메뉴를 1차 메뉴의 너비만큼 이동 */
-    width: 80%; /* 1차 메뉴의 너비를 상속 */
-    z-index: 2;
+    top: 0;
+    left:-500px;
+    width: 500px;
+    height :100%;
+    visibility :hidden;
+    z-index :1;
+}
+.sub_test2_on{
+    height: 120px;
+    opacity: 1;
+    visibility: visible;
+    transition: all 0.25s ease-in-out;
+}
+.sub_test_on{
+    height: 80px;
+    opacity: 1;
+    visibility: visible;
+    transition: all 0.25s ease-in-out;
+}
+.sub_test3_on {
+    position: absolute;
+    top: 0;
+    left: 301px;
+    width: 500px;
+    height: 100%;
+    z-index: 1;
+    visibility: visible;
+    box-shadow: 4px 2px 5px -2px rgba(45, 45, 47, 0.5);
+    border: 0px solid #222526;
+    border-left-width: 1px;
+    transition: all 0.5s ease-in-out;
 }
 
-.menu_li_li:hover {
-    background-color: rgba(50, 50, 50, 0.5);
-}
-
-/* 사이드바 너비의 80%만큼 왼쪽으로 이동 */
-/*.side-bar {*/
-/*    !*transform: translate(calc(var(--side-bar-width) * -0.7), 0);*!*/
-/*    !*transition: transform 0.5s;*!*/
-/*}*/
-
-/* 마우스 인식 시 원래의 위치로 이동 */
-/*.side-bar:hover {*/
-/*    transform: translate(-40px, 0); !* 둥근 모서리의 너비만큼 숨겨주기 *!*/
-/*}*/
 .foot{
-    position: absolute;
-    bottom: 30px;
+    flex: 1;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-end;
     align-items: center;
     width: 100%;
+}
+.foot_2{
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    height: 50px;
+}
+.friend_search{
+    display: flex;
+    box-sizing: border-box;
+    align-items: center;
+    width: 100%;
+    height: 70px;
+    padding: 15px 14px;
+}
+.friend_search_2{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    position: relative;
+}
+.select_search_friend {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 4px !important;
+    position: relative;
+    width: 100% !important;
+    height: 100% !important;
+    padding-left: 0px !important;
+    padding-right: 20px;
+    padding-bottom: 2px;
+    box-sizing: border-box;
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #3b3e3f !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
+    outline: none;
+    font-size: 11px !important;
+    color: white !important;
+    font-family: 'Orbit', sans-serif !important;
+    transition: all 0.25s ease-in-out !important;
+}
+.select_search_friend_disabled{
+    border-radius: 4px !important;
+    position: relative;
+    width: 100% !important;
+    height: 100% !important;
+    padding-left: 15px !important;
+    padding-right: 20px;
+    padding-bottom: 2px;
+    box-sizing: border-box;
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #3b3e3f !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
+    outline: none;
+    font-size: 11px !important;
+    color: white !important;
+    font-family: 'Orbit', sans-serif !important;
+    transition: all 0.25s ease-in-out !important;
+    cursor: auto;
+}
+.select_search_friend_disabled:hover{
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #595c5d !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
+}
+.select_search_friend * {
+    border: 0px !important;
+}
+.select_search_friend:hover {
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #595c5d !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
+}
+.select_search_friend::after {
+    display: none;
+}
+
+.select_search_friend_li{
+    font-size: 11px !important;
+    background-color: black!important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-family: 'Orbit', sans-serif !important;
+}
+.select_search_friend_li:hover{
+    background-color: rgba(255, 255, 255, 0.3) !important;
+}
+.move_nationally{
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important;
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 0px !important;
+    width: 40px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    color: white !important;
+    font-family: 'Russo One', sans-serif!important;
+    border-radius: 3px !important;
+    transition: all 0.25s ease-in-out !important;
+}
+.move_nationally:hover{
+    background-color: #272731 !important;
+}
+.flag_list_select{
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+}
+.foot_3{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 7px;
+    padding: 10px;
+    box-sizing: border-box;
+    align-items: center;
+    width: 100%;
+    height: 70px;
+    margin-bottom: 30px;
+}
+
+.R_maximum_btn{
+    margin: auto !important;
+    background-color: #18181f !important;
+    width: 80% !important;
+    min-width: 80% !important;
+    height: 80% !important;
+    border: 0px solid #3b3e3f !important;
+    border-top-width: 1px !important;
+    box-shadow: 2px 3px 0px 0px black;
+    color: white !important;
+    font-family: 'Russo One', sans-serif!important;
+    border-radius: 5px !important;
+    transition: all 0.25s ease-in-out !important;
+}
+.R_maximum_btn:hover{
+    background-color: #272731 !important;
+    box-shadow: -1px -1px 0px 0px black;
+    border-top-width: 0px !important;
+}
+
+.R_maximum_btn:disabled{
+    background-color: #1a1a1f !important;
+    color: rgba(70, 70, 70, 1) !important;
+    box-shadow: -1px -1px 0px 0px black;
+    border-top-width: 0px !important;
+    transition: all 0.25s ease-in-out;
 }
 .foot_text{
     font-size: 10px;
@@ -389,113 +588,83 @@ a {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 300px;
-    height: 400px;
-    border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.9);
-    border: 2px solid rgba(50, 50, 50, 0.9);
+    width: 350px;
+    border-radius: 4px;
+    background-color: rgb(0, 0, 0);
+    border: 1px solid #3b3e3f;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.passwordChangeDiv_2{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
 }
 .passwordChangeDiv_input_Form{
     display: flex;
-    width: 250px;
-    height: 50px;
+    width: 100%;
     position: relative;
     margin-bottom: 30px;
 }
 .passwordChangeDiv_input_Form2{
     display: flex;
-    width: 250px;
-    height: 50px;
+    width: 100%;
     position: relative;
     margin-bottom: 45px;
 }
 .passwordChangeDiv_input_Form3{
     display: flex;
-    width: 250px;
-    height: 50px;
+    width: 100%;
     position: relative;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 .passwordChangeDiv_btn_submit_div{
     display: flex;
-    width: 250px;
-    height: 50px;
+    width: 100%;
     position: relative;
     margin-bottom: 0px;
 }
 
-.passwordChangeDiv_input_success{
-    width: 80% !important;
-    height: 50px !important;
-    color: white;
-    cursor: auto;
+.passwordChangeDiv_input.success{
     border: 1px solid green !important;
-    font-size: 10px !important;
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    border-radius: 10px !important;
-    border-top-right-radius: 0px !important;
-    border-bottom-right-radius: 0px !important;
 }
-.passwordChangeDiv_input_fail{
-    width: 80% !important;
-    height: 50px !important;
-    color: white;
-    cursor: auto;
+.passwordChangeDiv_input.fail{
     border: 1px solid indianred !important;
-    font-size: 10px !important;
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    border-radius: 8px !important;
-    border-top-right-radius: 0px !important;
-    border-bottom-right-radius: 0px !important;
 }
 .passwordChangeDiv_input{
-    width: 80% !important;
-    height: 50px !important;
-    color: white;
-    cursor: auto;
-    font-size: 10px !important;
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    border-radius: 8px !important;
-    border-top-right-radius: 0px !important;
-    border-bottom-right-radius: 0px !important;
-}
-.passwordChangeDiv_input2{
     width: 100% !important;
     height: 50px !important;
     color: white;
     cursor: auto;
     font-size: 10px !important;
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    border-radius: 8px !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 4px !important;
+    border-top-right-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+}
+.passwordChangeDiv_input.two{
+    border-radius: 4px !important;
 }
 
 .loginDiv {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 430px;
-    height: 600px;
-    border-radius: 10px;
-    background-color: rgba(50, 50, 50, 0.7);
-    border: 2px solid rgba(50, 50, 50, 0.9);
+    width: 100%;
+    height: 100%;
+    background-color: rgba(24, 24, 31, 0.5) !important;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 .signDiv{
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 430px;
-    height: 750px;
-    border-radius: 10px;
-    background-color: rgba(50, 50, 50, 0.7);
-    border: 2px solid rgba(50, 50, 50, 0.9);
+    width: 100%;
+    height: 100%;
+    background-color: rgba(24, 24, 31, 0.5) !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -504,7 +673,21 @@ a {
 .loginDiv_2 {
     width: 90%;
 }
-
+.login_img_div{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.login_img{
+    width: 45%;
+    height: 35px;
+    margin-bottom: 40px;
+}
+.signup_img{
+    width: 50%;
+    height: 35px;
+    margin-bottom: 40px;
+}
 .signupDiv_2 {
     width: 90%;
 }
@@ -512,42 +695,37 @@ a {
 .myPageDiv2 {
     width: 100%;
     height: 35%;
-}
-.myPageDiv_profile{
-    width: 100%;
-    height: 75%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-end;
     align-items: center;
+    margin-bottom: 50px;
 }
 .myPageDiv_profile_img{
-    width: 120px;
-    height: 120px;
-    border-radius: 15px;
-    border: 1px solid rgba(100, 100, 100, 0.8);
+    width: 150px;
+    height: 150px;
+    border-radius: 4px;
+    border: 1px solid #3b3e3f !important;
     cursor: pointer;
+    margin-bottom: 20px;
 }
-.myPageDiv_profile_btn{
-    width: 100%;
-    height: 25%;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-}
-
 .myPageDiv3 {
     width: 100%;
-    height: 35%;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
 }
 .myPageDiv_info_1{
-    width: 50%;
-    height: 100%;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-left: 15px;
     box-sizing: border-box;
+    margin-top: 10px;
+    padding: 10px 30px;
+    position: relative;
 }
 .myPageDiv_info_2{
     width: 50%;
@@ -565,15 +743,15 @@ a {
 .myPageDiv_info_1_text{
     color: rgba(255, 255, 255, 0.8) !important;
     position: absolute;
-    top: -13px;
+    top: -10px;
     left: 40px;
     font-size: 10px;
 }
 .myPageDiv_info_2_text{
     color: rgba(255, 255, 255, 0.8) !important;
     position: absolute;
-    top: 57px;
-    left: 40px;
+    top: -10px;
+    left: 275px;
     font-size: 10px;
 }
 .myPageDiv_info_3_text{
@@ -584,38 +762,38 @@ a {
     font-size: 10px;
 }
 .myPageDiv_info_1_input{
-    width: 230px !important;
+    width: 50% !important;
     height: 50px !important;
-    margin-bottom: 20px !important;
     color: white;
     cursor: auto;
     font-size: 13px !important;
-    border-radius: 10px !important;
+    border-radius: 4px !important;
+    margin-right: 30px;
 }
 .myPageDiv_info_1_1_input{
-    width: 230px !important;
+    width: 50% !important;
     height: 50px !important;
     margin-bottom: 0px !important;
     color: white;
     cursor: auto;
     font-size: 13px !important;
-    border-radius: 10px !important;
+    border-radius: 4px !important;
 }
 
 .myPageDiv4 {
+    flex: 1;
     width: 100%;
-    height: 30%;
     display: flex;
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
-    padding: 5px 20px 20px;
+    padding: 25px 30px 30px;
 }
 .myPageDiv_Message_div{
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(24, 24, 31, 0.3);
     width: 100%;
     height: 100%;
-    border-radius: 15px;
+    border-radius: 4px;
     padding-bottom: 10px;
     box-sizing: border-box;
 }
@@ -631,9 +809,9 @@ a {
 .myPageDiv_Message_textarea{
     width: 100%;
     height: 100%;
-    background-color: rgba(50, 50, 50, 0.7);
+    background-color: rgba(255, 255, 255, 0.05);
     border: 0px;
-    border-radius: 12px;
+    border-radius: 4px;
     resize: none;
     outline: none;
     padding: 20px;
@@ -643,52 +821,24 @@ a {
     font-size: 12px;
 }
 .myPageDiv_Message_btn_div{
-    margin: auto;
-    width: 30%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
     height: 20%;
 }
-.myPageDiv_Message_btn{
-    width: 100%;
-    height: 100%;
-    margin-bottom: 0px;
-    color: white;
-    cursor: pointer;
-    border-radius: 8px;
-    background-color: black;
-    color: white;
-    outline: none;
-    border: 1px solid rgba(100, 100, 100, 0.8);
-    transition: all 0.25s ease-in-out;
-    font-size: 11px;
-}
-.myPageDiv_Message_btn2{
-    width: 100%;
-    height: 100%;
-    margin-bottom: 0px;
-    color: white;
-    cursor: pointer;
-    border-radius: 8px;
-    background-color: black;
-    color: rgba(23, 192, 23, 0.74);
-    outline: none;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    transition: all 0.25s ease-in-out;
-    font-size: 11px;
-}
-.myPageDiv_Message_btn:hover{
-    background-color: rgba(28, 28, 28, 0.8) !important;
-}
+
 
 input[type=text], input[type=password], input[type=file] {
     width: 100%;
     height: 50px;
     padding-left: 20px;
     box-sizing: border-box;
-    border-radius: 10px;
+    border-radius: 4px;
     background-color: rgba(0, 0, 0, 0.7);
     border: 1px solid rgba(200, 200, 200, 0.2);
     outline: none;
-    font-size: 13px;
+    font-size: 12px;
     transition: all 0.5s ease-in-out;
 }
 
@@ -698,10 +848,18 @@ input[type=text], input[type=password], input[type=file] {
 
 .inputFromText {
     color: white;
+    padding-left: 50px !important;
+}
+.inputFromText_pwd{
+    color: white;
+    padding-left: 20px !important;
+}
+.inputFromText::placeholder{
+    font-size: 11px !important;
 }
 
 .inputFromText2 {
-    color: white;
+    color: white !important;
     transition: all 0.25s ease-in-out;
 }
 
@@ -737,36 +895,40 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
 }
 
 .LogoDiv {
-    width: 50%;
-    height: 37%;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    margin: auto auto 80px;
-}
-
-.LogoImg {
-    width: 180px;
-    height: 180px;
-    border-radius: 17px;
-    box-shadow: 0px 0px 10px 4px rgba(245, 174, 33, 0.2);
+    margin: auto auto 40px 50px;
 }
 
 .loginForm {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0px 10px 40px;
+    padding: 0px 10px 50px;
     box-sizing: border-box;
     width: 100%;
 }
 .loginForm2 {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 0px 10px 25px;
     box-sizing: border-box;
     width: 100%;
+}
+.login_icon{
+    position: absolute;
+    top :12px;
+    left: 25px;
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+.pwd_icon{
+    position: absolute;
+    top :12px;
+    left: 25px;
+    color: rgba(255, 255, 255, 0.5) !important;
 }
 .loginForm_remmember{
     display: flex;
@@ -786,18 +948,25 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
     color: white !important;
 }
 
+
 .error_text {
+    background-color: #18181f !important;
+    width: 100%;
     height: 60px !important;
     color: indianred !important;
-    font-family: 'Russo One', sans-serif !important;
+    border: 0px solid #3b3e3f !important;
+    border-top-width: 1px !important;
+    box-shadow: 2px 3px 0px 0px black;
+}
+.error_text:hover{
+    background-color: #272731 !important;
+    box-shadow: -1px -1px 0px 0px black;
+    border-top-width: 0px !important;
 }
 
-.no_error_text {
-    height: 60px !important;
+.error_text.no {
     color: white !important;
-    font-family: 'Russo One', sans-serif !important;
 }
-
 .login_btn {
     width: 90%;
     height: 60px;
@@ -814,47 +983,31 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 0px !important;
-
-}
-
-button[type=submit] {
-    width: 90%;
-    height: 50px !important;
     padding-left: 20px;
-    box-sizing: border-box !important;
-    border-radius: 10px !important;
-    margin-right: 0px !important;
-    background-color: rgba(0, 0, 0, 1);
-    border: 1px solid rgba(100, 100, 100, 0.5);
-    outline: none;
-    font-size: 18px;
-    transition: all 0.25s ease-out;
-    cursor: pointer;
+    padding-right: 20px;
+    box-sizing: border-box;
+    margin-top: 5px !important;
 }
 
-button[type=submit]:hover {
-    background-color: rgba(28, 28, 28, 0.8);
-}
-
-button[type=submit]:disabled {
-    background-color: #000000;
-    color: #343434;
-    cursor: auto;
-}
 .checkbtn{
     border-radius: 0px !important;
-    border-top-right-radius: 10px !important;
-    border-bottom-right-radius: 10px !important;
+    border-top-right-radius: 4px !important;
+    border-bottom-right-radius: 4px !important;
+
+    background-color: #18181f !important;
+    border: 0px solid #3b3e3f !important;
+    border-top-width: 1px !important;
+    box-shadow: 2px 1px 0px 0px black;
+
     width: 30% !important;
     height: 50px !important;
     cursor: pointer;
-    background-color: black !important;
     color: white !important;
-    border: 1px solid rgba(200, 200, 200, 0.2) !important;
-    border-left-width: 0px !important;
-    font-family: 'Russo One', sans-serif !important;
     transition: all 0.25s ease-out;
+}
+.checkbtn:hover{
+    background-color: #272731 !important;
+    border-top-width: 0px !important;
 }
 
 .yesIDinput {
@@ -880,33 +1033,19 @@ button[type=submit]:disabled {
     transition: all 0.25s ease-in-out;
 }
 
-.yesIDinput2 {
+.emptyID.yes {
     border: 1px solid green!important;
-    color: white;
-    border-bottom-right-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-    transition: all 0.25s ease-in-out;
 }
 
-.noIDinput2 {
+.emptyID.no {
     border: 1px solid indianred!important;
-    color: white;
-    border-bottom-right-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-    transition: all 0.25s ease-in-out;
-}
-
-.emptyID2 {
-    color: white;
-    border-bottom-right-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-    transition: all 0.25s ease-in-out;
 }
 
 .SignUpBtn {
     color: white !important;
+    width: 100%;
     height: 60px !important;
-    font-family: 'Russo One', sans-serif !important;
+    font-family: 'Orbit', sans-serif !important;
 }
 .SignUpBtn:disabled{
     background-color: #000000 !important;
@@ -915,7 +1054,7 @@ button[type=submit]:disabled {
 }
 
 button[type=button]:disabled {
-    background-color: #000000 !important;
+    background-color: #000000;
     color: #343434 !important;
     cursor: auto !important;
 }
@@ -944,7 +1083,7 @@ button[type=button]:hover {
 
 #id_EMAIL {
     width: 90%;
-    margin: 10px auto auto;
+    margin: 0px auto auto;
 }
 
 #id_Login_ID {
@@ -965,6 +1104,9 @@ button[type=button]:hover {
 #id_SignUp_BTN {
     margin: auto;
     width: 100%;
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+    box-sizing: border-box !important;
 }
 
 #id_NINKNAME {
@@ -1038,13 +1180,13 @@ button[type=button]:hover {
     padding-left: 5px !important;
     padding-right: 20px;
     box-sizing: border-box;
-    border-radius: 10px !important;
+    border-radius: 4px !important;
     background-color: rgba(0, 0, 0, 0.7) !important;
     border: 1px solid rgba(200, 200, 200, 0.2);
     outline: none;
     font-size: 13px !important;
     color: rgba(220, 220, 220, 0.5) !important;
-    font-family: 'Russo One', sans-serif !important;
+    font-family: 'Orbit', sans-serif !important;
     transition: all 0.25s ease-in-out !important;
 }
 .custom_select * {
@@ -1070,7 +1212,7 @@ input:hover{
 .custom_select_wrapper::after {
     content: "▼";
     position: absolute;
-    top: 16px;
+    top: 13px;
     right: 20px;
     color: rgba(220, 220, 220, 0.5);
     font-size: 15px;
@@ -1078,6 +1220,5 @@ input:hover{
     /* 원하는 위치와 스타일로 수정 */
 }
 ul{
-    background-color: black !important;
-    border: 1px green !important;
+    background-color: black;
 }

@@ -163,11 +163,11 @@ const PasswordChange = React.memo(({isPasswordChangeDiv,isPasswordChangeDivClose
     }
     return (
         <div className={"passwordChangeDiv"}>
-            <div>
+            <div className={"passwordChangeDiv_2"}>
                 <div className={"passwordChangeDiv_input_Form"}>
                     <input
-                        className={isPassword ? "passwordChangeDiv_input_success" :
-                            isPassword2 ? "passwordChangeDiv_input_fail" : "passwordChangeDiv_input"
+                        className={isPassword ? "passwordChangeDiv_input success" :
+                            isPassword2 ? "passwordChangeDiv_input fail" : "passwordChangeDiv_input"
                         }
                         placeholder={"Please enter your PASSWORD"}
                         type='password'
@@ -182,7 +182,7 @@ const PasswordChange = React.memo(({isPasswordChangeDiv,isPasswordChangeDivClose
                 </div>
                 <div className={"passwordChangeDiv_input_Form2"}>
                     <input
-                        className={"passwordChangeDiv_input2"}
+                        className={"passwordChangeDiv_input two"}
                         placeholder={"Please enter your PASSWORD"}
                         type='password'
                         value={NewUserPwd}
@@ -195,7 +195,7 @@ const PasswordChange = React.memo(({isPasswordChangeDiv,isPasswordChangeDivClose
                 </div>
                 <div className={"passwordChangeDiv_input_Form3"}>
                     <input
-                        className={"passwordChangeDiv_input2"}
+                        className={"passwordChangeDiv_input"}
                         placeholder={"Please enter your PASSWORD"}
                         type='password'
                         value={NewUserPwdCheck}

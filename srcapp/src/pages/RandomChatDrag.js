@@ -1,21 +1,19 @@
 import React, {useEffect, useRef, useState, useCallback} from "react";
-import Draggable from 'react-draggable';
-
+import { Rnd } from "react-rnd";
+import Logo from "../img/logo_img.png";
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import FolderIcon from '@mui/icons-material/Folder';
 import MenuItem from '@mui/material/MenuItem';
 import {Stomp, Client} from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import Profile from "../img/profile.png"
-
 import "./css/RandomChat.css";
-import CateChatListItem from './CateChatListItem';
 import styled, {keyframes} from "styled-components";
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-
 
 const MessageStyled = styled.p`
 `;
@@ -26,13 +24,13 @@ const slideDownUserList = keyframes`
   }
   100% {
     width: 330px;
-    height: 70px;
+    height: 50px;
   }
 `;
 const slideUpUserList = keyframes`
   0% {
     width: 330px;
-    height: 70px
+    height: 50px
   }
   100% {
     width: 0px;
@@ -47,15 +45,15 @@ const MenuPanel = styled.div`
   left: 10px; // 수정된 부분
   z-index: 1;
   width: ${props => props.visible ? '330px' : '0px'}; // 기존 속성
-  height: ${props => props.visible ? '70px' : '0px'}; // 기존 속성
+  height: ${props => props.visible ? '50px' : '0px'}; // 기존 속성
   overflow-y: hidden;
   overflow-x: hidden;
   transition: all 0.25s ease-in-out;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  background: rgba(130, 130, 130, 0.7);
 `;
 
-const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
+const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isMinimize}) => {
         // 위치 및 상태 설정
         const [windowSize, setWindowSize] = useState({
             width: window.innerWidth,
@@ -70,7 +68,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
 
                 const newPosition = {
                     x: (window.innerWidth / 2) - (450 / 2),  //450은 Draggable 컴포넌트의 너비
-                    y: (window.innerHeight / 2) - (230 / 2), //230은 Draggable 컴포넌트의 높이
+                    y: (window.innerHeight / 2) - (250 / 2), //230은 Draggable 컴포넌트의 높이
                 };
                 setPosition(newPosition);
             };
@@ -82,11 +80,10 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         }, []);
         const initialPosition = {
             x: (windowSize.width / 2) - (450 / 2), // 450은 Draggable 컴포넌트의 너비
-            y: (windowSize.height / 2) - (230 / 2), // 200은 Draggable 컴포넌트의 높이
+            y: (windowSize.height / 2) - (250 / 2), // 200은 Draggable 컴포넌트의 높이
         };
-        const [position, setPosition] = useState(initialPosition);
+
         const handleDrag = useCallback((e, data) => trackPos(data), []);
-        const [isMinimized, setIsMinimized] = useState(false);
         const [isClosed, setIsClosed] = useState(false);
         const [isChatDiv, setIsChatDiv] = useState(false);
 
@@ -142,6 +139,24 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
 
         };
 
+        //채팅을 치고 있는지 안 치고 있는지 확인하는 상태 변수
+        const [isTyping, setIsTyping] = useState("");
+        const [Typing, setTyping] = useState([]);
+        const [dots, setDots] = useState('');
+
+        const [size, setSize] = useState({ width: "450px", height: "250px"});
+        //rnd
+        const [resizing, setResizing] = useState(false);
+        const handleResizeStart  = () => {
+            // 사이즈 결정
+            setResizing(true);
+        };
+        const handleResizeStop = (e, direction, ref) => {
+            // 사이즈 결정
+            setSize({ width: ref.style.width, height: ref.style.height });
+            setResizing(false); // resizing 상태 업데이트
+        };
+
         useEffect(() => {
             selectedLanguageRef.current = selectedLanguage;
         }, [selectedLanguage]);
@@ -155,6 +170,35 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         useEffect(() => {
             isScrollRef.current = isScroll;
         }, [isScroll]);
+        useEffect(() => {
+            if (!inputChange) {
+                setSendMessage("");
+            }
+        }, [inputChange]);
+        useEffect(() => {
+            if (client !== null) {
+                if (isTyping === "y") {
+                    sendTypingMessage();
+                } else if(isTyping === "n"){
+                    removeTypingMessage();
+                }
+            }
+        }, [isTyping]);
+        useEffect(() => {
+            if (Typing.length != 0) {
+                // 타이머 설정
+                const timerId = setInterval(() => {
+                    // dots의 길이에 따라 다음 상태 설정
+                    setDots(dots => dots.length < 3 ? dots + '.' : '');
+                }, 800);
+
+                // 컴포넌트가 언마운트되거나 업데이트되기 전에 타이머 제거
+                return () => clearInterval(timerId);
+            } else {
+                setDots("");
+            }
+
+        }, [Typing]);
 
 //--------------드래그 창 보임/숨김-----------------------
         useEffect(() => {
@@ -162,9 +206,11 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
             if (!show) {
                 setMenuDiv(false);
                 setMenuDiv2(false);
+                setIsChatDiv(false);
                 setIsClosed(false);
             }
         }, [show]);
+
 //--------------드래그 창 보임/숨김-----------------------
 
 //--------------메뉴 오픈-----------------------
@@ -318,7 +364,17 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                     payloadData.translatedMessage = translatedText;
                 }
             }
-            setMessages((prev) => [...prev, payloadData]);
+            if (payloadData.content === 'typing...') {
+                setTyping((prevMessages) => [...prevMessages, payloadData.sender + " typing "]);
+            } else if (payloadData.content === 'removeTyping') {
+                setTyping(prevList => prevList.filter(item => !item.includes(payloadData.sender)));
+                setDots("");
+            } else {
+                setTyping(prevList => prevList.filter(item => !item.includes(payloadData.sender)));
+                setDots("");
+                setIsTyping("f");
+                setMessages((prev) => [...prev, payloadData]);
+            }
         }
 
         function joinEvent() {
@@ -366,6 +422,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
 
         useEffect(() => {
             if (isChatDiv) {
+                setSize({ width: "450px", height: "600px"});
                 console.log("랜덤 채팅방 정보");
                 console.log(room);
                 setMenuDiv(false);
@@ -373,9 +430,11 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                 setSendMessage('');
                 connect();
             } else {
+                setSize({ width: "450px", height: "250px"});
                 disconnect();
             }
         }, [isChatDiv]);
+        const [position, setPosition] = useState(initialPosition);
 
         const trackPos = (data) => {
             setPosition({x: data.x, y: data.y});
@@ -383,7 +442,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
         const handleMinimizeClick = () => {
             setMenuDiv(false);
             setMenuDiv2(false);
-            setIsMinimized(!isMinimized);
+            isMinimize(!false);
         };
 
         const handleCloseClick = () => {
@@ -490,6 +549,25 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
             requestFrdAxios();
         };
 
+        //입력중...메시지 띄우기
+        const sendTypingMessage = () => {
+            // 메시지 전송 처리를 여기서 수행
+            const messageData = {
+                type: "CHAT",
+                content: "typing...",
+                randomRoomId: room.randomRoomId,
+            };
+            client.current.send(`/randomPub/randomChat/${room.randomRoomId}`, {}, JSON.stringify(messageData));
+        }
+        //백스페이스로 입력값을 지웠을 때 입력중...없애기
+        const removeTypingMessage = () => {
+            const messageData = {
+                type: "CHAT",
+                content: "removeTyping",
+                randomRoomId: room.randomRoomId,
+            };
+            client.current.send(`/randomPub/randomChat/${room.randomRoomId}`, {}, JSON.stringify(messageData));
+        }
 
         const handleSendMessage = (event) => {
             event.preventDefault();
@@ -525,13 +603,17 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
 //--------------스크롤 바 -----------------------
 //--------------텍스트 채팅 시 입력 메시지 보여주기----------------------
         const handleMessageChange = (e) => {
+            if (e.target.value.trim() !== '') {
+                setIsTyping("y");
+            } else {
+                setIsTyping("n");
+            }
             setSendMessage(e.target.value);
 
         };
 //--------------텍스트 채팅 시 입력 메시지 보여주기----------------------
 //--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환----------------------
         const handleInputChange = (e) => {
-            setSendMessage('');
             setInputChange(false);
         };
 //--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환---------------------
@@ -635,35 +717,66 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
             }
         };
 //--------------다운로드 파일----------------------
+
         return (
-            <div className="Drag">
+          <>
                 {!isClosed && (
                     <>
-                        <Draggable defaultPosition={position} onDrag={handleDrag} disabled={isMinimized}>
+                        <Rnd
+                            size={size}
+                            minWidth={450}
+                            minHeight={600}
+                            maxWidth={600}
+                            maxHeight={750}
+                            disabled={!randomMax}
+                            onResizeStop={handleResizeStop}
+                            onResizeStart={handleResizeStart}
+                            default={{ x: position.x, y: position.y }}
+                            enableResizing={{
+                                top: false,
+                                right: isChatDiv ? true : false,
+                                bottom: isChatDiv ? true : false,
+                                left: false,
+                                topRight: isChatDiv ? true : false,
+                                bottomRight: isChatDiv ? true : false,
+                                bottomLeft: false,
+                                topLeft: false,
+                            }}
+                            style={{
+                                borderRadius: "15px",
+                                zIndex: "3",
+                                position: "fixed",
+                                display: !randomMax ? "none" : "block",
+                                transition: resizing ? 'none' : 'width 0.25s ease-in-out, height 0.25s ease-in-out'
+                            }}
+                            dragHandleClassName="headerChat"
+                            // bounds="window"
+                            >
                             <div
-                                className="box"
                                 style={{
-                                    position: isMinimized ? 'absolute' : 'fixed',
-                                    display: isMinimized ? 'none' : 'block',
+                                    position: !randomMax ? 'absolute' : 'fixed',
+                                    display: !randomMax ? 'none' : 'block',
                                     top: '0',
                                     cursor: 'auto',
                                     color: 'black',
-                                    width: '450px',
-                                    height: isChatDiv ? '600px' : '230px',
+                                    width: '100%',
+                                    height: isChatDiv ? '100%' : '250px',
                                     borderRadius: '15px',
                                     borderTopLeftRadius: '15px',
                                     borderBottomLeftRadius: '15px',
-                                    padding: '1em',
+                                    padding: '0px',
                                     margin: 'auto',
                                     userSelect: 'none',
-                                    zIndex: '10',
-                                    background: 'rgb(50, 50, 50,0.8)',
+                                    zIndex: '3',
                                     transition: 'height 0.25s ease-in-out'
                                 }}
                             >
-                                <div className={"header"}>
+                                <div className={"headerChat"}>
                                     <div className={"btnDiv_create"}>
-
+                                        <img
+                                            className={"logo_img"}
+                                            src={Logo}
+                                        ></img>
                                     </div>
                                     <div className={"title_cate"}>
                                         Random Chat
@@ -681,35 +794,35 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                         >
                                         </Button>
                                     </div>
-
                                 </div>
+                                <div className={isChatDiv ? "contentChat_true" : "contentChat"}>
                                 {isChatDiv ? (
-                                    <div className={"chat"}>
+                                    <div className={"chatR"}>
                                         <div className={"EnterRoom"}>
                                             <div className={"EnterRoom_2"}>
                                                 <div className={"EnterRoomCate"}>
+
+                                                </div>
+                                                <div className={"EnterRoomName"}>
+
+                                                </div>
+                                                <div className={"EnterRoomClose"}>
                                                     {otherUserId.current !== null ?(
                                                         <Button
-                                                            className={"userList"}
+                                                            className={"userAdd_btn"}
                                                             onClick={() => {friendAddClick(otherUserId.current)}}
-                                                        >Friend add
+                                                        >
+                                                            <PersonAddIcon style={{fontSize : 'small'}}/>
                                                         </Button>
                                                     ):(
                                                         <>
                                                         </>
                                                     )}
-                                                </div>
-                                                <div className={"EnterRoomName"}>
-                                                    <span className={"EnterRoomName_2"}>
-
-                                                    </span>
-                                                </div>
-                                                <div className={"EnterRoomClose"}>
                                                     <Button
                                                         className={"Close_btn"}
                                                         onClick={exitChatDiv}
                                                     >
-                                                        Back
+                                                        <LogoutIcon style={{fontSize : 'small'}}/>
                                                     </Button>
                                                 </div>
                                             </div>
@@ -777,7 +890,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                                 {/*     src={message.userProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + message.userProfile : Profile}*/}
                                                                                 {/*/>*/}
                                                                                 <span
-                                                                                    className="userName">Stranger</span>
+                                                                                    className="userName">{message.sender}</span>
                                                                             </div>
                                                                             {message.fileName && (
                                                                                 <div className={"down_div"}>
@@ -822,6 +935,9 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                                             );
                                                         })}
                                                     </div>
+                                                    <div className="EnterRoomChat_content_typing">
+                                                        {Typing.length == 0 ? Typing[0] : Typing[Typing.length - 1]}{dots}
+                                                    </div>
                                                 </div>
                                                 <div className={"EnterRoomChat_input_one"}>
                                                     <form className={"EnterRoomChat_input_form_one"}
@@ -835,7 +951,8 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                                                         className={"menu_btn"}
                                                                         type="button"
                                                                         onClick={handleFileButtonClick}
-                                                                    >FILE
+                                                                    >
+                                                                        <FolderIcon style={{fontSize : 'small'}}/>
                                                                     </Button>
                                                                 </div>
                                                                 <div className={"trans"}>
@@ -903,7 +1020,7 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className={"select"}>
+                                    <div className={"selectR"}>
                                         <div className={"random_start"}>
                                             <div className={"random_start_2"}>
                                                 {randomStartText}
@@ -927,29 +1044,15 @@ const RandomChatDrag = React.memo(({show, onClose, logoutApiCate}) => {
 
                                     </div>
                                 )}
+                                </div>
                             </div>
                             {/* 밑으로 컨텐츠 들어갈 부분*/}
                             {/*<div style={{color:'white', fontSize: '22px'}}>x: {position.x.toFixed(0)}, y: {position.y.toFixed(0)}</div>*/}
                             {/*</div>*/}
-                        </Draggable>
-                        {isMinimized && (
-                            <Button
-                                onClick={handleMinimizeClick}
-                                style={{
-                                    position: 'absolute',
-                                    left: '46.2%',
-                                    bottom: '80px',
-                                    transform: 'translateX(calc(-50% + 150px))', // 수정된 부분
-                                    zIndex: '2',
-                                }}
-                                className={"maximum_btn"}
-                            >
-                                R
-                            </Button>
-                        )}
+                        </Rnd>
                     </>
                 )}
-            </div>
+          </>
         );
     })
 ;

@@ -4,57 +4,10 @@
     display: flex;
 }
 
-
-.btnDiv_create {
-    width: 100px;
-    display: flex;
-    justify-content: flex-start;
-}
-
-.title_cate {
-    width: calc(100% - 200px);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .btnDiv {
     width: 100px;
     display: flex;
     justify-content: flex-end;
-}
-
-.minimum {
-    width: 30px !important;
-    min-width: 30px !important;
-    height: 30px !important;
-    background-color: rgba(255, 255, 255, 0.8) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    font-size: 10px !important;
-    border-bottom-right-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-    font-family: 'Russo One', sans-serif !important;
-}
-
-.minimum:hover {
-    background-color: rgba(255, 255, 255, 0.4) !important;
-}
-
-.close {
-    width: 30px !important;
-    min-width: 30px !important;
-    height: 30px !important;
-    background-color: rgba(205, 92, 92, 0.8) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    font-size: 10px !important;
-    border-top-left-radius: 0px !important;
-    border-bottom-left-radius: 0px !important;
-    font-family: 'Russo One', sans-serif !important;
-}
-
-.close:hover {
-    background-color: rgba(205, 92, 92, 0.4) !important;
 }
 
 .maximum_btn {
@@ -82,56 +35,21 @@
     box-sizing: border-box;
 }
 
-.random_start {
-    width: 100%;
-    height: 100%;
-}
-
-.random_start_2 {
-    width: 100%;
-    height: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-transform: uppercase;
-    font-size: 20px;
-    color: white;
-}
-
-.random_start_3 {
-    width: 100%;
-    height: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.random_btn {
-    background-color: rgba(0, 0, 0, 0.9) !important;
-    width: 150px !important;
-    min-height: 50px !important;
-    font-family: 'Russo One', sans-serif !important;
-    color: white !important;
-    font-size: 15px !important;
-    border: 1px solid rgba(200, 200, 200, 0.3) !important;
-    border-radius: 10px !important;
-}
-
-.random_btn:hover {
-    background-color: rgba(0, 0, 0, 0.6) !important;
-    border: 1px solid rgba(200, 200, 200, 0.6) !important;
-}
-
 .EnterRoomChat_one {
     width: 100%;
     height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: rgba(11, 11, 14, 0.8);
+    border: 1px solid #222526;
+    border-top-width: 0px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
 }
 
 .chat_one {
     width: 100%;
-    height: calc(100% - 30px);
-    padding-top: 15px;
-    box-sizing: border-box;
+    height: calc(100% - 40px);
 }
 
 .input_menu {
@@ -148,12 +66,12 @@
 
 .EnterRoomChat_content_one {
     width: 100%;
-    height: 86%;
+    height: calc(100% - 70px);
 }
 
 .EnterRoomChat_input_one {
     width: 100%;
-    height: 14%;
+    height: 70px;
 }
 
 .EnterRoomChat_input_form_one {
@@ -178,6 +96,7 @@
     min-height: 100% !important;
     color: white;
     padding-left: 68px !important;
+    border-radius: 4px !important;
 }
 
 .inputchat_one2 {
@@ -187,6 +106,7 @@
     min-height: 100% !important;
     color: gray;
     padding-left: 68px !important;
+    border-radius: 4px !important;
 }
 
 .OneChat_menu_div {
@@ -198,17 +118,18 @@
 }
 
 .menu_div {
-    width: 330px;
-    height: 70px;
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 10px;
+    box-sizing: border-box;
 }
 
 .file {
     width: 50px;
-    height: 50px;
+    height: 35px;
     margin-right: 10px;
 }
 
@@ -216,22 +137,21 @@
     width: 100% !important;
     height: 100% !important;
     min-width: 100% !important;
-    background-color: rgba(255, 255, 255, 0.7) !important;
     font-family: 'Russo One', sans-serif !important;
-    color: black !important;
-    border: 1px solid rgba(0, 0, 0, 0.5) !important;
-    border-radius: 10px !important;
+    color: white !important;
+    background-color: rgba(24, 24, 31, 0.8) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 4px !important;
 }
 
 .menu_btn:hover {
-    background-color: rgba(255, 255, 255, 0.4) !important;
+    background-color: #18181f !important;
     border: 1px solid rgba(0, 0, 0, 1) !important;
-
 }
 
 .trans {
     width: 250px;
-    height: 50px;
+    height: 35px;
 }
 .trans_check{
     height: 25px;
@@ -240,26 +160,26 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    border-radius: 10px !important;
+    border-radius: 4px !important;
     position: relative;
     width: 100% !important;
-    height: 50px !important;
+    height: 100% !important;
     padding-left: 5px !important;
     padding-right: 20px;
     box-sizing: border-box;
-    background-color: rgba(255, 255, 255, 0.7) !important;
-    border: 1px solid rgba(0, 0, 0, 0.5) !important;
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
     outline: none;
-    font-size: 15px !important;
-    color: black !important;
-    font-family: 'Russo One', sans-serif !important;
+    font-size: 10px !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-family: 'Orbit', sans-serif !important;
     transition: all 0.25s ease-in-out !important;
 }
 .trans_select * {
     border: 0px !important;
 }
 .trans_select:hover {
-    background-color: rgba(255, 255, 255, 0.4) !important;
+    background-color: rgba(0, 0, 0, 0.9) !important;
     border: 1px solid black !important;
 }
 .trans_li_select{
@@ -282,7 +202,7 @@
     outline: none !important;
     background-color: rgba(255, 255, 255, 0.2) !important;
     font-family: 'Russo One', sans-serif !important;
-    border-radius: 10px !important;
+    border-radius: 4px !important;
     transition: border-bottom-left-radius 1s ease-in-out !important;
 }
 
@@ -303,25 +223,12 @@
     outline: none !important;
     background-color: rgba(255, 255, 255, 0.2) !important;
     font-family: 'Russo One', sans-serif !important;
-    border-radius: 10px !important;
+    border-radius: 4px !important;
     transition: border-bottom-left-radius 1s ease-in-out !important;
 }
 
 .add:hover {
     background-color: rgba(255, 255, 255, 0.4) !important;
-}
-
-.btnSend {
-    width: 20% !important;
-    height: 50px !important;
-    max-height: 50px !important;
-    min-height: 50px !important;
-    font-size: 15px !important;
-    color: white !important;
-    border: 1px solid rgba(200, 200, 200, 0.4) !important;
-    font-family: 'Russo One', sans-serif !important;
-    padding-right: 17px !important;
-    box-sizing: border-box;
 }
 
 .btnSend2 {
@@ -334,7 +241,7 @@
     border: 1px solid rgba(200, 200, 200, 0.4) !important;
     font-family: 'Russo One', sans-serif !important;
     background-color: black !important;
-    border-radius: 10px !important;
+    border-radius: 4px !important;
 }
 
 .btnSend2:hover {

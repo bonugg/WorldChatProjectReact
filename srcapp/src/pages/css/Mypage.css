@@ -1,6 +1,11 @@
 .myPage_clicked {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: rgba(24, 24, 31, 0.5) !important;
 }
 
 .friendRecieved_clicked {
@@ -8,121 +13,23 @@
     height: 100%;
     padding: 20px;
     box-sizing: border-box;
+    background-color: rgba(24, 24, 31, 0.5) !important;
 }
 
 .friendRequested_clicked {
     width: 100%;
     height: 100%;
-    color: white;
-    font-size: 20px;
-}
-
-.menu_1 {
-    position: absolute !important;
-    top: -2px !important;
-    left: -82.5px !important;;
-    background-color: rgba(50, 50, 50, 0.9) !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-    font-family: 'Russo One', sans-serif !important;
-    font-size: 10px !important;
-    min-width: 80px !important;
-    height: 100px !important;
-    border-bottom-right-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-}
-
-.menu_1:hover {
-    background-color: rgba(255, 255, 255, 0.3) !important;
-}
-
-.menu_1_clicked {
-    position: absolute !important;
-    top: -2px !important;
-    left: -82.5px !important;;
-    background-color: rgba(255, 255, 255, 0.3) !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-    font-family: 'Russo One', sans-serif !important;
-    font-size: 10px !important;
-    min-width: 80px !important;
-    height: 100px !important;
-    border-bottom-right-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-}
-
-.menu_2 {
-    position: absolute !important;
-    top: 104px !important;
-    left: -82.5px !important;;
-    background-color: rgba(50, 50, 50, 0.9) !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-    font-family: 'Russo One', sans-serif !important;
-    font-size: 10px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
-    height: 100px !important;
-    border-bottom-right-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-}
-
-.menu_2:hover {
-    background-color: rgba(255, 255, 255, 0.3) !important;
-}
-
-.menu_2_clicked {
-    position: absolute !important;
-    top: 104px !important;
-    left: -82.5px !important;
-    background-color: rgba(255, 255, 255, 0.3) !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-    font-family: 'Russo One', sans-serif !important;
-    font-size: 10px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
-    height: 100px !important;
-    border-bottom-right-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-}
-
-.menu_3 {
-    position: absolute !important;
-    top: 210px !important;
-    left: -82.5px !important;
-    background-color: rgba(50, 50, 50, 0.9) !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-    font-family: 'Russo One', sans-serif !important;
-    font-size: 10px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
-    height: 100px !important;
-    border-bottom-right-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-}
-
-.menu_3:hover {
-    background-color: rgba(255, 255, 255, 0.3) !important;
-}
-
-.menu_3_clicked {
-    position: absolute !important;
-    top: 210px !important;
-    left: -82.5px !important;
-    background-color: rgba(255, 255, 255, 0.3) !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-    font-family: 'Russo One', sans-serif !important;
-    font-size: 10px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
-    height: 100px !important;
-    border-bottom-right-radius: 0px !important;
-    border-top-right-radius: 0px !important;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: rgba(24, 24, 31, 0.5) !important;
 }
 
 .friendRecieved_div {
     width: 100%;
-    height: 10%;
-    background-color: rgba(0, 0, 0, 1);
-    border-top-right-radius: 10px;
-    border-top-left-radius: 10px;
+    height: 7%;
+    background-color: rgba(255, 255, 255, 0.07);
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -133,15 +40,16 @@
 
 .friendRecieved_div_2 {
     width: 100%;
-    height: 90%;
+    height: 93%;
     background-color: rgba(255, 255, 255, 0.05);
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
     padding: 10px 20px 20px;
     box-sizing: border-box;
     overflow: auto;
 }
-.friendRecieved_div_3{
+
+.friendRecieved_div_3 {
     width: 100%;
     height: 100%;
     display: flex;
@@ -149,6 +57,7 @@
     align-items: center;
     color: white;
     font-size: 20px;
+    white-space: nowrap;
 }
 
 .received_item {
@@ -156,7 +65,7 @@
     height: 50px;
     display: flex;
     align-items: center;
-    background-color: rgba(25, 25, 25, 0.8);
+    background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.5);
     margin-top: 10px;
     border-radius: 4px;
@@ -218,6 +127,7 @@
     padding: 5px;
     box-sizing: border-box;
 }
+
 .request_btn_2 {
     width: 40%;
     height: 100%;
@@ -227,6 +137,7 @@
     padding: 5px;
     box-sizing: border-box;
 }
+
 .received_btn {
     width: 30% !important;
     min-width: 30% !important;
@@ -267,101 +178,119 @@
 }
 
 .myPageDiv_profile_btn2 {
-    width: 120px;
+    width: 200px;
     height: 40px;
-    border-radius: 10px !important;
+    border-radius: 4px !important;
     font-size: 10px !important;
     color: white !important;
-    background-color: black !important;
     outline: none;
     cursor: pointer;
-    border: 1px solid black !important;
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #3b3e3f !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
     transition: all 0.25s ease-in-out !important;
     margin-top: 1px;
-    font-family: 'Russo One', sans-serif !important;
 }
 
 .myPageDiv_profile_btn3 {
-    width: 120px;
-    height: 40px;
-    border-radius: 10px !important;
-    font-size: 10px !important;
     color: rgba(23, 192, 23, 0.74) !important;
-    background-color: black !important;
+    width: 200px;
+    height: 40px;
+    border-radius: 4px !important;
+    font-size: 10px !important;
     outline: none;
     cursor: pointer;
-    border: 1px solid black !important;
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #3b3e3f !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
     transition: all 0.25s ease-in-out !important;
     margin-top: 1px;
-    font-family: 'Russo One', sans-serif !important;
 }
 
 .myPageDiv_profile_btn4 {
-    width: 120px;
-    height: 40px;
-    border-radius: 10px !important;
-    font-size: 10px !important;
     color: indianred !important;
-    background-color: black !important;
+    width: 200px;
+    height: 40px;
+    border-radius: 4px !important;
+    font-size: 10px !important;
     outline: none;
     cursor: pointer;
-    border: 1px solid black !important;
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #3b3e3f !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
     transition: all 0.25s ease-in-out !important;
     margin-top: 1px;
-    font-family: 'Russo One', sans-serif !important;
 }
 
 .myPageDiv_profile_btn2:hover {
-    background-color: rgba(28, 28, 28, 0.8) !important;
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #595c5d !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
 }
 
 .myPageDiv_info_1_btn {
-    width: 230px !important;
+    max-width: 50% !important;
+    width: 50% !important;
     height: 50px !important;
-    margin-bottom: 0px;
+    margin-bottom: 0px !important;
+    border-radius: 4px !important;
+    font-size: 11px !important;
     color: white !important;
-    cursor: pointer !important;
-    border-radius: 10px !important;
-    background-color: black !important;
     outline: none;
-    border: 1px solid black !important;
-    transition: all 0.25s ease-in-out;
-    font-size: 13px !important;
-    font-family: 'Russo One', sans-serif !important;
+    cursor: pointer;
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #3b3e3f !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
+    margin-bottom: 0px;
+    margin-left: 0px !important;
+    transition: all 0.25s ease-in-out !important;
 }
 
 .myPageDiv_info_1_btn:hover {
-    background-color: rgba(28, 28, 28, 0.8) !important;
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #595c5d !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
 }
 
 .myPageDiv_Message_btn {
-    width: 100% !important;
-    height: 100% !important;
-    margin-bottom: 0px;
-    color: white !important;
-    cursor: pointer;
-    border-radius: 8px !important;
-    background-color: black !important;
-    outline: none;
-    border: 1px solid rgba(100, 100, 100, 0.4) !important;
-    transition: all 0.25s ease-in-out;
+    width: 160px !important;
+    height: 80% !important;
+    border-radius: 4px !important;
     font-size: 10px !important;
-    font-family: 'Russo One', sans-serif !important;
+    color: white !important;
+    outline: none;
+    cursor: pointer;
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #3b3e3f !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
+    margin-bottom: 0px;
+    transition: all 0.25s ease-in-out !important;
 }
 
-.myPageDiv_Message_btn2 {
-    width: 100% !important;
-    height: 100% !important;
-    margin-bottom: 0px;
+.myPageDiv_Message_btn.one {
     color: rgba(23, 192, 23, 0.74) !important;
-    cursor: pointer;
-    border-radius: 8px !important;
-    background-color: black !important;
-    outline: none;
-    border: 1px solid rgba(100, 100, 100, 0.4) !important;
-    transition: all 0.25s ease-in-out;
-    font-size: 10px !important;
-    font-family: 'Russo One', sans-serif !important;
+}
+
+.myPageDiv_Message_btn:hover {
+    background-color: rgba(24, 24, 31, 1) !important;
+    border: 1px solid #595c5d !important;
+    border-bottom-width: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
 }
 
 .item-enter {
