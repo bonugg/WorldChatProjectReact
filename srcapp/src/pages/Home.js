@@ -378,7 +378,7 @@ const Home = React.memo(() => {
                 if (userName) {
                     //const ws = new WebSocket(`wss://localhost:9002/test`)
 
-                    const ws = new WebSocket(`wss://192.168.0.48:9002/test?userName=${userName}`);
+                    const ws = new WebSocket(`wss://192.168.0.54:9002/test?userName=${userName}`);
                     console.log("새로고침" + userName);
                     setRtcUserName(userName);
 
@@ -469,7 +469,7 @@ const Home = React.memo(() => {
 
                     if (username) {
                         //const ws = new WebSocket(`wss://localhost:9002/test`)
-                        const ws = new WebSocket(`wss://192.168.0.48:9002/test?userName=${userName}`);
+                        const ws = new WebSocket(`wss://192.168.0.54:9002/test?userName=${userName}`);
 
                         setSocket(ws)
                         // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
@@ -1062,6 +1062,107 @@ const Home = React.memo(() => {
                                             <li className="menu_li one" onClick={toggleMenu}>
                                                 <span style={{color: '#FFBD1F'}}>M</span>yPage
                                             </li>
+<<<<<<< HEAD
+                                            <li className="menu_li">
+                                                <span style={{color: '#FFBD1F'}}>C</span>hat
+                                                <ul className="menu_li">
+                                                    <li onClick={handleRandomShowDrag}
+                                                        className={"menu_li_sub"}
+                                                    >Random Chat
+                                                    </li>
+                                                    <li onClick={handleShowDrag}
+                                                        className={"menu_li_sub"}
+                                                    >Category Chat
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li className="menu_li"
+                                                onClick={logout}
+                                            >
+                                                <span style={{color: '#FFBD1F'}}>L</span>ogout
+                                            </li>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <li className="menu_li" onClick={login}>
+                                                <span style={{color: '#FFBD1F'}}>L</span>ogin
+                                            </li>
+                                            <li className="menu_li"
+                                                onClick={signup}
+                                            >
+                                                <span style={{color: '#FFBD1F'}}>S</span>ignUp
+                                            </li>
+                                        </>
+                                    )}
+                                    <div className={"foot"}>
+                                        <span className={"foot_text"}>@2023 WWC, Inc</span>
+                                    </div>
+
+                                </ul>
+                            </aside>
+                            {/*<div style={{width : '300px', height: '100%'}}>*/}
+
+                            {/*</div>*/}
+                            <CanvasContainer>
+                                <Canvas>
+                                    <CameraControl targetPosition={targetPosition} cameraPosition={cameraPosition}/>
+                                    <Earth
+                                        mainCamera={mainCamera}
+                                        isLoginZoom={isLoginZoom}
+                                        isSignUpZoom={isSignUpZoom}
+                                        LoginZoom={LoginZoom}
+                                        mouseLock={mouseLock}
+                                        loggedIn={loggedIn}
+                                        loggedOut={loggedOut}
+                                        isMapageZoom={isMapageZoom}
+                                        FriendsList={FriendsList}
+                                        isFriendsListZoom={isFriendsListZoom}
+                                        FriendsNationally={FriendsNationally}
+                                        FriendListApiOn={FriendListApiOn}
+                                        FrdId={FrdId}
+                                        FrdId2={FrdId2}
+                                    />
+                                </Canvas>
+                            </CanvasContainer>
+
+                            <DivStyledMenu visible={MyPageDiv ? "visible" : ""}>
+                                <MyPage
+                                    MyPageDiv={MyPageDiv}
+                                    onPasswordChange={onPasswordChange}
+                                    logoutApi={logoutApi}
+                                    onRemove={removeItemFromHomeComponent}
+                                />
+                            </DivStyledMenu>
+                            <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
+                                <FreindsList
+                                    onData={handleGrandchildData}
+                                    setChatType={setChatType}
+                                    FriendsList={FriendsList}
+                                    FriendNationally={FriendNationally}
+                                    FriendListApi={FriendListApi}
+                                    logoutApi3={logoutApi3}
+                                    isOneOnOneChatDiv={isOneOnOneChatDiv}
+                                    onRemove={removeItemFromHomeComponent2}
+                                    socket={socket}
+                                />
+                                {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
+                            </DivStyledMenu2>
+                            <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"}
+                                       ref={passwordChangeDivRef}>
+                                <PasswordChange
+                                    isPasswordChangeDiv={isPasswordChangeDiv}
+                                    isPasswordChangeDivClose={isPasswordChangeDivClose}
+                                    logoutApi2={logoutApi2}
+                                >
+                                </PasswordChange>
+                            </DivStyled>
+                            <DivStyledMenu visible={LoginDiv ? "visible" : ""}>
+                                {/* Content inside the loginDiv */}
+                                <div className={"loginDiv"}>
+                                    <div className={"loginDiv_2"}>
+                                        <div className={"LogoDiv"}>
+                                            <img className={"LogoImg"} src={Logo}></img>
+=======
                                             <div className={menutoggle ? "sub_test2_on" : "sub_test2"}>
                                                 <li
                                                     onClick={() => {
@@ -1082,6 +1183,7 @@ const Home = React.memo(() => {
                                                     className={"menu_li_sub"}>Friends Requested
                                                 </li>
                                             </div>
+>>>>>>> b91a9434a2d6de6aea7912944162ddb0d0ced287
                                         </div>
                                         <div className="menu_group">
                                             <li className="menu_li one" onClick={toggleMenu2}>

@@ -14,9 +14,9 @@ const Friends = () => {
                 console.log(response);
                 console.log(response.data.item.msg)
                 if(response.data.item.msg === "request ok") {
-                    alert("Friend request completed")
+                    alert("친구 신청이 완료되었습니다")
                 } else if(response.data.item.msg === "already frds") {
-                    alert("Already a friend or waiting for a reply")
+                    alert("이미 친구이거나 응답 대기중입니다.")
                 }
             } catch (e) {
                 console.log(e);
