@@ -218,22 +218,11 @@
 .friend_del_btn:hover {
     background-color: rgba(205, 92, 92, 0.9) !important;
 }
-.friend_del_yes_btn{
-    width: 80px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
-    height: 40px !important;
-    min-height: 40px !important;
-    max-height: 40px !important;
+.friend_del_btn_1.one{
     background-color: rgba(205, 92, 92, 0.6) !important;
-    color: white !important;
-    font-family: 'Russo One', sans-serif !important;
-    padding-right: 0px !important;
-    padding-left: 0px !important;
-    box-sizing: border-box !important;
     margin-right: 10px !important;
 }
-.friend_del_cancle_btn{
+.friend_del_btn_1{
     width: 80px !important;
     min-width: 80px !important;
     max-width: 80px !important;
@@ -242,7 +231,6 @@
     max-height: 40px !important;
     background-color: rgba(150, 150, 150, 0.6) !important;
     color: white !important;
-    font-family: 'Russo One', sans-serif !important;
     padding-right: 0px !important;
     padding-left: 0px !important;
     box-sizing: border-box !important;

@@ -189,6 +189,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
 
         const [roomList, setRoomList] = useState([]);
         const [CateName, setCateName] = useState('Select Category');
+        const [CateLoadingText, setCateLoadingText] = useState('No room');
         const [CateRoom, setCateRoom] = useState({});
         const [isChatDiv, setIsChatDiv] = useState(false);
         const [activeButton, setActiveButton] = useState(null);
@@ -648,6 +649,8 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
             if (category === undefined) {
                 category = "ALL";
             }
+            setCateName(category);
+            setCateLoadingText("Room Load...");
             currentCate.current = category;
             try {
                 const response = await fetch(`/api/v1/cateChat/roomList/${category}`, {
@@ -671,10 +674,9 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                     console.log(data.items);
                     if (data.items.length == 0) {
                         setRoomList(() => []);
-                        setCateName(category);
+                        setCateLoadingText("No room");
                     } else {
                         setRoomList(() => data.items)
-                        setCateName(category);
                     }
                 }
             } catch (error) {
@@ -1469,7 +1471,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                                                     <div className={"RoomList"}>
                                                         <div className={"RoomList_2"}>
                                                             {roomList && roomList.length === 0 ? (
-                                                                <div className={"noRoom"}>No Room</div>
+                                                                <div className={"noRoom"}>{CateLoadingText}</div>
                                                             ) : (
                                                                 roomList.map((room) => (
                                                                     <CateChatListItem

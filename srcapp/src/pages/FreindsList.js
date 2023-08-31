@@ -14,7 +14,7 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import "./css/FreindsList.css";
 
 
-const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType}) => {
+const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType, socket}) => {
     const [userList, setUserList] = useState([]);
     const freindsList = async (retry = true) => {
         
@@ -109,7 +109,7 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
                         {userList && userList.map(user => (
                             <CSSTransition  key={user.id} timeout={500} classNames="item">
                             <FreindsListItem
-                                             onRemove={removeItemFromList} frd={user} onData={onData} setChatType={setChatType} friendsChatDiv={friendsChatDivOn}>
+                                             onRemove={removeItemFromList} frd={user} onData={onData} setChatType={setChatType} friendsChatDiv={friendsChatDivOn} socket={socket}>
                             </FreindsListItem>
                             </CSSTransition>
                         ))}
