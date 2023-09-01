@@ -17,6 +17,9 @@ import axios from "axios";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import Logo from "../img/logo_img.png";
 import LogoutIcon from "@mui/icons-material/Logout";
+import {useDispatch, useSelector} from "react-redux";
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
 
 const MessageStyled = styled.p`
 `;
@@ -84,7 +87,7 @@ const MenuPanel = styled.div`
   overflow-x: hidden;
   transition: all 0.25s ease-in-out;
   border-radius: 4px;
-  background: rgba(130, 130, 130, 0.7);
+  background: rgba(30, 30, 30, 1);
 `;
 
 const DivStyled = styled.div`
@@ -140,6 +143,8 @@ const UserListPanel = styled.div`
 `;
 
 const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) => {
+        const dispatch = useDispatch();
+        const cateDragPosition = useSelector((state) => state.chatminimumCate.position);
         // 위치 및 상태 설정
         const [windowSize, setWindowSize] = useState({
             width: window.innerWidth,
@@ -156,7 +161,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                     x: (window.innerWidth / 2) - (450 / 2),  //450은 Draggable 컴포넌트의 너비
                     y: (window.innerHeight / 2) - (600 / 2), //230은 Draggable 컴포넌트의 높이
                 };
-                setPosition(newPosition);
+                dispatch({ type: "SET_CATEDRAG_POSITION", payload: newPosition });
             };
 
             window.addEventListener('resize', handleResize);
@@ -173,9 +178,9 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
         const [isUserListVisible2, setIsUserListVisible2] = useState(false);
 
         const [position, setPosition] = useState(initialPosition);
-        const handleDrag = useCallback((e, data) => trackPos(data), []);
 
         const catescroll = useRef();  //특정 DOM을 가리킬 때 사용하는 Hook함수, SecondDiv에 적용
+        const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
         //방 생성 클릭 시 실해되는 상태 변수
         const [createRoomId, setCreateRoomId] = useState('');
@@ -524,10 +529,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
             }
         }, [messages]);
 
-        const trackPos = (data) => {
-            setPosition({x: data.x, y: data.y});
-        };
-
         const handleMinimizeClick = () => {
             setMenuDiv(false);
             setMenuDiv2(false);
@@ -548,8 +549,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
             setRoomList([]);
             setCateName("Select Category");
             setIsClosed(true);
-            setPosition(initialPosition);
-
+            dispatch({ type: "SET_CATEDRAG_POSITION", payload: initialPosition });
             disconnect();
             if (onClose) {
                 onClose();
@@ -904,6 +904,16 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                 });
         };
 //--------------다운로드 파일----------------------
+        //--이모지
+
+        const toggleEmojiPicker = () => {
+            setShowEmojiPicker(!showEmojiPicker);
+        }
+
+        const addEmoji = (e) => {
+            let emoji = e.native;
+            setSendMessage(prevMessage => prevMessage + emoji);
+        }
         return (
             <>
                 {!isClosed && (
@@ -917,7 +927,10 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                             disabled={!cateMax}
                             onResizeStop={handleResizeStop}
                             onResizeStart={handleResizeStart}
-                            default={{x: position.x, y: position.y}}
+                            default={{ x: cateDragPosition.x, y: cateDragPosition.y }}
+                            onDragStop={(e, d) => {
+                                dispatch({ type: "SET_CATEDRAG_POSITION", payload: { x: d.x, y: d.y } });
+                            }}
                             enableResizing={{
                                 top: false,
                                 right: true,
@@ -931,15 +944,16 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                             style={{
                                 zIndex: "3",
                                 position: "fixed",
-                                display: !cateMax ? "none" : "block",
-                                transition: resizing ? 'none' : 'width 0.25s ease-in-out, height 0.25s ease-in-out'
+                                visibility: !cateMax ? "hidden" : "visible",
+                                opacity: !cateMax ? "0" : "1",
+                                transition: resizing ? 'none' : 'opacity 0.25s ease-in-out, width 0.25s ease-in-out, height 0.25s ease-in-out'
                             }}
                             dragHandleClassName="headerCate"
+                            bounds="window"
                         >
                             <div
                                 className="box"
                                 style={{
-                                    position: !cateMax ? 'absolute' : 'fixed',
                                     display: !cateMax ? 'none' : 'block',
                                     top: '0',
                                     cursor: 'auto',
@@ -1295,8 +1309,13 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                                                                     multiple
                                                                     style={{display: 'none'}}
                                                                 />
+                                                                <Button disabled={!isChatReadOnly} className={"emoji"} type="button" onClick={toggleEmojiPicker}>😃</Button>
+                                                                {showEmojiPicker && (
+                                                                    <Picker data={data} onEmojiSelect={addEmoji}/>
+                                                                )}
                                                                 <Button
-                                                                    className={menuDiv ? "add_now" : "add"}
+                                                                    disabled={!isChatReadOnly}
+                                                                    className={"add"}
                                                                     type="button"
                                                                     onClick={handleMenuOpen}
                                                                 >{menuDiv ? "-" : "+"}

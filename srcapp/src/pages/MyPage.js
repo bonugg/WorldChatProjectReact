@@ -441,7 +441,9 @@ const MyPage = React.memo(({
                                     <h5 className={"myPageDiv_info_1_text"}>PHONE</h5>
                                     <input type={"text"} className={"myPageDiv_info_1_input"} readOnly={true}
                                            value={MypageuserNationality}/>
-                                    <Button className={"myPageDiv_info_1_btn"} onClick={passwordChangeDiv}>Change
+                                    <Button className={"myPageDiv_info_1_btn"} onClick={passwordChangeDiv}
+                                    disabled={MypageuserPhone === ""}
+                                    >Change
                                         Password
                                     </Button>
                                 </div>

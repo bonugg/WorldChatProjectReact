@@ -1,32 +1,28 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Canvas} from '@react-three/fiber';
 import * as THREE from 'three';
+import {GoogleLogin} from "@react-oauth/google";
+import {GoogleOAuthProvider} from "@react-oauth/google";
+import jwtDecode from 'jwt-decode';
 
 const Test = ({count = 5000}) => {
-    const positions = React.useMemo(() => {
-        let positions = [];
-        for (let i = 0; i < count; i++) {
-            positions.push(THREE.MathUtils.randFloatSpread(100)); // x
-            positions.push(THREE.MathUtils.randFloatSpread(100)); // y
-            positions.push(THREE.MathUtils.randFloatSpread(100)); // z
-        }
-        return new Float32Array(positions);
-    }, [count]);
+    const clientId = '879795063670-a2a8avf7p2vnlqg9mc526r8ge2h5cgvc.apps.googleusercontent.com'
+    const userRef = useRef();
     return (
         <>
-            <Canvas camera={{position: [0, 0, -5]}}>
-                <points>
-                    <bufferGeometry attach="geometry">
-                        <bufferAttribute
-                            attachObject={['attributes', 'position']}
-                            array={positions}
-                            count={positions.length / 3}
-                            itemSize={3}
-                        />
-                    </bufferGeometry>
-                    <pointsMaterial attach="material" size={THREE.MathUtils.randFloat(0.1, 1)} color='white'/>
-                </points>
-            </Canvas>
+            <GoogleOAuthProvider clientId={clientId}>
+                <GoogleLogin
+                    onSuccess={(res) => {
+                        console.log(res);
+                        console.log(jwtDecode(res.credential));
+                        userRef.current = res.credential;
+                        console.log(userRef.current);
+                    }}
+                    onFailure={(err) => {
+                        console.log(err);
+                    }}
+                />
+            </GoogleOAuthProvider>
         </>
     );
 };

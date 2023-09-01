@@ -12,14 +12,16 @@ import RequestedList from "./pages/friends/RequestedList";
 import FriendsList from "./pages/friends/FriendsList";
 import ChatRoomList from "./pages/friends/ChatRoomList";
 import ChatRoom4 from "./pages/friends/ChatRoom4";
-
+import { GoogleOAuthProvider } from '@react-oauth/google'
 
 const App = () => {
+    const clientId = '879795063670-a2a8avf7p2vnlqg9mc526r8ge2h5cgvc.apps.googleusercontent.com'
 
     return (
+        <GoogleOAuthProvider clientId={clientId}>
             <Routes>
-                <Route index element={<Home />} />
-                <Route path='/test' element={<Test/>}/>
+                <Route index component={Home} element={<Home />} />
+                <Route path='/test' component={Test} element={<Test/>}/>
                 <Route path='/friends' element={<Friends/>}/>
                 <Route path='/accept' element={<Accept/>}/>
                 <Route path='/received-list' element={<ReceivedList/>}/>
@@ -45,6 +47,7 @@ const App = () => {
                 {/*<Route path="/join" element={<Join />} />*/}
                 {/*<Route path="*" element={<NotFound />} />*/}
             </Routes>
+        </GoogleOAuthProvider>
     );
 };
 

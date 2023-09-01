@@ -396,7 +396,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
                 break;
             case "SecurityError":
             case "PermissionDeniedError":
-                // Do nothing; this is the same as the user canceling the call.
+                // Do nothing; this is the same as the chatRandom canceling the call.
                 break;
             default:
                 alert("Error opening your camera and/or microphone: " + error.message);
