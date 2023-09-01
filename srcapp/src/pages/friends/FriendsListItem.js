@@ -15,7 +15,7 @@ const FriendsListItem = ({frds}) => {
                 const response = await axios.post('/chat/create', {userId: id},
                     {headers: {
                             'Authorization': localStorage.getItem('Authorization')
-                        }
+                           }
                     });
                 console.log(response);
                 console.log(response.data.item.chatroom)
