@@ -89,7 +89,7 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
 
         const initialPosition = {
             x: (windowSize.width / 2) - (450 / 2), // 450은 Draggable 컴포넌트의 너비
-            y: (windowSize.height / 2) - (600 / 2), // 200은 Draggable 컴포넌트의 높이
+            y: (windowSize.height / 2) - (250 / 2), // 200은 Draggable 컴포넌트의 높이
         };
         const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 

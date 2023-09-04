@@ -17,7 +17,6 @@ import "./css/FreindsList.css";
 const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType, socket}) => {
     const [userList, setUserList] = useState([]);
     const freindsList = async (retry = true) => {
-        
         try {
             console.log(FriendNationally);
             const response = await fetch('/friends/friends-list/' + FriendNationally, {

@@ -1,0 +1,42 @@
+/* 거절 모달의 기본 스타일 */
+.modal {
+    background-color: rgba(0, 0, 0, 0.85); /* 검은색 반투명 배경 */
+}
+
+.modal-header, .modal-footer {
+    border: none; /* 구분선 제거 */
+}
+
+.decline-modal .modal-content {
+    background-color: #1a1a1a; /* 어두운 검은색 */
+    border: 2px solid #ff4a4a; /* 빨강색 테두리 */
+    box-shadow: 0 0 15px 5px #ff4a4a; /* 빨강색의 박스 쉐도우 */
+    border-radius: 10px; /* 모서리 둥글게 */
+}
+
+/* 거절 모달의 제목 스타일 */
+.decline-modal .modal-title {
+    color: #ff4a4a; /* 빨강색 */
+}
+
+/* 거절 모달의 본문 스타일 */
+.modal-body {
+    color: #aaa; /* 회색 글자 */
+}
+
+/* 확인 버튼 스타일 */
+.decline-primary{
+    background-color: #1a1a1a; /* 어두운 검은색 배경 */
+    border:2px solid gray;
+    color: gray; /* 회색 글자 */
+    transition: all 0.3s ease-in-out;
+}
+
+/* 버튼 호버 효과 */
+button.variant-secondary:hover {
+    opacity: 0.8; /* 투명도 감소 */
+}
+
+.receiver {
+    color:lightcoral
+}
