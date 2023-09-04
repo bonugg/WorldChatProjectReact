@@ -325,7 +325,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                 setSelectedLanguage(" ");
                 setMessages([]);
                 setIsChatReadOnly(false);
-                leaveEvent();
+                //leaveEvent();
                 client.current.disconnect(() => {
                     console.log("websocket disconnected");
                 });

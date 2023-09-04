@@ -1021,531 +1021,429 @@ const Home = React.memo(() => {
 
             return (
                 <Suspense fallback={<Fallback/>}>
-                    <div className={"fullScreen"}>
-                        <RandomChatDrag randomMax={randomMax} isMinimize={handleIsMinimized} show={randomChatDrag}
-                                        logoutApiCate={logoutApiCate}
-                                        onClose={handleRandomShowDragClose}/>
-                        <OneOnOneChatDrag friendMax={friendMax} isMinimize={handleIsMinimizedFriend}
-                                          show={oneononeChatDrag} oneOnOneUserId={oneOnOneUserId}
-                                          oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
-                                          onClose={handleOneOnOneShowDragClose}/>
-                        <CateChatDrag cateMax={cateMax} isMinimize={handleIsMinimizedCate}
-                                      show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
-                        <aside
-                            className={MyPageDiv ? `side-bar one` : `side-bar`}
-                        >
-                            <div className={"logo_div"}>
-                                <img
-                                    onClick={home}
-                                    className={`logo_main_text`}
-                                    src={Logo_text}
-                                ></img>
-                            </div>
+                <div className={"fullScreen"}>
+                    <RandomChatDrag randomMax={randomMax} isMinimize={handleIsMinimized} show={randomChatDrag}
+                                    logoutApiCate={logoutApiCate}
+                                    onClose={handleRandomShowDragClose}/>
+                    <OneOnOneChatDrag friendMax={friendMax} isMinimize={handleIsMinimizedFriend}
+                                      show={oneononeChatDrag} oneOnOneUserId={oneOnOneUserId}
+                                      oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
+                                      onClose={handleOneOnOneShowDragClose}/>
+                    <CateChatDrag cateMax={cateMax} isMinimize={handleIsMinimizedCate}
+                                  show={showDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
+                    <aside
+                        className={MyPageDiv ? `side-bar one` : `side-bar`}
+                    >
+                        <div className={"logo_div"}>
+                            <img
+                                onClick={home}
+                                className={`logo_main_text`}
+                                src={Logo_text}
+                            ></img>
+                        </div>
 
-                            <section className="side-bar__icon-box">
-                                <section className="side-bar__icon-1">
-                                    <div></div>
-                                    <div></div>
-                                    <div></div>
-                                </section>
+                        <section className="side-bar__icon-box">
+                            <section className="side-bar__icon-1">
+                                <div></div>
+                                <div></div>
+                                <div></div>
                             </section>
-                            <ul>
-                                <li className="menu_li"
-                                    onClick={home}
-                                    style={{marginTop: '10px', border: '0px solid #222526', borderTopWidth: '1px'}}
-                                >
-                                    <span style={{color: '#FFBD1F'}}>H</span>ome
-                                </li>
-                                {loggedIn ? (
-                                    <>
-                                        <div className="menu_group2">
-                                            <li className="menu_li one" onClick={toggleMenu}>
-                                                <span style={{color: '#FFBD1F'}}>M</span>yPage
+                        </section>
+                        <ul>
+                            <li className="menu_li"
+                                onClick={home}
+                                style={{marginTop: '10px', border: '0px solid #222526', borderTopWidth: '1px'}}
+                            >
+                                <span style={{color: '#FFBD1F'}}>H</span>ome
+                            </li>
+                            {loggedIn ? (
+                                <>
+                                    <div className="menu_group2">
+                                        <li className="menu_li one" onClick={toggleMenu}>
+                                            <span style={{color: '#FFBD1F'}}>M</span>yPage
+                                        </li>
+                                        <div className={menutoggle ? "sub_test2_on" : "sub_test2"}>
+                                            <li
+                                                onClick={() => {
+                                                    mypage('MyPage');
+                                                }}
+                                                className={"menu_li_sub"}>MyPage
                                             </li>
-<<<<<<< HEAD
-                                            <li className="menu_li">
-                                                <span style={{color: '#FFBD1F'}}>C</span>hat
-                                                <ul className="menu_li">
-                                                    <li onClick={handleRandomShowDrag}
-                                                        className={"menu_li_sub"}
-                                                    >Random Chat
-                                                    </li>
-                                                    <li onClick={handleShowDrag}
-                                                        className={"menu_li_sub"}
-                                                    >Category Chat
-                                                    </li>
-                                                </ul>
+                                            <li
+                                                onClick={() => {
+                                                    mypage('Received');
+                                                }}
+                                                className={"menu_li_sub"}>Friends Received
                                             </li>
-                                            <li className="menu_li"
-                                                onClick={logout}
-                                            >
-                                                <span style={{color: '#FFBD1F'}}>L</span>ogout
+                                            <li
+                                                onClick={() => {
+                                                    mypage('Requested');
+                                                }}
+                                                className={"menu_li_sub"}>Friends Requested
                                             </li>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <li className="menu_li" onClick={login}>
-                                                <span style={{color: '#FFBD1F'}}>L</span>ogin
-                                            </li>
-                                            <li className="menu_li"
-                                                onClick={signup}
-                                            >
-                                                <span style={{color: '#FFBD1F'}}>S</span>ignUp
-                                            </li>
-                                        </>
-                                    )}
-                                    <div className={"foot"}>
-                                        <span className={"foot_text"}>@2023 WWC, Inc</span>
+                                        </div>
                                     </div>
-
-                                </ul>
-                            </aside>
-                            {/*<div style={{width : '300px', height: '100%'}}>*/}
-
-                            {/*</div>*/}
-                            <CanvasContainer>
-                                <Canvas>
-                                    <CameraControl targetPosition={targetPosition} cameraPosition={cameraPosition}/>
-                                    <Earth
-                                        mainCamera={mainCamera}
-                                        isLoginZoom={isLoginZoom}
-                                        isSignUpZoom={isSignUpZoom}
-                                        LoginZoom={LoginZoom}
-                                        mouseLock={mouseLock}
-                                        loggedIn={loggedIn}
-                                        loggedOut={loggedOut}
-                                        isMapageZoom={isMapageZoom}
-                                        FriendsList={FriendsList}
-                                        isFriendsListZoom={isFriendsListZoom}
-                                        FriendsNationally={FriendsNationally}
-                                        FriendListApiOn={FriendListApiOn}
-                                        FrdId={FrdId}
-                                        FrdId2={FrdId2}
-                                    />
-                                </Canvas>
-                            </CanvasContainer>
-
-                            <DivStyledMenu visible={MyPageDiv ? "visible" : ""}>
-                                <MyPage
-                                    MyPageDiv={MyPageDiv}
-                                    onPasswordChange={onPasswordChange}
-                                    logoutApi={logoutApi}
-                                    onRemove={removeItemFromHomeComponent}
-                                />
-                            </DivStyledMenu>
-                            <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
-                                <FreindsList
-                                    onData={handleGrandchildData}
-                                    setChatType={setChatType}
-                                    FriendsList={FriendsList}
-                                    FriendNationally={FriendNationally}
-                                    FriendListApi={FriendListApi}
-                                    logoutApi3={logoutApi3}
-                                    isOneOnOneChatDiv={isOneOnOneChatDiv}
-                                    onRemove={removeItemFromHomeComponent2}
-                                    socket={socket}
-                                />
-                                {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
-                            </DivStyledMenu2>
-                            <DivStyled visible={isPasswordChangeDiv ? "visible" : isPasswordChangeDiv2 ? "" : "hidden"}
-                                       ref={passwordChangeDivRef}>
-                                <PasswordChange
-                                    isPasswordChangeDiv={isPasswordChangeDiv}
-                                    isPasswordChangeDivClose={isPasswordChangeDivClose}
-                                    logoutApi2={logoutApi2}
-                                >
-                                </PasswordChange>
-                            </DivStyled>
-                            <DivStyledMenu visible={LoginDiv ? "visible" : ""}>
-                                {/* Content inside the loginDiv */}
-                                <div className={"loginDiv"}>
-                                    <div className={"loginDiv_2"}>
-                                        <div className={"LogoDiv"}>
-                                            <img className={"LogoImg"} src={Logo}></img>
-=======
-                                            <div className={menutoggle ? "sub_test2_on" : "sub_test2"}>
-                                                <li
-                                                    onClick={() => {
-                                                        mypage('MyPage');
-                                                    }}
-                                                    className={"menu_li_sub"}>MyPage
-                                                </li>
-                                                <li
-                                                    onClick={() => {
-                                                        mypage('Received');
-                                                    }}
-                                                    className={"menu_li_sub"}>Friends Received
-                                                </li>
-                                                <li
-                                                    onClick={() => {
-                                                        mypage('Requested');
-                                                    }}
-                                                    className={"menu_li_sub"}>Friends Requested
-                                                </li>
-                                            </div>
->>>>>>> b91a9434a2d6de6aea7912944162ddb0d0ced287
-                                        </div>
-                                        <div className="menu_group">
-                                            <li className="menu_li one" onClick={toggleMenu2}>
-                                                <span style={{color: '#FFBD1F'}}>C</span>hat
+                                    <div className="menu_group">
+                                        <li className="menu_li one" onClick={toggleMenu2}>
+                                            <span style={{color: '#FFBD1F'}}>C</span>hat
+                                        </li>
+                                        <div className={menutoggle2 ? "sub_test_on" : "sub_test"}>
+                                            <li onClick={handleRandomShowDrag} className={"menu_li_sub"}>Random Chat
                                             </li>
-                                            <div className={menutoggle2 ? "sub_test_on" : "sub_test"}>
-                                                <li onClick={handleRandomShowDrag} className={"menu_li_sub"}>Random Chat
-                                                </li>
-                                                <li onClick={handleShowDrag} className={"menu_li_sub"}>Category Chat</li>
-                                            </div>
+                                            <li onClick={handleShowDrag} className={"menu_li_sub"}>Category Chat</li>
                                         </div>
-                                        <li className="menu_li"
-                                            onClick={logout}
-                                        >
-                                            <span style={{color: '#FFBD1F'}}>L</span>ogout
-                                        </li>
-                                    </>
-                                ) : (
-                                    <>
-                                        <li className="menu_li" onClick={login}>
-                                            <span style={{color: '#FFBD1F'}}>L</span>ogin
-                                        </li>
-                                        <li className="menu_li"
-                                            onClick={signup}
-                                        >
-                                            <span style={{color: '#FFBD1F'}}>S</span>ignUp
-                                        </li>
-                                    </>
-                                )}
-                            </ul>
-                            <div className={"foot"}>
-                                {loggedIn ? (
-                                    <>
-                                        <div className={"friend_search"}>
-                                            <div className={"friend_search_2"}>
-                                                {isMapageZoom || !isAtInitialPosition ?
-                                                    (
-                                                        // <input className={"select_search_friend_disabled"}
-                                                        //        value={"Please go home"}
-                                                        //        readOnly={true}
-                                                        // >
-                                                        // </input>
-                                                        <Select className={"select_search_friend"}
-                                                                value={" "}
-                                                        >
+                                    </div>
+                                    <li className="menu_li"
+                                        onClick={logout}
+                                    >
+                                        <span style={{color: '#FFBD1F'}}>L</span>ogout
+                                    </li>
+                                </>
+                            ) : (
+                                <>
+                                    <li className="menu_li" onClick={login}>
+                                        <span style={{color: '#FFBD1F'}}>L</span>ogin
+                                    </li>
+                                    <li className="menu_li"
+                                        onClick={signup}
+                                    >
+                                        <span style={{color: '#FFBD1F'}}>S</span>ignUp
+                                    </li>
+                                </>
+                            )}
+                        </ul>
+                        <div className={"foot"}>
+                            {loggedIn ? (
+                                <>
+                                    <div className={"friend_search"}>
+                                        <div className={"friend_search_2"}>
+                                            {isMapageZoom || !isAtInitialPosition ?
+                                                (
+                                                    // <input className={"select_search_friend_disabled"}
+                                                    //        value={"Please go home"}
+                                                    //        readOnly={true}
+                                                    // >
+                                                    // </input>
+                                                    <Select className={"select_search_friend"}
+                                                            value={" "}
+                                                    >
 
-                                                            <MenuItem className={"select_search_friend_li"}
-                                                                      value={" "}>Please go home</MenuItem>
-                                                        </Select>
-                                                    ) : (
-                                                        <Select className={"select_search_friend"}
-                                                                onChange={handleNationallyChange}
-                                                                value={selectedNationally}
-                                                        >
+                                                        <MenuItem className={"select_search_friend_li"}
+                                                                  value={" "}>Please go home</MenuItem>
+                                                    </Select>
+                                                ) : (
+                                                    <Select className={"select_search_friend"}
+                                                            onChange={handleNationallyChange}
+                                                            value={selectedNationally}
+                                                    >
 
+                                                        <MenuItem className={"select_search_friend_li"}
+                                                                  value={" "}>Search Nationally</MenuItem>
+                                                        {Object.entries(nationallyList).map(([code, name]) => (
                                                             <MenuItem className={"select_search_friend_li"}
-                                                                      value={" "}>Search Nationally</MenuItem>
-                                                            {Object.entries(nationallyList).map(([code, name]) => (
-                                                                <MenuItem className={"select_search_friend_li"}
-                                                                          key={code}
-                                                                          value={name}>
-                                                                    <img src={
-                                                                        getNationalityFlag(name)}
-                                                                         alt="Nationality flag"
-                                                                         className={"flag_list_select"}
-                                                                    />
-                                                                    {name}</MenuItem>
-                                                            ))}
-                                                        </Select>
-                                                    )
-                                                }
-                                                <Button
-                                                    type={'submit'}
-                                                    className={"move_nationally"}
-                                                    onClick={handleSearchNationally}
-                                                >
-                                                    <SearchIcon fontSize="small"/>
-                                                </Button>
-                                            </div>
-                                        </div>
-                                        <div className="foot_3">
+                                                                      key={code}
+                                                                      value={name}>
+                                                                <img src={
+                                                                    getNationalityFlag(name)}
+                                                                     alt="Nationality flag"
+                                                                     className={"flag_list_select"}
+                                                                />
+                                                                {name}</MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                )
+                                            }
                                             <Button
                                                 type={'submit'}
-                                                disabled={randomMax}
-                                                onClick={RandomHandleMinimizeClick}
-                                                className={"R_maximum_btn"}
+                                                className={"move_nationally"}
+                                                onClick={handleSearchNationally}
                                             >
-                                                <QuestionMarkIcon fontSize="small"/>
-                                            </Button>
-                                            <Button
-                                                type={'submit'}
-                                                disabled={cateMax}
-                                                onClick={CateHandleMinimizeClick}
-                                                className={"R_maximum_btn"}
-                                            >
-                                                <GroupsIcon fontSize="small"/>
-                                            </Button>
-                                            <Button
-                                                disabled={friendMax}
-                                                onClick={FriendHandleMinimizeClick}
-                                                type={'submit'}
-                                                className={"R_maximum_btn"}
-                                            >
-                                                <GroupIcon fontSize="small"/>
-                                            </Button>
-                                            <Button
-                                                type={'submit'}
-                                                className={"R_maximum_btn"}
-                                            >
-                                                <VideoChatIcon fontSize="small"/>
-                                            </Button>
-                                            <Button
-                                                type={'submit'}
-                                                className={"R_maximum_btn"}
-                                            >
-                                                <PhoneIcon fontSize="small"/>
+                                                <SearchIcon fontSize="small"/>
                                             </Button>
                                         </div>
-                                    </>
-                                ) : (
-                                    <></>)
-                                }
-                                <div className={"foot_2"}>
-                                    <span className={"foot_text"}>@2023 WWC, Inc</span>
-                                </div>
+                                    </div>
+                                    <div className="foot_3">
+                                        <Button
+                                            type={'submit'}
+                                            disabled={randomMax}
+                                            onClick={RandomHandleMinimizeClick}
+                                            className={"R_maximum_btn"}
+                                        >
+                                            <QuestionMarkIcon fontSize="small"/>
+                                        </Button>
+                                        <Button
+                                            type={'submit'}
+                                            disabled={cateMax}
+                                            onClick={CateHandleMinimizeClick}
+                                            className={"R_maximum_btn"}
+                                        >
+                                            <GroupsIcon fontSize="small"/>
+                                        </Button>
+                                        <Button
+                                            disabled={friendMax}
+                                            onClick={FriendHandleMinimizeClick}
+                                            type={'submit'}
+                                            className={"R_maximum_btn"}
+                                        >
+                                            <GroupIcon fontSize="small"/>
+                                        </Button>
+                                        <Button
+                                            type={'submit'}
+                                            className={"R_maximum_btn"}
+                                        >
+                                            <VideoChatIcon fontSize="small"/>
+                                        </Button>
+                                        <Button
+                                            type={'submit'}
+                                            className={"R_maximum_btn"}
+                                        >
+                                            <PhoneIcon fontSize="small"/>
+                                        </Button>
+                                    </div>
+                                </>
+                            ) : (
+                                <></>)
+                            }
+                            <div className={"foot_2"}>
+                                <span className={"foot_text"}>@2023 WWC, Inc</span>
                             </div>
-                        </aside>
-                        <CanvasContainer
-                        >
-                            <Canvas>
-                                <CameraControl targetPosition={targetPosition} cameraPosition={cameraPosition}/>
-                                <Earth
-                                    mainCamera={mainCamera}
-                                    isLoginZoom={isLoginZoom}
-                                    isSignUpZoom={isSignUpZoom}
-                                    LoginZoom={LoginZoom}
-                                    mouseLock={mouseLock}
-                                    loggedIn={loggedIn}
-                                    loggedOut={loggedOut}
-                                    isMapageZoom={isMapageZoom}
-                                    FriendsList={FriendsList}
-                                    isFriendsListZoom={isFriendsListZoom}
-                                    FriendsNationally={FriendsNationally}
-                                    FriendListApiOn={FriendListApiOn}
-                                    FrdId={FrdId}
-                                    FrdId2={FrdId2}
-                                    NationallyList={handleNationallyList}
-                                    selectedNationallyMove={selectedNationallyMove}
-                                    resetCityName={handleResetCityName}
-                                />
-                            </Canvas>
-                        </CanvasContainer>
-                        <div className={MyPageDiv ? "sub_test3_on" : "sub_test3"}>
-                            <MyPage
-                                MyPageDiv={MyPageDiv}
-                                homeMyGo={homeMyGo}
-                                MyPageG={MyPageG}
-                                FriendsReceived={FriendsReceived}
-                                FriendsReqested={FriendsReqested}
-                                logoutApi={logoutApi}
-                                onRemove={removeItemFromHomeComponent}
-                            />
                         </div>
-                        <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
-                            <FreindsList
-                                onData={handleGrandchildData}
-                                setChatType={setChatType}
+                    </aside>
+                    <CanvasContainer
+                    >
+                        <Canvas>
+                            <CameraControl targetPosition={targetPosition} cameraPosition={cameraPosition}/>
+                            <Earth
+                                mainCamera={mainCamera}
+                                isLoginZoom={isLoginZoom}
+                                isSignUpZoom={isSignUpZoom}
+                                LoginZoom={LoginZoom}
+                                mouseLock={mouseLock}
+                                loggedIn={loggedIn}
+                                loggedOut={loggedOut}
+                                isMapageZoom={isMapageZoom}
                                 FriendsList={FriendsList}
-                                FriendNationally={FriendNationally}
-                                FriendListApi={FriendListApi}
-                                logoutApi3={logoutApi3}
-                                isOneOnOneChatDiv={isOneOnOneChatDiv}
-                                onRemove={removeItemFromHomeComponent2}
+                                isFriendsListZoom={isFriendsListZoom}
+                                FriendsNationally={FriendsNationally}
+                                FriendListApiOn={FriendListApiOn}
+                                FrdId={FrdId}
+                                FrdId2={FrdId2}
+                                NationallyList={handleNationallyList}
+                                selectedNationallyMove={selectedNationallyMove}
+                                resetCityName={handleResetCityName}
                             />
-                            {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
-                        </DivStyledMenu2>
-                        <div className={LoginDiv ? "sub_test3_on" : "sub_test3"}>
-                            <div className={"loginDiv"}>
-                                <div className={"loginDiv_2"}>
-                                    <div className={"login_img_div"}>
-                                        <img src={Login} className={"login_img"}/>
-                                    </div>
-                                    <form onSubmit={handleSubmit}>
-                                        <div className={"loginForm2"} id={"id_Login_ID"}>
-                                            <input
-                                                className={"inputFromText"}
-                                                placeholder={"Please enter your ID"}
-                                                type='text'
-                                                value={username}
-                                                onChange={(e) => setUsername(e.target.value)}
-                                                onFocus={resetButton}
-                                            />
-                                            <PersonIcon className={"login_icon"}/>
-                                        </div>
-                                        <div className={"loginForm2"} id={"id_Login_PWD"}>
-                                            <input
-                                                className={"inputFromText"}
-                                                placeholder={"Please enter your PASSWORD"}
-                                                type='password'
-                                                value={password}
-                                                onChange={(e) => setPassword(e.target.value)}
-                                                onFocus={resetButton}
-                                            />
-                                            <KeyIcon className={"pwd_icon"}/>
-                                        </div>
-                                        <div className={"loginForm_remmember"} id={"id_Remember_Account"}>
-                                            <Checkbox
-                                                className={"rememberAccountCheckbox"}
-                                                type="checkbox"
-                                                checked={rememberAccount}
-                                                onChange={() => setRememberAccount(!rememberAccount)}
-                                            />
-                                            <label className={"label_remmember"} htmlFor={"rememberAccount"}>Remember
-                                                Account</label>
-                                        </div>
-                                        <div className={"login_btn2"} id={"id_Login_BTN"}>
-                                            <Button
-                                                type="submit"
-                                                className={buttonText === "ID OR PASSWORD ERROR" ? "error_text" : "error_text no"}>
-                                                {buttonText}
-                                            </Button>
-                                        </div>
-                                    </form>
-
-                                </div>
-                            </div>
-                        </div>
-                        <div className={SignUpDiv ? "sub_test3_on" : "sub_test3"}>
-                            <div className={"signDiv"}>
-                                <div className={"signupDiv_2"}>
-                                    <div className={"login_img_div"}>
-                                        <img src={Signup} className={"signup_img"}/>
-                                    </div>
-                                    <form onSubmit={handleSubmitSignUp}>
-                                        <div className={"loginForm"} id={"id_ID"}>
-                                            <input
-                                                className={IdCheckError ? "emptyID yes" : IdCheckError2 ? "emptyID no" : "emptyID"}
-                                                placeholder={"Please enter your ID"}
-                                                type='text'
-                                                value={SginuserName}
-                                                onChange={handleUsernameChange}
-                                            />
-                                            <Button
-                                                className={"checkbtn"}
-                                                disabled={isIdCheckDisabled}
-                                                type={"button"}
-                                                onClick={idCheck}>Check
-                                            </Button>
-                                            <p className={"Text_sign"}>7 to 10 characters consisting of English letters
-                                                and
-                                                numbers</p>
-                                        </div>
-                                        <div className={"loginForm"} id={"id_PWD"}>
-                                            <input
-                                                className={"inputFromText_pwd"}
-                                                placeholder={"Please enter your PASSWORD"}
-                                                type='password'
-                                                value={SignuserPwd}
-                                                onChange={handlePasswordChange}
-                                            />
-                                            <p className={PasswordCheck === 'At least 8 characters consisting of English and numbers, including 2 special characters' ?
-                                                "Text_sign" : PasswordCheck === "Available PASSWORD" ?
-                                                    "Text_sign" : "Text_sign_Error_sign"
-                                            }>{PasswordCheck}</p>
-                                        </div>
-                                        <div className={"loginForm"} id={"id_EMAIL"}>
-                                            <input
-                                                className={emailCheckError ? "inputFromText2" : emailCheckError2 ? "NoinputFromText"
-                                                    : "emptyFromText"}
-                                                placeholder={"Please enter your EMAIL"}
-                                                type='text'
-                                                value={SignuserEmail}
-                                                onChange={handleEmailChange}
-                                            />
-                                        </div>
-                                        <div className={"loginForm"} id={"id_NINKNAME"}>
-                                            <input
-                                                className={NickNameCheckError ? "emptyID yes" : NickNameCheckError2 ? "emptyID no" : "emptyID"}
-                                                placeholder={"Please enter your NICKNAME"}
-                                                type='text'
-                                                value={SignuserNickName}
-                                                onChange={handleNickNameChange}
-                                            />
-                                            <Button
-                                                className={"checkbtn"}
-                                                disabled={isNickNameCheckError}
-                                                type={"button"}
-                                                onClick={NickNameCheck}>Check
-                                            </Button>
-                                            <p className={"Text_sign"}>
-                                                Consists of 10 characters or less, with or without English or
-                                                numbers</p>
-                                        </div>
-                                        <div className={"loginForm"} id={"id_NATIONALITY"}>
-                                            <div className="custom_select_wrapper">
-                                                <Select className={"custom_select"}
-                                                        onChange={handleCountryChange}
-                                                        id="demo-simple-select"
-                                                        value={SignuserNationality || ' '}
-
-                                                >
-                                                    <MenuItem className={"menu_li_select"} value={" "} disabled>Please
-                                                        select a COUNTRY</MenuItem>
-                                                    <MenuItem className={"menu_li_select"} value={"KR"}>KR</MenuItem>
-                                                    <MenuItem className={"menu_li_select"} value={"US"}>US</MenuItem>
-                                                    <MenuItem className={"menu_li_select"} value="CA">CA</MenuItem>
-                                                    {/* 캐나다 추가 */}
-                                                    <MenuItem className={"menu_li_select"} value="JP">JP</MenuItem>
-                                                    <MenuItem className={"menu_li_select"} value="CN">CN</MenuItem>
-                                                    <MenuItem className={"menu_li_select"} value="PH">PH</MenuItem>
-                                                    {/* 필리핀 추가 */}
-                                                    <MenuItem className={"menu_li_select"} value="RU">RU</MenuItem>
-                                                    {/* 러시아 추가 */}
-                                                    <MenuItem className={"menu_li_select"} value="AU">AU</MenuItem>
-                                                    {/* 호주 추가 */}
-                                                    <MenuItem className={"menu_li_select"} value="IT">IT</MenuItem>
-                                                    {/* 이탈리아 추가 */}
-                                                </Select>
-                                            </div>
-                                        </div>
-                                        <div className={"loginForm"} id={"id_PHONE"}>
-                                            <input
-                                                className={phoneCheckError ? "inputFromText3" : phoneCheckError2 ? "NoinputFromText2"
-                                                    : "emptyFromText2"}
-                                                placeholder={"Please enter your PHONE"}
-                                                type='text'
-                                                value={SignuserPhone}
-                                                onChange={handlePhoneChange}
-                                            />
-                                        </div>
-                                        <div className={"login_btn"} id={"id_SignUp_BTN"}>
-                                            <Button
-                                                className={"SignUpBtn"}
-                                                type='submit'
-                                                disabled={PasswordCheck !== "Available PASSWORD"
-                                                    || !IdCheckError || !emailCheckError || !NickNameCheckError || SignuserNationality == "" || !phoneCheckError
-                                                }>SignUp
-                                            </Button>
-                                        </div>
-                                    </form>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        {/*rtc*/}
-                        <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser}
-                                                           setShowRtcChat={setShowRtcChat} type2={type2}
-                                                           setType2={setType2}/>}
-                        </DivStyledMenu>
-
-                        <DivStyledMenu visible={showRtcVoiceChat}>
-                            {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser}
-                                                                     setShowRtcVoiceChat={setShowRtcVoiceChat}
-                                                                     type2={type2}
-                                                                     setType2={setType2}/>}
-                        </DivStyledMenu>
-
-                        {/* 드래그 채팅창 사이드 밖 영역 */}
+                        </Canvas>
+                    </CanvasContainer>
+                    <div className={MyPageDiv ? "sub_test3_on" : "sub_test3"}>
+                        <MyPage
+                            MyPageDiv={MyPageDiv}
+                            homeMyGo={homeMyGo}
+                            MyPageG={MyPageG}
+                            FriendsReceived={FriendsReceived}
+                            FriendsReqested={FriendsReqested}
+                            logoutApi={logoutApi}
+                            onRemove={removeItemFromHomeComponent}
+                        />
                     </div>
-                </Suspense>
+                    <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
+                        <FreindsList
+                            onData={handleGrandchildData}
+                            setChatType={setChatType}
+                            FriendsList={FriendsList}
+                            FriendNationally={FriendNationally}
+                            FriendListApi={FriendListApi}
+                            logoutApi3={logoutApi3}
+                            isOneOnOneChatDiv={isOneOnOneChatDiv}
+                            onRemove={removeItemFromHomeComponent2}
+                        />
+                        {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
+                    </DivStyledMenu2>
+                    <div className={LoginDiv ? "sub_test3_on" : "sub_test3"}>
+                        <div className={"loginDiv"}>
+                            <div className={"loginDiv_2"}>
+                                <div className={"login_img_div"}>
+                                    <img src={Login} className={"login_img"}/>
+                                </div>
+                                <form onSubmit={handleSubmit}>
+                                    <div className={"loginForm2"} id={"id_Login_ID"}>
+                                        <input
+                                            className={"inputFromText"}
+                                            placeholder={"Please enter your ID"}
+                                            type='text'
+                                            value={username}
+                                            onChange={(e) => setUsername(e.target.value)}
+                                            onFocus={resetButton}
+                                        />
+                                        <PersonIcon className={"login_icon"}/>
+                                    </div>
+                                    <div className={"loginForm2"} id={"id_Login_PWD"}>
+                                        <input
+                                            className={"inputFromText"}
+                                            placeholder={"Please enter your PASSWORD"}
+                                            type='password'
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            onFocus={resetButton}
+                                        />
+                                        <KeyIcon className={"pwd_icon"}/>
+                                    </div>
+                                    <div className={"loginForm_remmember"} id={"id_Remember_Account"}>
+                                        <Checkbox
+                                            className={"rememberAccountCheckbox"}
+                                            type="checkbox"
+                                            checked={rememberAccount}
+                                            onChange={() => setRememberAccount(!rememberAccount)}
+                                        />
+                                        <label className={"label_remmember"} htmlFor={"rememberAccount"}>Remember
+                                            Account</label>
+                                    </div>
+                                    <div className={"login_btn2"} id={"id_Login_BTN"}>
+                                        <Button
+                                            type="submit"
+                                            className={buttonText === "ID OR PASSWORD ERROR" ? "error_text" : "error_text no"}>
+                                            {buttonText}
+                                        </Button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div className={SignUpDiv ? "sub_test3_on" : "sub_test3"}>
+                        <div className={"signDiv"}>
+                            <div className={"signupDiv_2"}>
+                                <div className={"login_img_div"}>
+                                    <img src={Signup} className={"signup_img"}/>
+                                </div>
+                                <form onSubmit={handleSubmitSignUp}>
+                                    <div className={"loginForm"} id={"id_ID"}>
+                                        <input
+                                            className={IdCheckError ? "emptyID yes" : IdCheckError2 ? "emptyID no" : "emptyID"}
+                                            placeholder={"Please enter your ID"}
+                                            type='text'
+                                            value={SginuserName}
+                                            onChange={handleUsernameChange}
+                                        />
+                                        <Button
+                                            className={"checkbtn"}
+                                            disabled={isIdCheckDisabled}
+                                            type={"button"}
+                                            onClick={idCheck}>Check
+                                        </Button>
+                                        <p className={"Text_sign"}>7 to 10 characters consisting of English letters
+                                            and
+                                            numbers</p>
+                                    </div>
+                                    <div className={"loginForm"} id={"id_PWD"}>
+                                        <input
+                                            className={"inputFromText_pwd"}
+                                            placeholder={"Please enter your PASSWORD"}
+                                            type='password'
+                                            value={SignuserPwd}
+                                            onChange={handlePasswordChange}
+                                        />
+                                        <p className={PasswordCheck === 'At least 8 characters consisting of English and numbers, including 2 special characters' ?
+                                            "Text_sign" : PasswordCheck === "Available PASSWORD" ?
+                                                "Text_sign" : "Text_sign_Error_sign"
+                                        }>{PasswordCheck}</p>
+                                    </div>
+                                    <div className={"loginForm"} id={"id_EMAIL"}>
+                                        <input
+                                            className={emailCheckError ? "inputFromText2" : emailCheckError2 ? "NoinputFromText"
+                                                : "emptyFromText"}
+                                            placeholder={"Please enter your EMAIL"}
+                                            type='text'
+                                            value={SignuserEmail}
+                                            onChange={handleEmailChange}
+                                        />
+                                    </div>
+                                    <div className={"loginForm"} id={"id_NINKNAME"}>
+                                        <input
+                                            className={NickNameCheckError ? "emptyID yes" : NickNameCheckError2 ? "emptyID no" : "emptyID"}
+                                            placeholder={"Please enter your NICKNAME"}
+                                            type='text'
+                                            value={SignuserNickName}
+                                            onChange={handleNickNameChange}
+                                        />
+                                        <Button
+                                            className={"checkbtn"}
+                                            disabled={isNickNameCheckError}
+                                            type={"button"}
+                                            onClick={NickNameCheck}>Check
+                                        </Button>
+                                        <p className={"Text_sign"}>
+                                            Consists of 10 characters or less, with or without English or
+                                            numbers</p>
+                                    </div>
+                                    <div className={"loginForm"} id={"id_NATIONALITY"}>
+                                        <div className="custom_select_wrapper">
+                                            <Select className={"custom_select"}
+                                                    onChange={handleCountryChange}
+                                                    id="demo-simple-select"
+                                                    value={SignuserNationality || ' '}
+
+                                            >
+                                                <MenuItem className={"menu_li_select"} value={" "} disabled>Please
+                                                    select a COUNTRY</MenuItem>
+                                                <MenuItem className={"menu_li_select"} value={"KR"}>KR</MenuItem>
+                                                <MenuItem className={"menu_li_select"} value={"US"}>US</MenuItem>
+                                                <MenuItem className={"menu_li_select"} value="CA">CA</MenuItem>
+                                                {/* 캐나다 추가 */}
+                                                <MenuItem className={"menu_li_select"} value="JP">JP</MenuItem>
+                                                <MenuItem className={"menu_li_select"} value="CN">CN</MenuItem>
+                                                <MenuItem className={"menu_li_select"} value="PH">PH</MenuItem>
+                                                {/* 필리핀 추가 */}
+                                                <MenuItem className={"menu_li_select"} value="RU">RU</MenuItem>
+                                                {/* 러시아 추가 */}
+                                                <MenuItem className={"menu_li_select"} value="AU">AU</MenuItem>
+                                                {/* 호주 추가 */}
+                                                <MenuItem className={"menu_li_select"} value="IT">IT</MenuItem>
+                                                {/* 이탈리아 추가 */}
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <div className={"loginForm"} id={"id_PHONE"}>
+                                        <input
+                                            className={phoneCheckError ? "inputFromText3" : phoneCheckError2 ? "NoinputFromText2"
+                                                : "emptyFromText2"}
+                                            placeholder={"Please enter your PHONE"}
+                                            type='text'
+                                            value={SignuserPhone}
+                                            onChange={handlePhoneChange}
+                                        />
+                                    </div>
+                                    <div className={"login_btn"} id={"id_SignUp_BTN"}>
+                                        <Button
+                                            className={"SignUpBtn"}
+                                            type='submit'
+                                            disabled={PasswordCheck !== "Available PASSWORD"
+                                                || !IdCheckError || !emailCheckError || !NickNameCheckError || SignuserNationality == "" || !phoneCheckError
+                                            }>SignUp
+                                        </Button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {/*rtc*/}
+                    <DivStyledMenu visible={showRtcChat}>
+                        {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser}
+                                                       setShowRtcChat={setShowRtcChat} type2={type2}
+                                                       setType2={setType2}/>}
+                    </DivStyledMenu>
+
+                    <DivStyledMenu visible={showRtcVoiceChat}>
+                        {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser}
+                                                                 setShowRtcVoiceChat={setShowRtcVoiceChat}
+                                                                 type2={type2}
+                                                                 setType2={setType2}/>}
+                    </DivStyledMenu>
+
+                    {/* 드래그 채팅창 사이드 밖 영역 */}
+                </div>
+            </Suspense>
             );
         }
     )
