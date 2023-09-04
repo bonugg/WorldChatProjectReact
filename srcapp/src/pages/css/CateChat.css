@@ -426,6 +426,10 @@ input[type='number'] {
     border: 1px solid rgba(200, 200, 200, 0.4) !important;
     font-family: 'Russo One', sans-serif !important;
     box-sizing: border-box;
+    background-color: black !important;
+}
+.btnSend:hover{
+    background-color: rgba(0, 0, 0, 0.8) !important;
 }
 
 .EnterRoomCate {

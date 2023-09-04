@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState, useCallback} from "react";
-import { Rnd } from "react-rnd";
+import {Rnd} from "react-rnd";
 import Logo from "../img/logo_img.png";
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
@@ -14,6 +14,9 @@ import styled, {keyframes} from "styled-components";
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import {useDispatch, useSelector} from "react-redux";
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
 
 const MessageStyled = styled.p`
 `;
@@ -43,17 +46,21 @@ const MenuPanel = styled.div`
   position: absolute;
   top: 95%;
   left: 10px; // 수정된 부분
-  z-index: 1;
+  z-index: 9999;
   width: ${props => props.visible ? '330px' : '0px'}; // 기존 속성
   height: ${props => props.visible ? '50px' : '0px'}; // 기존 속성
   overflow-y: hidden;
   overflow-x: hidden;
   transition: all 0.25s ease-in-out;
   border-radius: 4px;
-  background: rgba(130, 130, 130, 0.7);
+  background: rgba(30, 30, 30, 1);
 `;
 
-const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isMinimize}) => {
+const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isMinimize}) => {
+        const dispatch = useDispatch();
+        const randomDragPosition = useSelector((state) => state.chatminimum.position);
+        const [isChatDiv, setIsChatDiv] = useState(false);
+
         // 위치 및 상태 설정
         const [windowSize, setWindowSize] = useState({
             width: window.innerWidth,
@@ -68,9 +75,9 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
 
                 const newPosition = {
                     x: (window.innerWidth / 2) - (450 / 2),  //450은 Draggable 컴포넌트의 너비
-                    y: (window.innerHeight / 2) - (250 / 2), //230은 Draggable 컴포넌트의 높이
+                    y: (window.innerHeight / 2) - (600 / 2), //230은 Draggable 컴포넌트의 높이
                 };
-                setPosition(newPosition);
+                dispatch({type: "SET_RANDOMDRAG_POSITION", payload: newPosition});
             };
 
             window.addEventListener('resize', handleResize);
@@ -78,14 +85,14 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                 window.removeEventListener('resize', handleResize);
             };
         }, []);
+
         const initialPosition = {
             x: (windowSize.width / 2) - (450 / 2), // 450은 Draggable 컴포넌트의 너비
-            y: (windowSize.height / 2) - (250 / 2), // 200은 Draggable 컴포넌트의 높이
+            y: (windowSize.height / 2) - (600 / 2), // 200은 Draggable 컴포넌트의 높이
         };
+        const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-        const handleDrag = useCallback((e, data) => trackPos(data), []);
         const [isClosed, setIsClosed] = useState(false);
-        const [isChatDiv, setIsChatDiv] = useState(false);
 
 //랜덤 채팅 입장 후
 //인풋창 비활성화 상태 변수
@@ -144,16 +151,15 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
         const [Typing, setTyping] = useState([]);
         const [dots, setDots] = useState('');
 
-        const [size, setSize] = useState({ width: "450px", height: "250px"});
-        //rnd
+        const [size, setSize] = useState({width: "450px", height: "250px"});
         const [resizing, setResizing] = useState(false);
-        const handleResizeStart  = () => {
+        const handleResizeStart = () => {
             // 사이즈 결정
             setResizing(true);
         };
         const handleResizeStop = (e, direction, ref) => {
             // 사이즈 결정
-            setSize({ width: ref.style.width, height: ref.style.height });
+            setSize({width: ref.style.width, height: ref.style.height});
             setResizing(false); // resizing 상태 업데이트
         };
 
@@ -179,7 +185,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
             if (client !== null) {
                 if (isTyping === "y") {
                     sendTypingMessage();
-                } else if(isTyping === "n"){
+                } else if (isTyping === "n") {
                     removeTypingMessage();
                 }
             }
@@ -325,7 +331,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                 setSelectedLanguage(" ");
                 setMessages([]);
                 setIsChatReadOnly(false);
-                //leaveEvent();
+                leaveEvent();
                 client.current.disconnect(() => {
                     console.log("websocket disconnected");
                 });
@@ -352,8 +358,8 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                     setRandomStartText("start a random chat");
                 }
                 setIsChatDiv(false);
-            }else if(payloadData.type == "CHAT"){
-                if (payloadData.sender !== LoginUserNickName.current){
+            } else if (payloadData.type == "CHAT") {
+                if (payloadData.sender !== LoginUserNickName.current) {
                     otherUserId.current = payloadData.userId;
                 }
             }
@@ -422,7 +428,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
 
         useEffect(() => {
             if (isChatDiv) {
-                setSize({ width: "450px", height: "600px"});
+                setSize({width: "450px", height: "600px"});
                 console.log("랜덤 채팅방 정보");
                 console.log(room);
                 setMenuDiv(false);
@@ -430,15 +436,10 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                 setSendMessage('');
                 connect();
             } else {
-                setSize({ width: "450px", height: "250px"});
+                setSize({width: "450px", height: "250px"});
                 disconnect();
             }
         }, [isChatDiv]);
-        const [position, setPosition] = useState(initialPosition);
-
-        const trackPos = (data) => {
-            setPosition({x: data.x, y: data.y});
-        };
         const handleMinimizeClick = () => {
             setMenuDiv(false);
             setMenuDiv2(false);
@@ -448,7 +449,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
         const handleCloseClick = () => {
             setIsChatDiv(false);
             setIsClosed(true);
-            setPosition(initialPosition);
+            dispatch({type: "SET_RANDOMDRAG_POSITION", payload: initialPosition});
             if (isChatDiv) {
                 disconnect();
             }
@@ -511,6 +512,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                     setRoom(result.randomRoomDTO);
                     LoginUserNickName.current = result.userNickName;
                     setIsChatDiv(true);
+
                     return result;
                     // navigate(`/random/${result.randomRoomId}`, {state: {room: result}});
 
@@ -527,19 +529,22 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
         const exitChatDiv = () => {
             setRandomStartText("start a random chat");
             setIsChatDiv(false);
+
         };
         const friendAddClick = (otherId) => {
-            const requestFrdAxios = async() => {
+            const requestFrdAxios = async () => {
                 try {
                     const response = await axios.post('/friends/request', {userId: otherId},
-                        {headers: {
+                        {
+                            headers: {
                                 Authorization: `${localStorage.getItem('Authorization')}`
-                            }});
+                            }
+                        });
                     console.log(response);
                     console.log(response.data.item.msg)
-                    if(response.data.item.msg === "request ok") {
+                    if (response.data.item.msg === "request ok") {
                         alert("친구 신청이 완료되었습니다")
-                    } else if(response.data.item.msg === "already frds") {
+                    } else if (response.data.item.msg === "already frds") {
                         alert("이미 친구이거나 응답 대기중입니다.")
                     }
                 } catch (e) {
@@ -702,7 +707,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
         const downloadFile = async (fileName, fileDir) => {
             try {
                 const response = await axios.get(`/randomFile/download/${fileName}`, {
-                    params: { fileDir },
+                    params: {fileDir},
                     responseType: 'blob',
                 });
 
@@ -717,21 +722,33 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
             }
         };
 //--------------다운로드 파일----------------------
+//--이모지
 
+        const toggleEmojiPicker = () => {
+            setShowEmojiPicker(!showEmojiPicker);
+        }
+
+        const addEmoji = (e) => {
+            let emoji = e.native;
+            setSendMessage(prevMessage => prevMessage + emoji);
+        }
         return (
-          <>
+            <>
                 {!isClosed && (
                     <>
                         <Rnd
                             size={size}
                             minWidth={450}
-                            minHeight={600}
+                            minHeight={!isChatDiv ? 250 : 600}
                             maxWidth={600}
                             maxHeight={750}
                             disabled={!randomMax}
                             onResizeStop={handleResizeStop}
                             onResizeStart={handleResizeStart}
-                            default={{ x: position.x, y: position.y }}
+                            default={{x: randomDragPosition.x, y: randomDragPosition.y}}
+                            onDragStop={(e, d) => {
+                                dispatch({type: "SET_RANDOMDRAG_POSITION", payload: {x: d.x, y: d.y}});
+                            }}
                             enableResizing={{
                                 top: false,
                                 right: isChatDiv ? true : false,
@@ -746,17 +763,17 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                                 borderRadius: "15px",
                                 zIndex: "3",
                                 position: "fixed",
-                                display: !randomMax ? "none" : "block",
-                                transition: resizing ? 'none' : 'width 0.25s ease-in-out, height 0.25s ease-in-out'
+                                visibility: !randomMax ? "hidden" : "visible",
+                                opacity: !randomMax ? "0" : "1",
+                                transition: resizing ? 'none' : 'opacity 0.25s ease-in-out, width 0.25s ease-in-out, height 0.25s ease-in-out'
                             }}
                             dragHandleClassName="headerChat"
+                            bounds="window"
                             // bounds="window"
-                            >
+                        >
                             <div
                                 style={{
-                                    position: !randomMax ? 'absolute' : 'fixed',
                                     display: !randomMax ? 'none' : 'block',
-                                    top: '0',
                                     cursor: 'auto',
                                     color: 'black',
                                     width: '100%',
@@ -796,254 +813,269 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                                     </div>
                                 </div>
                                 <div className={isChatDiv ? "contentChat_true" : "contentChat"}>
-                                {isChatDiv ? (
-                                    <div className={"chatR"}>
-                                        <div className={"EnterRoom"}>
-                                            <div className={"EnterRoom_2"}>
-                                                <div className={"EnterRoomCate"}>
+                                    {isChatDiv ? (
+                                        <div className={"chatR"}>
+                                            <div className={"EnterRoom"}>
+                                                <div className={"EnterRoom_2"}>
+                                                    <div className={"EnterRoomCate"}>
 
-                                                </div>
-                                                <div className={"EnterRoomName"}>
+                                                    </div>
+                                                    <div className={"EnterRoomName"}>
 
-                                                </div>
-                                                <div className={"EnterRoomClose"}>
-                                                    {otherUserId.current !== null ?(
+                                                    </div>
+                                                    <div className={"EnterRoomClose"}>
+                                                        {otherUserId.current !== null ? (
+                                                            <Button
+                                                                className={"userAdd_btn"}
+                                                                onClick={() => {
+                                                                    friendAddClick(otherUserId.current)
+                                                                }}
+                                                            >
+                                                                <PersonAddIcon style={{fontSize: 'small'}}/>
+                                                            </Button>
+                                                        ) : (
+                                                            <>
+                                                            </>
+                                                        )}
                                                         <Button
-                                                            className={"userAdd_btn"}
-                                                            onClick={() => {friendAddClick(otherUserId.current)}}
+                                                            className={"Close_btn"}
+                                                            onClick={exitChatDiv}
                                                         >
-                                                            <PersonAddIcon style={{fontSize : 'small'}}/>
+                                                            <LogoutIcon style={{fontSize: 'small'}}/>
                                                         </Button>
-                                                    ):(
-                                                        <>
-                                                        </>
-                                                    )}
-                                                    <Button
-                                                        className={"Close_btn"}
-                                                        onClick={exitChatDiv}
-                                                    >
-                                                        <LogoutIcon style={{fontSize : 'small'}}/>
-                                                    </Button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className={"EnterRoomChat"}>
-                                            <div className={"EnterRoomChat_2"}>
-                                                <div className={"EnterRoomChat_content"}>
-                                                    <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
-                                                        {messages.map((message, index) => {
-                                                            const isMyMessage = message.sender === LoginUserNickName.current;
-                                                            return (
-                                                                <MessageStyled
-                                                                    key={index}
-                                                                    className={message.type !== 'CHAT' ? "userJoin" : isMyMessage ? "userY" : "userX"}
-                                                                >
-                                                                    {message.type !== 'CHAT' ? (
-                                                                        <div>
+                                            <div className={"EnterRoomChat"}>
+                                                <div className={"EnterRoomChat_2"}>
+                                                    <div className={"EnterRoomChat_content"}>
+                                                        <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
+                                                            {messages.map((message, index) => {
+                                                                const isMyMessage = message.sender === LoginUserNickName.current;
+                                                                return (
+                                                                    <MessageStyled
+                                                                        key={index}
+                                                                        className={message.type !== 'CHAT' ? "userJoin" : isMyMessage ? "userY" : "userX"}
+                                                                    >
+                                                                        {message.type !== 'CHAT' ? (
+                                                                            <div>
                                                                             <span
                                                                                 className="content_join">{message.content}</span>
-                                                                            <p className="message-regdate_Join">{message.time}</p>
-                                                                        </div>
-                                                                    ) : isMyMessage ? (
-                                                                        <div>
-                                                                            <div className={"message-user"}>
-                                                                                {/*<img className={"message-user-profile"}*/}
-                                                                                {/*     src={message.userProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + message.userProfile : Profile}*/}
-                                                                                {/*/>*/}
-                                                                                <span
-                                                                                    className="userName">{message.sender}</span>
+                                                                                <p className="message-regdate_Join">{message.time}</p>
                                                                             </div>
-                                                                            {message.fileName && (
-                                                                                <div className={"down_div"}>
-                                                                                    {message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i)
-                                                                                        ? <img src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/"+ message.fileName}
-                                                                                               alt="uploaded"
-                                                                                               className={"message_img"}/>
-                                                                                        : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i)
-                                                                                            ? <video src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/"+ message.fileName}
-                                                                                                     controls
-                                                                                                     className={"message_img"}/> // 동영상 렌더링
-                                                                                            : <div className={"message_other"}>
+                                                                        ) : isMyMessage ? (
+                                                                            <div>
+                                                                                <div className={"message-user"}>
+                                                                                    {/*<img className={"message-chatRandom-profile"}*/}
+                                                                                    {/*     src={message.userProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + message.userProfile : Profile}*/}
+                                                                                    {/*/>*/}
+                                                                                    <span
+                                                                                        className="userName">{message.sender}</span>
+                                                                                </div>
+                                                                                {message.fileName && (
+                                                                                    <div className={"down_div"}>
+                                                                                        {message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i)
+                                                                                            ? <img
+                                                                                                src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/" + message.fileName}
+                                                                                                alt="uploaded"
+                                                                                                className={"message_img"}/>
+                                                                                            : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i)
+                                                                                                ? <video
+                                                                                                    src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/" + message.fileName}
+                                                                                                    controls
+                                                                                                    className={"message_img"}/> // 동영상 렌더링
+                                                                                                : <div
+                                                                                                    className={"message_other"}>
                                                                                             <span
                                                                                                 className={"message_other_text"}>
                                                                                                      {message.fileOrigin}
                                                                                             </span>
-                                                                                            </div> // 파일 이름 렌더링
-                                                                                    }
-                                                                                    <Button
-                                                                                        onClick={() => downloadFile(message.fileOrigin, message.fileName)}
-                                                                                        className={message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn" : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i) ? "downBtn" : "downBtn2"}
-                                                                                    >
-                                                                                        <FileDownloadIcon/>
-                                                                                    </Button> {/* 다운로드 버튼 */}
-                                                                                </div>
-                                                                            )}
-                                                                            <span
-                                                                                className="content_user">{message.content}</span>
-                                                                            <span
-                                                                                className="message-regdate">{message.time}</span>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div>
-                                                                            <div className={"message-other"}>
-                                                                                {/*<img className={"message-other-profile"}*/}
-                                                                                {/*     src={message.userProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + message.userProfile : Profile}*/}
-                                                                                {/*/>*/}
+                                                                                                </div> // 파일 이름 렌더링
+                                                                                        }
+                                                                                        <Button
+                                                                                            onClick={() => downloadFile(message.fileOrigin, message.fileName)}
+                                                                                            className={message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn" : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i) ? "downBtn" : "downBtn2"}
+                                                                                        >
+                                                                                            <FileDownloadIcon/>
+                                                                                        </Button> {/* 다운로드 버튼 */}
+                                                                                    </div>
+                                                                                )}
                                                                                 <span
-                                                                                    className="userName">{message.sender}</span>
+                                                                                    className="content_user">{message.content}</span>
+                                                                                <span
+                                                                                    className="message-regdate">{message.time}</span>
                                                                             </div>
-                                                                            {message.fileName && (
-                                                                                <div className={"down_div"}>
-                                                                                    {message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i)
-                                                                                        ? <img src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/"+ message.fileName}
-                                                                                               alt="uploaded"
-                                                                                               className={"message_img2"}/>
-                                                                                        : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i)
-                                                                                            ? <video src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/"+ message.fileName}
-                                                                                                     controls
-                                                                                                     className={"message_img2"}/> // 동영상 렌더링
-                                                                                            : <div className={"message_other2"}>
+                                                                        ) : (
+                                                                            <div>
+                                                                                <div className={"message-other"}>
+                                                                                    {/*<img className={"message-other-profile"}*/}
+                                                                                    {/*     src={message.userProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + message.userProfile : Profile}*/}
+                                                                                    {/*/>*/}
+                                                                                    <span
+                                                                                        className="userName">{message.sender}</span>
+                                                                                </div>
+                                                                                {message.fileName && (
+                                                                                    <div className={"down_div"}>
+                                                                                        {message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i)
+                                                                                            ? <img
+                                                                                                src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/" + message.fileName}
+                                                                                                alt="uploaded"
+                                                                                                className={"message_img2"}/>
+                                                                                            : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i)
+                                                                                                ? <video
+                                                                                                    src={"https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/" + message.fileName}
+                                                                                                    controls
+                                                                                                    className={"message_img2"}/> // 동영상 렌더링
+                                                                                                : <div
+                                                                                                    className={"message_other2"}>
                                                                                             <span
                                                                                                 className={"message_other_text2"}>
                                                                                                      {message.fileOrigin}
                                                                                             </span>
-                                                                                            </div> // 파일 이름 렌더링
-                                                                                    }
-                                                                                    <Button
-                                                                                        onClick={() => downloadFile(message.fileOrigin, message.fileName)}
-                                                                                        className={message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn_other" : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i) ? "downBtn_other" : "downBtn_other2"}
-                                                                                    >
-                                                                                        <FileDownloadIcon/>
-                                                                                    </Button> {/* 다운로드 버튼 */}
-                                                                                </div>
-                                                                            )}
-                                                                            {message.translatedMessage ?
+                                                                                                </div> // 파일 이름 렌더링
+                                                                                        }
+                                                                                        <Button
+                                                                                            onClick={() => downloadFile(message.fileOrigin, message.fileName)}
+                                                                                            className={message.fileOrigin.match(/\.(jpg|jpeg|png|gif)$/i) ? "downBtn_other" : message.fileOrigin.match(/\.(mp4|webm|ogg)$/i) ? "downBtn_other" : "downBtn_other2"}
+                                                                                        >
+                                                                                            <FileDownloadIcon/>
+                                                                                        </Button> {/* 다운로드 버튼 */}
+                                                                                    </div>
+                                                                                )}
+                                                                                {message.translatedMessage ?
+                                                                                    <span
+                                                                                        className="content_other_trans"
+                                                                                    >(translate) {message.translatedMessage}</span>
+                                                                                    :
+                                                                                    <>
+                                                                                    </>
+                                                                                }
                                                                                 <span
-                                                                                    className="content_other_trans"
-                                                                                >(translate) {message.translatedMessage}</span>
-                                                                                :
-                                                                                <>
-                                                                                </>
-                                                                            }
-                                                                            <span
-                                                                                className="content_other">{message.content}</span>
-                                                                            <span
-                                                                                className="message-regdate_other">{message.time}</span>
-                                                                        </div>
-                                                                    )}
-                                                                </MessageStyled>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                    <div className="EnterRoomChat_content_typing">
-                                                        {Typing.length == 0 ? Typing[0] : Typing[Typing.length - 1]}{dots}
-                                                    </div>
-                                                </div>
-                                                <div className={"EnterRoomChat_input_one"}>
-                                                    <form className={"EnterRoomChat_input_form_one"}
-                                                          onSubmit={handleSendMessage}>
-                                                        <MenuPanel
-                                                            visible={menuDiv ? "visible" : menuDiv2 ? "" : "hidden"}
-                                                        >
-                                                            <div className={"menu_div"}>
-                                                                <div className={"file"}>
-                                                                    <Button
-                                                                        className={"menu_btn"}
-                                                                        type="button"
-                                                                        onClick={handleFileButtonClick}
-                                                                    >
-                                                                        <FolderIcon style={{fontSize : 'small'}}/>
-                                                                    </Button>
-                                                                </div>
-                                                                <div className={"trans"}>
-                                                                    <Select className={"trans_select"}
-                                                                            onChange={handleLanguageChange}
-                                                                            value={selectedLanguage}
-                                                                    >
-                                                                        <MenuItem className={"trans_li_select"} value={" "}>Not translated</MenuItem>
-                                                                        {Object.entries(languages).map(([code, name]) => (
-                                                                            <MenuItem className={"trans_li_select"} key={code}
-                                                                                      value={code}>{name}</MenuItem>
-                                                                        ))}
-                                                                    </Select>
-                                                                </div>
-
-                                                            </div>
-                                                        </MenuPanel>
-                                                        <div className={"input_menu"}>
-                                                            <input
-                                                                placeholder={!isChatReadOnly ? "Connecting, please wait" : "Please enter your message"}
-                                                                type="text"
-                                                                className={inputChange ? "inputchat_one2" : "inputchat_one"}
-                                                                required
-                                                                value={sendMessage}
-                                                                onClick={handleInputChange}
-                                                                readOnly={!isChatReadOnly} // isChatDiv가 false일 때 readOnly를 true로 변경
-                                                                onChange={handleMessageChange}
-                                                            />
-                                                            <input
-                                                                type="file"
-                                                                id="file"
-                                                                ref={inputFileRef}
-                                                                onChange={handleFileChange}
-                                                                multiple
-                                                                style={{display: 'none'}}
-                                                            />
-                                                            <Button
-                                                                className={menuDiv ? "add_now" : "add"}
-                                                                type="button"
-                                                                onClick={handleMenuOpen}
-                                                            >{menuDiv ? "-" : "+"}
-                                                            </Button>
+                                                                                    className="content_other">{message.content}</span>
+                                                                                <span
+                                                                                    className="message-regdate_other">{message.time}</span>
+                                                                            </div>
+                                                                        )}
+                                                                    </MessageStyled>
+                                                                );
+                                                            })}
                                                         </div>
+                                                        <div className="EnterRoomChat_content_typing">
+                                                            {Typing.length == 0 ? Typing[0] : Typing[Typing.length - 1]}{dots}
+                                                        </div>
+                                                    </div>
+                                                    <div className={"EnterRoomChat_input_one"}>
+                                                        <form className={"EnterRoomChat_input_form_one"}
+                                                              onSubmit={handleSendMessage}>
+                                                            <MenuPanel
+                                                                visible={menuDiv ? "visible" : menuDiv2 ? "" : "hidden"}
+                                                            >
+                                                                <div className={"menu_div"}>
+                                                                    <div className={"file"}>
+                                                                        <Button
+                                                                            className={"menu_btn"}
+                                                                            type="button"
+                                                                            onClick={handleFileButtonClick}
+                                                                        >
+                                                                            <FolderIcon style={{fontSize: 'small'}}/>
+                                                                        </Button>
+                                                                    </div>
+                                                                    <div className={"trans"}>
+                                                                        <Select className={"trans_select"}
+                                                                                onChange={handleLanguageChange}
+                                                                                value={selectedLanguage}
+                                                                        >
+                                                                            <MenuItem className={"trans_li_select"}
+                                                                                      value={" "}>Not translated</MenuItem>
+                                                                            {Object.entries(languages).map(([code, name]) => (
+                                                                                <MenuItem className={"trans_li_select"}
+                                                                                          key={code}
+                                                                                          value={code}>{name}</MenuItem>
+                                                                            ))}
+                                                                        </Select>
+                                                                    </div>
 
-                                                        {inputChange ? (
-                                                            <Button
-                                                                className={"btnSend2"}
-                                                                type="button"
-                                                                onClick={uploadFiles}
-                                                            >UPLOAD
-                                                            </Button>
-                                                        ) : (
-                                                            <Button
-                                                                className={"btnSend"}
-                                                                type="submit"
-                                                                onClick={handleSendMessage}
-                                                            >SEND
-                                                            </Button>
-                                                        )}
+                                                                </div>
+                                                            </MenuPanel>
+                                                            <div className={"input_menu"}>
+                                                                <input
+                                                                    placeholder={!isChatReadOnly ? "Connecting, please wait" : "Please enter your message"}
+                                                                    type="text"
+                                                                    className={inputChange ? "inputchat_one2" : "inputchat_one"}
+                                                                    required
+                                                                    value={sendMessage}
+                                                                    onClick={handleInputChange}
+                                                                    readOnly={!isChatReadOnly} // isChatDiv가 false일 때 readOnly를 true로 변경
+                                                                    onChange={handleMessageChange}
+                                                                />
+                                                                <input
+                                                                    type="file"
+                                                                    id="file"
+                                                                    ref={inputFileRef}
+                                                                    onChange={handleFileChange}
+                                                                    multiple
+                                                                    style={{display: 'none'}}
+                                                                />
+                                                                <Button disabled={!isChatReadOnly} className={"emoji"} type="button" onClick={toggleEmojiPicker}>😃</Button>
+                                                                {showEmojiPicker && (
+                                                                    <Picker data={data} onEmojiSelect={addEmoji}/>
+                                                                )}
+                                                                <Button
+                                                                    disabled={!isChatReadOnly}
+                                                                    className={"add"}
+                                                                    type="button"
+                                                                    onClick={handleMenuOpen}
+                                                                >{menuDiv ? "-" : "+"}
+                                                                </Button>
+                                                            </div>
+
+                                                            {inputChange ? (
+                                                                <Button
+                                                                    className={"btnSend2"}
+                                                                    type="button"
+                                                                    onClick={uploadFiles}
+                                                                >UPLOAD
+                                                                </Button>
+                                                            ) : (
+                                                                <Button
+                                                                    className={"btnSend"}
+                                                                    type="submit"
+                                                                    onClick={handleSendMessage}
+                                                                >SEND
+                                                                </Button>
+                                                            )}
 
 
-                                                    </form>
+                                                        </form>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className={"selectR"}>
-                                        <div className={"random_start"}>
-                                            <div className={"random_start_2"}>
-                                                {randomStartText}
+                                    ) : (
+                                        <div className={"selectR"}>
+                                            <div className={"random_start"}>
+                                                <div className={"random_start_2"}>
+                                                    {randomStartText}
+                                                </div>
+                                                <div className={"random_start_3"}>
+                                                    <Button
+                                                        style={{marginRight: '20px'}}
+                                                        className={"random_btn"}
+                                                        onClick={startRandomChat}
+                                                    >
+                                                        START
+                                                    </Button>
+                                                    <Button
+                                                        className={"random_btn"}
+                                                        onClick={handleCloseClick}
+                                                    >
+                                                        CLOSE
+                                                    </Button>
+                                                </div>
                                             </div>
-                                            <div className={"random_start_3"}>
-                                                <Button
-                                                    style={{marginRight: '20px'}}
-                                                    className={"random_btn"}
-                                                    onClick={startRandomChat}
-                                                >
-                                                    START
-                                                </Button>
-                                                <Button
-                                                    className={"random_btn"}
-                                                    onClick={handleCloseClick}
-                                                >
-                                                    CLOSE
-                                                </Button>
-                                            </div>
-                                        </div>
 
-                                    </div>
-                                )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             {/* 밑으로 컨텐츠 들어갈 부분*/}
@@ -1052,7 +1084,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                         </Rnd>
                     </>
                 )}
-          </>
+            </>
         );
     })
 ;

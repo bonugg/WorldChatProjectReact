@@ -17,9 +17,7 @@
     background-color: rgba(50, 50, 50, 0.5);
 }
 button{
-    font-family: 'Orbit', sans-serif !important;
-}
-button[type=submit]{
+    font-family: 'Russo One', sans-serif !important;
     transition: all 0.25s ease-in-out !important;
 }
 
@@ -144,7 +142,80 @@ body {
     z-index: 1;
     cursor: pointer;
 }
+.first_div{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.65);
+    visibility: visible;
+    z-index :20;
+    transition: all 0.25s ease-in-out;
 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.first_div.none{
+    opacity: 0;
+    visibility: hidden;
+    z-index :-1;
+    transition: all 0.25s ease-in-out;
+}
+.SelectCountry_div{
+    width: 400px;
+    background-color: #0b0b0e;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding : 30px;
+    box-sizing: border-box;
+    border: 1px solid #3b3e3f;
+}
+.SelectCountry_div_1{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+    color: white;
+    margin-bottom: 40px;
+}
+.SelectCountry_div_2{
+    width: 100%;
+    height: 60px;
+}
+.SelectCountry_div_3{
+    width: 100%;
+    height: 50px;
+    display: flex;
+    margin-top: 30px;
+}
+.SelectCountry_btn{
+    width: 50%;
+    height: 100%;
+    background-color: #18181f !important;
+    border: 0px solid #3b3e3f !important;
+    border-top-width: 1px !important;
+    box-shadow: 2px 3px 0px 0px black;
+    border-radius: 5px !important;
+    transition: all 0.25s ease-in-out !important;
+    color: white !important;
+    margin-right: 40px !important;
+}
+.SelectCountry_btn.no{
+    background-color: rgba(205, 92, 92, 0.6) !important;
+    margin-right: 0px !important;
+}
+.SelectCountry_btn:hover{
+    background-color: #272731 !important;
+}
+.SelectCountry_btn.no:hover{
+    background-color: rgba(205, 92, 92, 0.9) !important;
+}
 a {
     color: inherit; /* 부모 엘리먼트의 값을 물려받는다 */
     text-decoration: none;
@@ -540,7 +611,40 @@ a {
     height: 70px;
     margin-bottom: 30px;
 }
-
+.line_create{
+    position: relative;
+    overflow: hidden;
+    margin: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px 1px black;
+    width: 80%;
+    height: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.line_create.one::before{
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+.line_create::before{
+    background: conic-gradient(transparent 180deg,  #FFBD1F 360deg);
+    animation: rotate 1s infinite linear;
+    position: absolute;
+    top: -25%;
+    left: -25%;
+    opacity: 1;
+    content: "";
+    width: 150%;
+    height: 150%;
+    z-index: -1;
+    transition: opacity 1s ease-in-out;
+}
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
 .R_maximum_btn{
     margin: auto !important;
     background-color: #18181f !important;
@@ -549,7 +653,6 @@ a {
     height: 80% !important;
     border: 0px solid #3b3e3f !important;
     border-top-width: 1px !important;
-    box-shadow: 2px 3px 0px 0px black;
     color: white !important;
     font-family: 'Russo One', sans-serif!important;
     border-radius: 5px !important;
@@ -557,14 +660,12 @@ a {
 }
 .R_maximum_btn:hover{
     background-color: #272731 !important;
-    box-shadow: -1px -1px 0px 0px black;
     border-top-width: 0px !important;
 }
 
 .R_maximum_btn:disabled{
     background-color: #1a1a1f !important;
     color: rgba(70, 70, 70, 1) !important;
-    box-shadow: -1px -1px 0px 0px black;
     border-top-width: 0px !important;
     transition: all 0.25s ease-in-out;
 }
@@ -694,7 +795,7 @@ a {
 
 .myPageDiv2 {
     width: 100%;
-    height: 35%;
+    height: 25%;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -799,7 +900,7 @@ a {
 }
 .myPageDiv_Message_text{
     width: 100%;
-    height: 80%;
+    height: 90%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -825,7 +926,7 @@ a {
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 20%;
+    height: 10%;
 }
 
 
@@ -956,12 +1057,11 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
     color: indianred !important;
     border: 0px solid #3b3e3f !important;
     border-top-width: 1px !important;
+    font-family: 'Russo One', sans-serif !important;
     box-shadow: 2px 3px 0px 0px black;
 }
 .error_text:hover{
     background-color: #272731 !important;
-    box-shadow: -1px -1px 0px 0px black;
-    border-top-width: 0px !important;
 }
 
 .error_text.no {
@@ -978,17 +1078,67 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
     box-sizing: border-box;
 }
 .login_btn2 {
-    width: 95% !important;
+    width: 100% !important;
     height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 33px;
+    padding-right: 33px;
     box-sizing: border-box;
     margin-top: 5px !important;
 }
-
+.login_btn_google_div{
+    width: 100% !important;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 33px;
+    padding-right: 33px;
+    box-sizing: border-box;
+    margin-top: 40px;
+}
+.social_login_box.google{
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    color: #262626 !important;
+    border: 0px solid #6c6c6c !important;
+    border-top-width: 1px !important;
+    box-shadow: 2px 3px 2px 0px #727272;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.25s ease;
+}
+.social_login_box.google:hover{
+    background-color: rgba(255, 255, 255, 0.65);
+    cursor: pointer;
+}
+.social_login_image_box{
+    width: 60px;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.google_icon{
+    width: 100%;
+    height: 100%;
+}
+.social_login_text_box{
+    width: calc(100% - 120px);
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Russo One', sans-serif;
+}
+.social_login_blank_box{
+    width: 60px;
+    height: 100%;
+}
 .checkbtn{
     border-radius: 0px !important;
     border-top-right-radius: 4px !important;
@@ -1007,7 +1157,6 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
 }
 .checkbtn:hover{
     background-color: #272731 !important;
-    border-top-width: 0px !important;
 }
 
 .yesIDinput {
@@ -1041,15 +1190,25 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
     border: 1px solid indianred!important;
 }
 
+
 .SignUpBtn {
     color: white !important;
     width: 100%;
     height: 60px !important;
     font-family: 'Orbit', sans-serif !important;
+
+    background-color: #18181f !important;
+    border: 0px solid #3b3e3f !important;
+    border-top-width: 1px !important;
+    box-shadow: 2px 3px 0px 0px black;
+}
+.SignUpBtn:hover{
+    background-color: #272731 !important;
 }
 .SignUpBtn:disabled{
-    background-color: #000000 !important;
-    color: #343434 !important;
+    background-color: #2b2b2f !important;
+    box-shadow: -2px -2px 0px 0px black;
+    color: #8d8d8d !important;
     cursor: auto !important;
 }
 

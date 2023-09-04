@@ -95,7 +95,7 @@
     max-height: 100% !important;
     min-height: 100% !important;
     color: white;
-    padding-left: 68px !important;
+    padding-left: 85px !important;
     border-radius: 4px !important;
 }
 
@@ -139,14 +139,13 @@
     min-width: 100% !important;
     font-family: 'Russo One', sans-serif !important;
     color: white !important;
-    background-color: rgba(24, 24, 31, 0.8) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgb(200, 200, 200) !important;
     border-radius: 4px !important;
 }
 
 .menu_btn:hover {
-    background-color: #18181f !important;
-    border: 1px solid rgba(0, 0, 0, 1) !important;
+    background-color: rgba(255, 255, 255, 0.5) !important;
 }
 
 .trans {
@@ -168,7 +167,7 @@
     padding-right: 20px;
     box-sizing: border-box;
     background-color: rgba(0, 0, 0, 0.6) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid rgb(200, 200, 200) !important;
     outline: none;
     font-size: 10px !important;
     color: rgba(255, 255, 255, 0.7) !important;
@@ -180,7 +179,6 @@
 }
 .trans_select:hover {
     background-color: rgba(0, 0, 0, 0.9) !important;
-    border: 1px solid black !important;
 }
 .trans_li_select{
     font-size: 12px !important;
@@ -189,12 +187,12 @@
     color: rgba(255, 255, 255, 0.8) !important;
 }
 
-.add_now {
+.emoji{
     position: absolute !important;
     top: 10px !important;
-    left: 10px !important;
-    width: 50px !important;
-    min-width: 50px !important;
+    left: 45px !important;
+    width: 30px !important;
+    min-width: 30px !important;
     height: 30px !important;
     font-size: 15px !important;
     color: white !important;
@@ -205,17 +203,12 @@
     border-radius: 4px !important;
     transition: border-bottom-left-radius 1s ease-in-out !important;
 }
-
-.add_now:hover {
-    background-color: rgba(255, 255, 255, 0.4) !important;
-}
-
 .add {
     position: absolute !important;
     top: 10px !important;
     left: 10px !important;
-    width: 50px !important;
-    min-width: 50px !important;
+    width: 30px !important;
+    min-width: 30px !important;
     height: 30px !important;
     font-size: 15px !important;
     color: white !important;
@@ -229,6 +222,9 @@
 
 .add:hover {
     background-color: rgba(255, 255, 255, 0.4) !important;
+}
+.add:disabled{
+    color: #ffffff !important;
 }
 
 .btnSend2 {

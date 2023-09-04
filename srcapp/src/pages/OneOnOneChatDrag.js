@@ -17,7 +17,7 @@ import Picker from '@emoji-mart/react'  // <-- 추가
 import data from '@emoji-mart/data'
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Logo from "../img/logo_img.png";
-
+import {useDispatch, useSelector} from "react-redux";
 const MessageStyled = styled.p`
 `;
 const slideDownUserList = keyframes`
@@ -53,10 +53,16 @@ const MenuPanel = styled.div`
   overflow-x: hidden;
   transition: all 0.25s ease-in-out;
   border-radius: 4px;
-  background: rgba(130, 130, 130, 0.7);
+  background: rgba(30, 30, 30, 1);
 `;
 
 const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUserId, oneOnOneUserNickName, friendMax, isMinimize}) => {
+        const dispatch = useDispatch();
+        const friendDragPosition = useSelector((state) => state.chatminimumFriend.position);
+        const friendRoomId = useSelector((state) => state.chatminimumFriend.roomId);
+        const friendId = useSelector((state) => state.chatminimumFriend.friendNum);
+        const friendIdRef = useRef(null);
+
         // 위치 및 상태 설정
         const [windowSize, setWindowSize] = useState({
             width: window.innerWidth,
@@ -73,7 +79,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                     x: (window.innerWidth / 2) - (450 / 2),  //450은 Draggable 컴포넌트의 너비
                     y: (window.innerHeight / 2) - (600 / 2), //230은 Draggable 컴포넌트의 높이
                 };
-                setPosition(newPosition);
+                dispatch({ type: "SET_FRIENDDRAG_POSITION", payload: newPosition });
             };
 
             window.addEventListener('resize', handleResize);
@@ -85,10 +91,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
             x: (windowSize.width / 2) - (450 / 2), // 450은 Draggable 컴포넌트의 너비
             y: (windowSize.height / 2) - (600 / 2), // 200은 Draggable 컴포넌트의 높이
         };
-        const [position, setPosition] = useState(initialPosition);
-        const handleDrag = useCallback((e, data) => trackPos(data), []);
         const [isClosed, setIsClosed] = useState(false);
-        const [isChatDiv, setIsChatDiv] = useState(false);
 
         //메뉴창 비활성화 상태 변수
         const [menuDiv, setMenuDiv] = useState(false);
@@ -125,6 +128,11 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
         const previousScrollbarStateRef = useRef(previousScrollbarState);
 
         const roomIdRef = useRef(null); // roomId 참조 변수 생성
+        useEffect(() => {
+            if (friendRoomId) {
+                roomIdRef.current = friendRoomId;
+            }
+        }, [friendRoomId]);
         const userNickNameRef = useRef(null)
         const userProfileRef = useRef(null);
         const userProfileOtherRef = useRef(null);
@@ -247,7 +255,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                         'Authorization': localStorage.getItem('Authorization'),
                         'userName': localStorage.getItem('userName'),
                     },
-                    body: JSON.stringify({userId: oneOnOneUserId})
+                    body: JSON.stringify({userId: friendIdRef.current})
                 });
 
                 const accessToken = response.headers.get('Authorization');
@@ -261,7 +269,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                 console.log("실행");
                 const responseData = await response.json();
                 if (responseData.item && responseData.item.chatroom.id) {
-                    roomIdRef.current = responseData.item.chatroom.id;
+                    dispatch({ type: "SET_FRIENDROOM_NUM", payload: responseData.item.chatroom.id });
                     userNickNameRef.current = responseData.item.userNickName;
                     userProfileRef.current = responseData.item.userProfile;
                     userProfileOtherRef.current = responseData.item.userProfileOther;
@@ -284,7 +292,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
             setIsChatReadOnly(false);
             const headers = {
                 Authorization: localStorage.getItem("Authorization"),
-                roomId: roomIdRef.current,
+                roomId:  roomIdRef.current,
                 friendChat: 'on'
             };
             const socket = new SockJS(`/friendchat`);
@@ -568,7 +576,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
 
         const addEmoji = (e) => {
             let emoji = e.native;
-            setMessages(prevMessage => prevMessage + emoji);
+            setSendMessage(prevMessage => prevMessage + emoji);
         }
 
 //--------------채팅 창 오픈----------------------
@@ -578,11 +586,19 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                 setMenuDiv(false);
                 setMenuDiv2(false);
                 setUserNickNameOther("");
+                dispatch({ type: "SET_FRIEND_NUM", payload: null });
                 disconnect();
                 setIsClosed(false);
             } else {
                 if (userNickNameOther == "") {
                     setUserNickNameOther(oneOnOneUserNickName);
+                }
+                console.log(oneOnOneUserId + "-==-");
+                if(oneOnOneUserId !== '') {
+                    console.log(oneOnOneUserId + "실행oooo");
+                    dispatch({ type: "SET_FRIEND_NUM", payload: oneOnOneUserId });
+                }else {
+                    console.log(oneOnOneUserId + "2");
                 }
                 connect();
             }
@@ -593,6 +609,9 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                 }
             };
         }, [show]);
+        useEffect(() => {
+            friendIdRef.current = friendId;
+        }, [friendId]);
 //--------------채팅 창 오픈----------------------
 
 //--------------메세지 추가 될 때마다 현재 위치 구해서 스크롤바 내리기----------------------
@@ -614,13 +633,6 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
             }
         }, [messages]);
 //--------------메세지 추가 될 때마다 현재 위치 구해서 스크롤바 내리기----------------------
-
-
-//--------------창 위치 조절-----------------------
-        const trackPos = (data) => {
-            setPosition({x: data.x, y: data.y});
-        };
-//--------------창 위치 조절-----------------------
 
 //--------------메세지 배열에 추가----------------------
         const showMessageOutput = (messageOutput) => {
@@ -650,7 +662,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
 //--------------채팅창 닫기 -----------------------
         const handleCloseClick = () => {
             setIsClosed(true);
-            setPosition(initialPosition);
+            dispatch({ type: "SET_FRIENDDRAG_POSITION", payload: initialPosition });
             if (onClose) {
                 onClose();
             }
@@ -752,7 +764,10 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                             disabled={!friendMax}
                             onResizeStop={handleResizeStop}
                             onResizeStart={handleResizeStart}
-                            default={{ x: position.x, y: position.y }}
+                            default={{x: friendDragPosition.x, y: friendDragPosition.y }}
+                            onDragStop={(e, d) => {
+                                dispatch({ type: "SET_FRIENDDRAG_POSITION", payload: { x: d.x, y: d.y } });
+                            }}
                             enableResizing={{
                                 top: false,
                                 right: true,
@@ -767,19 +782,17 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                 borderRadius: "15px",
                                 zIndex: "3",
                                 position: "fixed",
-                                left: position.x,
-                                top: position.y,
-                                display: !friendMax ? "none" : "block",
-                                transition: resizing ? 'none' : 'width 0.25s ease-in-out, height 0.25s ease-in-out'
+                                visibility: !friendMax ? "hidden" : "visible",
+                                opacity: !friendMax ? "0" : "1",
+                                transition: resizing ? 'none' : 'opacity 0.25s ease-in-out, width 0.25s ease-in-out, height 0.25s ease-in-out'
                             }}
                             dragHandleClassName="headerChat"
+                            bounds="window"
                         >
                             <div
                                 className="box"
                                 style={{
-                                    position: !friendMax ? 'absolute' : 'fixed',
-                                    display: !friendMax ? 'none' : 'block',
-                                    top: '0',
+                                    display: !friendMax ? "none" : "block",
                                     cursor: 'auto',
                                     color: 'black',
                                     width: '100%',
@@ -790,8 +803,6 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                     padding: '0px',
                                     margin: 'auto',
                                     userSelect: 'none',
-                                    zIndex: '3',
-                                    transition: 'height 0.25s ease-in-out'
                                 }}
                             >
                                 <div className={"headerChat"}>
@@ -976,8 +987,13 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                             multiple
                                                             style={{display: 'none'}}
                                                         />
+                                                        <Button disabled={!isChatReadOnly} className={"emoji"} type="button" onClick={toggleEmojiPicker}>😃</Button>
+                                                        {showEmojiPicker && (
+                                                            <Picker data={data} onEmojiSelect={addEmoji}/>
+                                                        )}
                                                         <Button
-                                                            className={menuDiv ? "add_now" : "add"}
+                                                            disabled={!isChatReadOnly}
+                                                            className={"add"}
                                                             type="button"
                                                             onClick={handleMenuOpen}
                                                         >{menuDiv ? "-" : "+"}
@@ -999,17 +1015,12 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                         >SEND
                                                         </Button>
                                                     )}
-
-
                                                 </form>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            {/* 밑으로 컨텐츠 들어갈 부분*/}
-                            {/*<div style={{color:'white', fontSize: '22px'}}>x: {position.x.toFixed(0)}, y: {position.y.toFixed(0)}</div>*/}
-                            {/*</div>*/}
                         </Rnd>
                     </>
                 )}

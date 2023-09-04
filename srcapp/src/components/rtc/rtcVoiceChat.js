@@ -389,7 +389,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                 break;
             case "SecurityError":
             case "PermissionDeniedError":
-                // Do nothing; this is the same as the user canceling the call.
+                // Do nothing; this is the same as the chatRandom canceling the call.
                 break;
             default:
                 alert("Error opening your camera and/or microphone: " + error.message);

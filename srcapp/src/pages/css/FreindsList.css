@@ -62,16 +62,31 @@
 }
 .friendsList_item_div{
     width: 100%;
-    height: 90px;
-    margin-bottom: 10px;
+    height: 70px;
+    margin-bottom: 40px;
     padding: 0px 10px;
     box-sizing: border-box;
     position: relative;
 }
+.userMessage_div{
+    position: absolute;
+    top: 100%;
+    left: 5%;
+    width: 90%;
+    height: 25px;
+    color: white;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    font-size: 12px;
+}
 .friendsList_delete_div{
     background-color: rgba(0, 0, 0, 1);
     width: 100%;
-    height: 100%;
+    height: 70px;
     display: flex;
     margin-bottom: 10px;
     border-radius: 4px;
@@ -84,7 +99,7 @@
     background-color: rgba(11, 11, 14, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
-    height: 100%;
+    height: 70px;
     display: flex;
     margin-bottom: 10px;
     border-radius: 4px;
@@ -118,7 +133,7 @@
     position: relative;
 }
 .friendsList_item_img{
-    width: 90px;
+    width: 70px;
     padding: 5px;
     box-sizing: border-box;
 }
@@ -144,7 +159,7 @@
     text-overflow: ellipsis;
 }
 .friendsList_item_btn_div{
-    width: calc(100% - 190px);
+    width: calc(100% - 170px);
     height: 100%;
     display: flex;
     justify-content: flex-start;
