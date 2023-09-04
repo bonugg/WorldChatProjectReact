@@ -53,7 +53,7 @@ const MenuPanel = styled.div`
   background: rgba(130, 130, 130, 0.7);
 `;
 
-const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isMinimize}) => {
+const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isMinimize, socket}) => {
         // 위치 및 상태 설정
         const [windowSize, setWindowSize] = useState({
             width: window.innerWidth,
@@ -147,6 +147,11 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
         const [size, setSize] = useState({ width: "450px", height: "250px"});
         //rnd
         const [resizing, setResizing] = useState(false);
+
+        //친구신청에 필요한 상태변수
+        // const [friendsId, setFriendsId] = useState("");
+        // const friendsIdRef = useRef(null);
+
         const handleResizeStart  = () => {
             // 사이즈 결정
             setResizing(true);
@@ -325,7 +330,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                 setSelectedLanguage(" ");
                 setMessages([]);
                 setIsChatReadOnly(false);
-                leaveEvent();
+                // leaveEvent();
                 client.current.disconnect(() => {
                     console.log("websocket disconnected");
                 });
@@ -528,6 +533,7 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
             setRandomStartText("start a random chat");
             setIsChatDiv(false);
         };
+//친구추가
         const friendAddClick = (otherId) => {
             const requestFrdAxios = async() => {
                 try {
@@ -536,9 +542,19 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
                                 Authorization: `${localStorage.getItem('Authorization')}`
                             }});
                     console.log(response);
-                    console.log(response.data.item.msg)
+                    console.log(response.data.item.msg);
+                    console.log(response.data.item.friends);
+                    console.log("아래는 친구row id")
+                    console.log(response.data.item.friends.id);
                     if(response.data.item.msg === "request ok") {
                         alert("친구 신청이 완료되었습니다")
+                        const friendRequest = {
+                            type: "friendRequest",
+                            receiverId: otherId,
+                            requesterId: LoginUserNickName.current,
+                            friendsId: response.data.item.friends.id
+                        };
+                        socket.send(JSON.stringify(friendRequest));
                     } else if(response.data.item.msg === "already frds") {
                         alert("이미 친구이거나 응답 대기중입니다.")
                     }
@@ -548,6 +564,36 @@ const RandomChatDrag = React.memo(({randomMax ,show, onClose, logoutApiCate, isM
             }
             requestFrdAxios();
         };
+
+        if(socket) {
+            socket.onmessage = async (event) => {
+                const receivedMessage = JSON.parse(event.data);
+                console.log("친구 신청 받아오는지?");
+                console.log(receivedMessage);
+                if (receivedMessage.type === 'friendRequest') {
+                    const isAccepted = window.confirm(`${receivedMessage.from}님의 친구 요청을 수락하시겠습니까?`);
+                    if (isAccepted) {
+                        const response = await axios.post("/friends/approve", {id: receivedMessage.friendsId}, {
+                            headers: {
+                                Authorization: `${localStorage.getItem('Authorization')}`
+                            }
+                        });
+                        console.log(response);
+                        alert("수락");
+                    } else {
+                        const response = await axios.post("/friends/decline", {id: receivedMessage.friendsId}, {
+                            headers: {
+                                Authorization: `${localStorage.getItem('Authorization')}`
+                            }
+                        });
+                        console.log(response);
+                        alert("거절");
+                    }
+                };
+            };
+        };
+
+
 
         //입력중...메시지 띄우기
         const sendTypingMessage = () => {

@@ -12,10 +12,13 @@ import Philippines from "../img/flag/PH.png";
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import "./css/FreindsList.css";
+import axios from "axios";
 
 
 const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType, socket}) => {
     const [userList, setUserList] = useState([]);
+    const [unreadCount, setUnreadCount] = useState({});
+
     const freindsList = async (retry = true) => {
         
         try {
@@ -27,7 +30,6 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
                     'userName': localStorage.getItem('userName'),
                 },
             });
-
             const accessToken = response.headers.get('Authorization');
             if (accessToken != null) {
                 localStorage.setItem('Authorization', accessToken);
@@ -40,6 +42,7 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
             console.log(data);
             if(data && data.items) {
                 setUserList(() => data.items);
+                getUnreadMessageCount(data.items);
             }else {
                 setUserList([]);
             }
@@ -58,7 +61,6 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
             setUserList([]);
         }
     }, [FriendNationally]);
-
 
     // 국적 이미지 대응
     const flagImage = {
@@ -91,7 +93,59 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
 
     const friendsChatDivOn = (isDiv, userId, userNickName) => {
         isOneOnOneChatDiv(isDiv, userId, userNickName);
+
+        setUnreadCount(prevCounts => ({
+            ...prevCounts,
+            [userNickName]: 0
+        }));
     };
+
+    //메시지 안읽은 개수 웹소켓
+    useEffect(() => {
+        if (socket) {
+            socket.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                console.log("서버에서 받은 보낸사람");
+                console.log(msg);
+                //unreadCounts를 업데이트합니다.
+                setUnreadCount(prevCounts => ({
+                    ...prevCounts,
+                    [msg.sender]: (prevCounts[msg.sender] || 0) + 1
+                }));
+            };
+        }
+    }, [socket]);
+
+    // //db에서 안읽은거 불러오기
+    const getUnreadMessageCount = async (users) => {
+        try {
+            console.log("유저리스트");
+            console.log(users);
+            const userNickNames = users.map(user => user.friends.userNickName);
+            console.log("유저 리스트안에 친구 닉네임들");
+            console.log(userNickNames);
+
+            const response = await axios.post('/chatroom/unread-messages',
+                {userNickName: userNickNames},
+                {
+                    headers: {
+                        "Authorization": localStorage.getItem("Authorization")
+                    }
+                })
+            console.log("안읽은 메시지 개수")
+            console.log(response);
+            if(response.data && response.data.items) {
+                const unreadCnt = {};
+                response.data.items.forEach((count, index) => {
+                    unreadCnt[userNickNames[index]] = count;
+                });
+                setUnreadCount(unreadCnt);
+            }
+
+        } catch (e) {
+            console.log(e);
+        }
+    }
 
     return (
         <div className={"friendsListDiv"}>
@@ -107,13 +161,12 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
                 <div className={"friendsList_2"}>
                     <TransitionGroup>
                         {userList && userList.map(user => (
-                            <CSSTransition  key={user.id} timeout={500} classNames="item">
+                            <CSSTransition key={user.id} timeout={500} classNames="item">
                             <FreindsListItem
-                                             onRemove={removeItemFromList} frd={user} onData={onData} setChatType={setChatType} friendsChatDiv={friendsChatDivOn} socket={socket}>
+                                             onRemove={removeItemFromList} frd={user} onData={onData} setChatType={setChatType} friendsChatDiv={friendsChatDivOn} unreadCount={unreadCount[user.friends.userNickName] || 0}>
                             </FreindsListItem>
                             </CSSTransition>
                         ))}
-                                                                           
                     </TransitionGroup>
                     </div>
             </div>

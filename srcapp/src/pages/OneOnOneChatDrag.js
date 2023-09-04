@@ -294,12 +294,15 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                 getChatMessageFromDB();
                 client.subscribe("/frdSub/" + roomIdRef.current, async (messageOutput) => {
                     const responseData = JSON.parse(messageOutput.body);// 이 부분 추가
-
-                    if (responseData.type === "status") {
-                        if (responseData.content === "online") {
-                            updateReads();
-                        }
-                    } else{
+                    if(responseData.msg === "updated") {
+                        const updatedMessages = responseData.updatedMsgList;
+                        console.log("업데이트된 메시지 리스트")
+                        console.log(updatedMessages);
+                        setMessages(prevMessages => prevMessages.map(msg => {
+                            const updateMsg = updatedMessages.find(uMsg => uMsg.id === msg.id);
+                            return updateMsg ? updateMsg : msg;
+                        }));
+                    } else {
                         if (responseData.sender !== userNickNameRef.current && selectedLanguageRef.current != " ") {
                             const translatedText = await detectAndTranslate(responseData.message);
                             if (translatedText) {
@@ -437,7 +440,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                 console.log(e);
             }
         }
-        //채팅창 업데이트
+
 
 
 //--------------파일 버튼 클릭 후 파일 첨부 시에 파일 명 인풋창에 표시----------------------
@@ -669,7 +672,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
         };
 //--------------메뉴 오픈-----------------------
 
-        //입력중...메시지 띄우기
+        //입력중...메시지 띄우기 아아그럼 이건 컴파일 문제다
         const sendTypingMessage = () => {
             // 메시지 전송 처리를 여기서 수행
             const message = {
@@ -915,7 +918,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                                         <span
                                                                             className="content_other">{message.message}</span>
                                                                         <span
-                                                                        className="message-regdate_other">{message.checkRead ? (<div className={"on"}></div>) : (<div className={"off"}></div>)}&nbsp;&nbsp;&nbsp;{message.createdAt}</span>
+                                                                        className="message-regdate_other">{message.createdAt}</span>
                                                                     </div>
                                                                 )}
                                                             </MessageStyled>
