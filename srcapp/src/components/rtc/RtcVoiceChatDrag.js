@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import Draggable from 'react-draggable';
 import Button from "@mui/material/Button";
 
-function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking,senderIsTalking,src1,src2,toggleMike,localAudio}) {
+function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking,senderIsTalking,src1,src2,toggleMike,localAudio,toggleRecording,isRecording}) {
     const [position, setPosition] = useState({x: -183, y: -286});
     const [isMinimized, setIsMinimized] = useState(false);
     const [isClosed, setIsClosed] = useState(false);
@@ -10,6 +10,9 @@ function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking
     const [button1Active, setButton1Active] = useState(false);
     const [button2Active, setButton2Active] = useState(false);
     const [button3Active, setButton3Active] = useState(false);
+    const [recoderButton, setRecoderButton] = useState(false);
+
+    const [dotCount, setDotCount] = useState(0);
 
     useEffect(() => {
         if (!show) {
@@ -20,6 +23,41 @@ function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking
     const trackPos = (data) => {
         setPosition({x: data.x, y: data.y});
     };
+    const Language = (language)=>{
+        console.log("선택언어: " + language)
+        // setSelectLang(language);
+        // lang(language);
+        localStorage.setItem('language', language);
+    }
+    // useEffect로 isRecording 상태가 변경될 때 타이머 설정/해제
+    useEffect(() => {
+        let interval;
+        if (isRecording) {
+            interval = setInterval(() => {
+                setDotCount((prevDotCount) => {
+                    if (prevDotCount < 3) {
+                        return prevDotCount + 1;
+                    } else {
+                        return 1;
+                    }
+                });
+            }, 500);  // 0.5초 간격으로 업데이트
+        } else {
+            setDotCount(0);  // 녹음이 중지되면 dotCount 초기화
+        }
+
+        return () => {
+            if (interval) {
+                clearInterval(interval);  // 컴포넌트 언마운트 또는 isRecording 상태 변경 시 타이머 해제
+            }
+        };
+    }, [isRecording]);
+
+    const buttonText = isRecording ? `번역중${'.'.repeat(dotCount)}` : '녹음 번역';
+    const buttonColor = isRecording ? 'red' : '';  // 녹음 중일 때 빨간색 배경, 아니면 기본 배경색
+
+
+
     // let lastEventTimestamp = 0;
     // const THROTTLE_INTERVAL = 10000; // 0.2초
     // useEffect(()=>{
@@ -210,6 +248,26 @@ function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking
                                 >
                                     mike {button2Active ? 'OFF' : 'ON'}
                                 </Button>
+
+                                <Button
+                                    onClick={toggleRecording}
+                                    style={{
+                                        backgroundColor:buttonColor,
+                                        transition: 'background-color 0.3s',
+                                        color: 'white',
+                                        width: '30%'
+                                    }}
+                                >
+                                    {buttonText}
+
+                                </Button>
+                                <div style={{position: 'absolute', backgroundColor: '#fff', border: '1px solid #ccc'}}>
+                                    <div onClick={() => Language('Kor')}>Kor</div>
+                                    <div onClick={() => Language('Eng')}>Eng</div>
+                                    <div onClick={() => Language('Jpn')}>Jpn</div>
+                                    <div onClick={() => Language('Chn')}>Chn</div>
+                                </div>
+
                                 {/*<Button*/}
                                 {/*    style={{*/}
                                 {/*        backgroundColor: button3Active ? '#f05650' : '',*/}
