@@ -23,10 +23,8 @@ const FreindsList = React.memo(({FriendNationally, logoutApi3, FriendsList,isOne
 
     const [nationallyName, setNationallyName] = useState('');
     const [isChatDiv, setIsChatDiv] = useState(false);
+    
     const freindsList = async (retry = true) => {
-
-       
-        
         try {
             const response = await fetch('/api/v1/user/friendsList', {
                 method: 'POST',

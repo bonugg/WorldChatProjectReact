@@ -31,6 +31,8 @@ const FreindsListItem = React.memo(({user, friendsChatDiv,onData,setChatType}) =
         friendsChatDiv(true, userId, userNickName);
     };
 
+    console.log("유저프로필네임" + userProfileName);
+
     const Rtc = (type) => {
         console.log("이름"+userName);
         onData(userName);

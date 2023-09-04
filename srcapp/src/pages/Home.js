@@ -214,6 +214,12 @@ const Home = React.memo(() => {
         const [showDeclineModal,setShowDeclineModal] = useState(false);
         const [modalContent, setModalContent] = useState("");
 
+        //const [sendUserProfile,setSendUserProfile] = useState(null);
+
+
+        //const sendUserProfile = userList.find(u => u.userName === sendUser)?.userProfileName;
+
+
         const handleModalConfirm = () => {
             setShowModal(false);
             setSendUser(modalContent.split("님이")[0]);
@@ -229,30 +235,35 @@ const Home = React.memo(() => {
         };
 
         const handleModalDecline = () => {
-            //setSendUser(modalContent.split("님이")[0]);
-            handleDecline();
-
+            const sender = modalContent.split("님이")[0];
+            setSendUser(sender);
+            console.log("거절버튼 눌렀을때 샌더유저 " + sendUser);
+            handleDecline(sender);
         }
 
-        const handleSendDeclineModal = () => {
-            setShowRtcVoiceChat(false);
+        const handleSendDeclineModal = (e) => {
+            e.stopPropagation();
+            console.log("거절모달 닫힘@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"+showDeclineModal);
             setShowDeclineModal(false);
+            
         }
-        
+
+       
         
         // let socket;
-        useEffect(() => {
-            if (socket) {
-                socket.onmessage = function (event) {
-                    const receivedMessage = event.data;
+        // useEffect(() => {
+        //     if (socket) {
+        //         socket.onmessage = function (event) {
+        //             const receivedMessage = event.data;
                     
-                    console.log("receivedMessage ::::" + receivedMessage );
-                    setModalContent(receivedMessage);
-                    setShowModal(true);
+        //             console.log("receivedMessage ::::" + receivedMessage );
+        //             setModalContent(receivedMessage);
+                  
 
-                };
-            }
-        }, [socket]);
+        //         };
+        //     }
+        // }, [socket]);
+        
 
         const onPasswordChange = (newValue) => {
             setIsPasswordChangeDiv(newValue);
@@ -320,10 +331,19 @@ const Home = React.memo(() => {
 
 useEffect(() => {
     if (type2) {
+
         sendRequestToServer();
         console.log('유즈이펙트' + type2);
     }
 }, [type2]); 
+
+useEffect(() => {
+    if (showModal) {
+        const sender = modalContent.split("님이")[0];
+        setSendUser(sender);
+        console.log("모달창 보여줄때 찍히는 콘솔로그 샌드유저 " + sendUser);
+    }
+}, [showModal, modalContent]);
 
 
 useEffect(() => {
@@ -355,13 +375,14 @@ useEffect(() => {
         };
 
         setSocket(ws);
+       
     }
 }, []);  // 이 배열이 비어 있으므로 이 useEffect는 컴포넌트가 마운트될 때만 실행되게
 
 
 const localRoom = sendUser + "님과 " + receiverUser + "님의 음성채팅방"
 
-const handleDecline = async () => {
+const handleDecline = async (sender) => {
 
     try {
         const response = await fetch('/webrtc/decline', {
@@ -371,7 +392,7 @@ const handleDecline = async () => {
             },
             body: JSON.stringify({
                 sender: localStorage.getItem('userName'),  // 현재 유저 (거절한 사람)
-                receiver: sendUser, // 통화를 요청한 사람
+                receiver: sender, // 통화를 요청한 사람
                 roomId:localRoom,
                 
             })
@@ -394,7 +415,6 @@ const handleDecline = async () => {
 
     // 모달 닫기
     setShowModal(false);
-    setShowDeclineModal(false);
 };
 
 useEffect(() => {
@@ -404,11 +424,11 @@ useEffect(() => {
 
             if (receivedMessage.includes("거절")) {
                 // 거절 메시지를 받았을 때의 로직
+                setShowDeclineModal(true);
+                setShowModal(false);
                 setShowRtcChat(false);
                 setShowRtcVoiceChat(false);
                 setModalContent(receivedMessage);
-                //setShowModal(false);
-                setShowDeclineModal(true);
                 setChatType('');
             } else {
                 // 기존의 메시지 처리 로직
@@ -419,12 +439,18 @@ useEffect(() => {
     }
 }, [socket]);
 
+
+const sendUserProfile = userList.find(u => u.userName === sendUser)?.userProfileName;
+
+//console.log("홈 모달창 샌드유저 이미지 확인값@@@@@@" + sendUserProfile);
 console.log("샌드유저 스테이트 확인값 @@@@@@@@@@@@@@@@@" + sendUser);
 console.log("리시버유버 스테이트 확인값 @@@@@@@@@@@@@@@@" + receiverUser);
 
 
 const sendRequestToServer = async () => {
+    
     try {
+
         const response = await fetch('/webrtc/request', {
             method: 'POST',
             headers: {
@@ -441,6 +467,8 @@ const sendRequestToServer = async () => {
         console.log("요청리시버 " + receiverUser);
 
         if (response.ok) {
+            
+            setSendUser(rtcUserName);
             console.log(type2+"타입ㅂㅂㅂㅂㅂㅂㅂㅂ");
             console.log("api 호출 완료 request@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2")
             if (type2 === "video") {
@@ -464,11 +492,13 @@ const setChatType = (type) => {
 };
 
 const handleGrandchildData = (data) => {
-    console.log(data+"1232132121");
+    console.log(data+"onData 데이타@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     setDataFromChild(data);
     setReceiverUser(data);
     setSendUser(rtcUserName);
 };
+
+
 
 
 
@@ -903,6 +933,8 @@ const handleGrandchildData = (data) => {
             return null;
         };
 
+        
+
         const login = () => {
             if (isLoginZoom) {
                 return null;
@@ -1001,6 +1033,7 @@ const handleGrandchildData = (data) => {
             setLoginDiv(false);
             setShowRtcChat(false);
         };
+        
 
         //로딩 전 메뉴바 숨기기
         const [isLoading, setIsLoading] = useState(true);
@@ -1020,6 +1053,13 @@ const handleGrandchildData = (data) => {
                 </>
             );
         }
+        
+        
+
+
+ 
+        
+        
 
         console.log("home userList" + userList);
 
@@ -1058,19 +1098,23 @@ const handleGrandchildData = (data) => {
                             </Canvas>
                         </CanvasContainer>
 
+                    <UserListContext.Provider value={{ userList, setUserList }}>
                     <NotificationModal 
                         show={showModal} 
                         onHide={() => setShowModal(false)}
                         onAccept={handleModalConfirm}
                         onDecline={handleModalDecline}
                         message={modalContent}
+                        sendUserProfile={sendUserProfile}
                     />
+                    </UserListContext.Provider>
+              
+
                     <NotificationDeclineModal
                         show={showDeclineModal}
                         onHide={() => setShowDeclineModal(false)}
                         message={modalContent}
                         onDeclineAccept={handleSendDeclineModal}
-
                     />
 
 

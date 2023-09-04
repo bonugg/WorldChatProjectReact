@@ -22,24 +22,55 @@
 /* 모달 본문 스타일 */
 .modal-body {
     color: #aaa; /* 회색 글자 */
+    text-align: center;
+}
+
+.modal-body img {
+    width:150px;
+    height:100px;
+}
+
+.modal-image-box {
+    width:150px;
+    margin: auto;
+    margin-bottom: 15px;
 }
 
 /* 수락 버튼 스타일 */
-.request-modal button.variant-primary {
-    background-color: #4a6fa5; /* 연한 파랑색 배경 */
-    border-color: #4a6fa5; /* 연한 파랑색 테두리 */
-    color: #fff; /* 흰색 글자 */
+.request-primary {
+    background: none;
+    border: 2px solid #4a6fa5;
+    color: lightblue;
+    padding: 10px 20px; /* 패딩 조절 */
+    transition: all 0.3s ease-in-out; /* 호버 효과를 위한 전환 효과 */
 }
 
+
 /* 거절 버튼 스타일 */
-.request-modal button.variant-secondary {
-    background-color: #1a1a1a; /* 어두운 검은색 배경 */
-    border-color: #4a6fa5; /* 연한 파랑색 테두리 */
-    color: #aaa; /* 회색 글자 */
+.request-secondary {
+    background: none;
+    border: 2px solid gray; /* 테두리 제거 */
+    color: lightcoral;
+    padding: 10px 20px; /* 패딩 조절 */
+    transition: all 0.3s ease-in-out; /* 호버 효과를 위한 전환 효과 */
 }
 
 /* 버튼 호버 효과 */
-button.variant-primary:hover, 
-button.variant-secondary:hover {
-    opacity: 0.8; /* 투명도 감소 */
+.request-secondary:hover,
+.request-primary:hover {
+    transform: translateY(-2px); /* 약간 위로 이동 */
+    box-shadow: 5px 5px 5px rgba(171, 150, 150, 0.2); /* 그림자 강조 */
+    background-color: #4a6fa5;
+}
+
+/* 버튼 눌림 효과 */
+.request-secondary:active,
+.request-primary:active {
+    transform: translateY(0px); /* 원래 위치로 복귀 */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* 그림자 약화 */
+    background-color: #4a6fa5;
+}
+
+.sender{
+    color:lightblue;
 }

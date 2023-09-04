@@ -79,6 +79,11 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                 const blob = new Blob(recordedChunksArray, { type: 'audio/webm' });
                 const audioURL = window.URL.createObjectURL(blob);
                 console.log("녹음중지@@@@@@@");
+
+                if (blob.size < 1024) {
+                    console.log("녹음된 파일 크기가 너무 작아 저장되지 않습니다.");
+                    return;  // 저장 로직을 더 이상 진행하지 않음
+                }
     
                 const tempLink = document.createElement('a');
                 tempLink.href = audioURL;
@@ -87,7 +92,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 
             };
 
-            recorder.start(100);
+            recorder.start(50);
             setMediaRecorder(recorder);
             setIsRecording(true);
 
@@ -537,6 +542,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     function stop() {
         setDisconnect(true);
         setType2('');
+        console.log("보이스스탑메소드" + type2);
 
         alert("상대방과의 연결이 끊어졌습니다.");
 
@@ -549,7 +555,6 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         }
         
         cleanupAudioResources();
-
 
         console.log(localUserName + "exit")
         console.log(localRoom + "exit");
@@ -649,7 +654,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
             }
             const data = await response.json();
             if (data) {
-                setUserList(() => data.items);
+                setUserList(data.items);
             }
         } catch (error) {
             if (retry) {

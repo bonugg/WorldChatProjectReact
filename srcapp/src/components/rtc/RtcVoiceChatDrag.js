@@ -49,7 +49,8 @@ useEffect(() => {
 }, [isRecording]);
 
 const buttonText = isRecording ? `번역중${'.'.repeat(dotCount)}` : '녹음 번역';
-const buttonColor = isRecording ? 'red' : '';  // 녹음 중일 때 빨간색 배경, 아니면 기본 배경색
+const buttonColor = isRecording ? 'lightcoral' : '';  // 녹음 중일 때 빨간색 배경, 아니면 기본 배경색
+const textColor = isRecording ? 'black' : 'white';
 
 
 
@@ -238,7 +239,8 @@ const buttonColor = isRecording ? 'red' : '';  // 녹음 중일 때 빨간색 �
                                         backgroundColor: button2Active ? '#f05650' : '',
                                         transition: 'background-color 0.3s',
                                         color: 'white',
-                                        width: '30%'
+                                        width: '30%',
+                                        border: '2px solid lightcoral'
                                     }}
                                 >
                                     mike {button2Active ? 'OFF' : 'ON'}
@@ -249,11 +251,13 @@ const buttonColor = isRecording ? 'red' : '';  // 녹음 중일 때 빨간색 �
                                     style={{
                                         backgroundColor:buttonColor,
                                         transition: 'background-color 0.3s',
-                                        color: 'white',
-                                        width: '30%'
+                                        width: '30%',  
+                                        color: textColor,     
+                                        border:'2px solid lightblue'                          
                                     }}
                                 >
                                     {buttonText}
+                                  
                                    
                                 </Button>
 
