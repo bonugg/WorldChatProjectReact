@@ -245,6 +245,10 @@ const Home = React.memo(() => {
             e.stopPropagation();
             console.log("거절모달 닫힘@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"+showDeclineModal);
             setShowDeclineModal(false);
+            const modalElement = document.querySelector('.decline-modal');
+            if (modalElement) {
+                modalElement.style.display = 'none';
+            }
             
         }
 
