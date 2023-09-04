@@ -49,7 +49,7 @@ const FriendsReceivedListItem = ({list, onRemove}) => {
     return (
         <div
             className={statements === "APPROVED" ? "received_item3" : statements === "DECLINE" ? "received_item2" : "received_item"}>
-            <div className={"request_user"}>{user.userName}</div>
+            <div className={"request_user"}>{user.userNickName}</div>
             <div className={`statement`}>
                <span>
                        {statements}

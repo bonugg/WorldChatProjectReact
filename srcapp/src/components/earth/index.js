@@ -8,7 +8,9 @@ import EarthNormalMap from "../../assets/textures/8k_earth_normal_map.jpg";
 import Pluto_MadeMap from "../../assets/textures/Pluto_Made.webp";
 import EarthSpecularMap from "../../assets/textures/8k_earth_specular_map.jpg";
 import EarthCloudsMap from "../../assets/textures/8k_earth_clouds.jpg";
+import Asteroid from "../../assets/textures/asteroid.jpg";
 import CloudsMap from "../../assets/textures/cloud.jpg";
+import Space from "../../assets/textures/black2.jpg";
 import {TextureLoader} from "three";
 import MarsMap from "../../assets/textures/mars.jpg";
 import SunMap from "../../assets/textures/sun.jpg";
@@ -42,9 +44,11 @@ const Earth = React.memo(({
                           }) => {
 
     const objectGroup = useRef();
-    const [KR, US, CA, IT, JP, RU, AU, PH, CN, mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
+    const spackBackground = useRef();
+    const spackBackgroundRef = useRef();
+    const [spacebackground, ASTEROID, KR, US, CA, IT, JP, RU, AU, PH, CN, mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
         TextureLoader,
-        [KRMAP, USMAP, CAMAP, ITMAP, JPMAP, RUMAP, AUMAP, PHMAP, CNMAP, Pluto_MadeMap, CloudsMap, EarthNightMap, EarthDayMap, EarthNormalMap, EarthSpecularMap, EarthCloudsMap, MarsMap, SunMap]
+        [Space, Asteroid, KRMAP, USMAP, CAMAP, ITMAP, JPMAP, RUMAP, AUMAP, PHMAP, CNMAP, Pluto_MadeMap, CloudsMap, EarthNightMap, EarthDayMap, EarthNormalMap, EarthSpecularMap, EarthCloudsMap, MarsMap, SunMap]
     );
     //클릭 도시 이름 저장 변수
 
@@ -76,17 +80,12 @@ const Earth = React.memo(({
     const cloudsRefspecular = useRef();
     const sunRef = useRef();
     const cloudsRef = useRef();
-    const cloudsRefMars = useRef();
-    const cloudsRefSun = useRef();
     const mouse = new THREE.Vector2();
     const raycaster = new THREE.Raycaster();
     const {camera} = useThree(); // 카메라 객체 가져오기
     const {scene} = useThree();
     //원 배열에 담기 (삭제 기능)
     const [circles, setCircles] = useState([]);
-
-    const nomarRef = useRef();
-    const cloudsRefnomar = useRef();
 
     const countryCoordinates = {
         KR: {lat: 37.541, lng: 126.986},
@@ -164,10 +163,9 @@ const Earth = React.memo(({
     useFrame(({clock}) => {
         // if (!earthR) {
         const elapsedTime = clock.getElapsedTime();
+        spackBackgroundRef.current.rotation.y = elapsedTime / 50;
         sunRef.current.rotation.y = elapsedTime / 20;
-        cloudsRefSun.current.rotation.y = elapsedTime / 20;
-        marsRef.current.rotation.y = elapsedTime / 20;
-        cloudsRefMars.current.rotation.y = elapsedTime / 20;
+        marsRef.current.rotation.y = elapsedTime / 50;
         specularRef.current.rotation.y = elapsedTime / 20;
         cloudsRefspecular.current.rotation.y = elapsedTime / 20;
         // }
@@ -185,7 +183,6 @@ const Earth = React.memo(({
         }
         //마이페이지 클릭 시 줌 해제
         if (isMapageZoom) {
-            AllresetCityColors();
             setClickedCity(null);
             setSelectedCity(null);
             setZoomIn(false);
@@ -202,7 +199,6 @@ const Earth = React.memo(({
         if (zoomIn && target) {
             if (clickedCity) {
                 if (!isCityZoom) {
-                    resetCityColors(); // Add this line
                     setIsOnMouseClickLock(true);
                     camera.position.lerp(target, 0.1);
                     camera.lookAt(target);
@@ -256,7 +252,6 @@ const Earth = React.memo(({
                             FriendsNationally('');
                         } else {
                             setIsAtInitialPosition(false);
-                            AllresetCityColors();
                         }
                         //로그아웃이 돼서 홈화면으로 돌아가는 중에 login또는 signup클릭 시 실행
                         if (isLoginZoom || isSignUpZoom) {
@@ -269,29 +264,95 @@ const Earth = React.memo(({
         previousTime.current = currentTime;
     });
 
+    const planetPositions = [
+        [0, -100, 200],
+        [200, -100, 30],
+        [100, 100, 0],
+        [-200, 20, 100],
+        // ... add more positions as needed
+    ];
+
+    const meshRef = useRef();
+
+    useFrame(() => {
+        if (meshRef.current) {
+            const time = Date.now() * 0.001;
+            const mesh = meshRef.current;
+            for (let i = 0; i < planetPositions.length; i++) {
+                const dummyObject3D = new THREE.Object3D();
+                dummyObject3D.position.set(...planetPositions[i]);
+                dummyObject3D.updateMatrix();
+                mesh.setMatrixAt(i, dummyObject3D.matrix);
+            }
+            mesh.instanceMatrix.needsUpdate = true;
+        }
+    });
+
+
+    const vertexShader = `
+varying vec3 vVertexWorldPosition;
+varying vec3 vVertexNormal;
+
+void main() {
+    vVertexNormal = normalize(normalMatrix * normal);
+    vVertexWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`;
+
+    const fragmentShader = `
+uniform vec3 glowColor;
+uniform float cameraDistance;
+varying vec3 vVertexWorldPosition;
+varying vec3 vVertexNormal;
+
+void main() {
+    float intensity = pow(0.9 - dot(vVertexNormal, vec3(0.0, 0.0, 1.0)), 6.0);
+
+    gl_FragColor = vec4(glowColor, intensity);
+}`;
+
+
+    // void main() {
+    //     float intensity = pow(0.8 - dot(vVertexNormal, vec3(0.0, 0.0, 1.0)), 6.0);
+    //     gl_FragColor = vec4(glowColor, intensity);
+    //
+    // }`;
+
+
+    const shaderMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            glowColor: { type: "c", value: new THREE.Color(0x74b9ff) }
+        },
+        vertexShader,
+        fragmentShader,
+    });
+
+
     return (
         <>
             <ambientLight intensity={1.2}/>
             <pointLight color="white" position={[-200, 50, -100]} intensity={1.2}/>
+
+            <instancedMesh ref={meshRef} args={[null, null, planetPositions.length]}>
+                <sphereGeometry args={[1.2, 5, 5]}/>
+                <meshPhongMaterial specularMap={specularMap}/>
+                <meshStandardMaterial
+                    map={ASTEROID}
+                    normalMap={normalMap}
+                    metalness={0.6}
+                    roughness={0.7}
+                />
+            </instancedMesh>
+
             <Stars
-                radius={500}
-                depth={10}
-                count={10000}
-                factor={7}
+                radius={350}
+                depth={1}
+                count={1000}
+                factor={5}
                 saturation={0}
                 fade={true}
             />
 
-            <mesh ref={cloudsRefMars} position={[-30, 0, -60]}>
-                <sphereGeometry args={[1.21, 47, 47]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.25}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
             <group position={[-30, 0, -60]}>
                 <mesh
                     ref={marsRef}
@@ -301,22 +362,29 @@ const Earth = React.memo(({
                     <meshStandardMaterial
                         map={marsMap}
                         normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
+                        metalness={0.85}
+                        roughness={0.5}
+                    />
+                </mesh>
+
+                <mesh>
+                    <sphereGeometry args={[1.28, 32, 32]}/>
+                    <shaderMaterial
+                        attach="material"
+                        args={[{
+                            uniforms: {
+                                glowColor: { value: new THREE.Color('rgba(175,106,67)') }
+                            },
+                            vertexShader,
+                            fragmentShader,
+                            side: THREE.BackSide,
+                            blending: THREE.AdditiveBlending,
+                            transparent:true
+                        }]}
                     />
                 </mesh>
             </group>
 
-            <mesh ref={cloudsRefSun} position={[30, 0, -60]}>
-                <sphereGeometry args={[1.21, 32, 32]}/>
-                <meshPhongMaterial
-                    map={cloudsMap2}
-                    opacity={0.4}
-                    depthWrite={true}
-                    transparent={true}
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
             <group ref={objectGroup} position={[30, 0, -60]}>
                 <mesh
                     ref={sunRef}
@@ -326,8 +394,25 @@ const Earth = React.memo(({
                     <meshStandardMaterial
                         map={sunMap}
                         normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
+                        metalness={0.85}
+                        roughness={0.5}
+                    />
+                </mesh>
+
+                <mesh>
+                    <sphereGeometry args={[1.28, 100, 100]}/>
+                    <shaderMaterial
+                        attach="material"
+                        args={[{
+                            uniforms: {
+                                glowColor: { value: new THREE.Color('rgba(224,102,65)') }
+                            },
+                            vertexShader,
+                            fragmentShader,
+                            side: THREE.BackSide,
+                            blending: THREE.AdditiveBlending,
+                            transparent:true
+                        }]}
                     />
                 </mesh>
             </group>
@@ -339,15 +424,16 @@ const Earth = React.memo(({
                     opacity={0.3}
                     depthWrite={true}
                     transparent={true}
-                    side={THREE.DoubleSide}
                 />
             </mesh>
             <mesh position={[0, -60, -30]}>
-                <torusGeometry args={[1.75, 0.1, 16, 100]}/>
+                <ringGeometry args={[1.6, 2.2, 32]}/>
                 <meshPhongMaterial
-                    color={'rgba(25,25,25,1)'}
+                    color={'rgb(94,89,89)'}
+                    opacity={0.5}
                     depthWrite={true}
-                    side={THREE.DoubleSide}
+                    transparent={true}
+                    side={THREE.DoubleSide} // Add this line
                 />
             </mesh>
             <group position={[0, -60, -30]}>
@@ -363,6 +449,23 @@ const Earth = React.memo(({
                         roughness={0.7}
                     />
                 </mesh>
+
+                <mesh>
+                    <sphereGeometry args={[1.26, 100, 100]}/>
+                    <shaderMaterial
+                        attach="material"
+                        args={[{
+                            uniforms: {
+                                glowColor: { value: new THREE.Color('rgb(229,216,204)') }
+                            },
+                            vertexShader,
+                            fragmentShader,
+                            side: THREE.BackSide,
+                            blending: THREE.AdditiveBlending,
+                            transparent:true
+                        }]}
+                    />
+                </mesh>
             </group>
 
             <mesh ref={cloudsRef} position={[0, 0, 3]}>
@@ -372,7 +475,6 @@ const Earth = React.memo(({
                     opacity={0.4}
                     depthWrite={true}
                     transparent={true}
-                    side={THREE.DoubleSide}
                 />
             </mesh>
             <group ref={objectGroup} position={[0, 0, 3]}>
@@ -386,12 +488,45 @@ const Earth = React.memo(({
                     <meshStandardMaterial
                         map={colorMap}
                         normalMap={normalMap}
-                        metalness={0.6}
-                        roughness={0.7}
+                        metalness={0.8}
+                        roughness={0.5}
+                    />
+                </mesh>
+
+                {/* Glow effect */}
+                <mesh>
+                    <sphereGeometry args={[1.1, 32, 32]}/>
+                    <shaderMaterial
+                        attach="material"
+                        args={[{
+                            uniforms: {
+                                glowColor: { value: new THREE.Color('rgba(53,68,126)') },
+                                cameraDistance: { value: Infinity }
+                            },
+                            vertexShader,
+                            fragmentShader,
+                            side: THREE.BackSide,
+                            blending: THREE.AdditiveBlending,
+                            transparent:true
+                        }]}
                     />
                 </mesh>
             </group>
 
+            <group ref={spackBackground} position={[0, 0, 3]}>
+                <mesh
+                    ref={spackBackgroundRef}
+                >
+                    <sphereGeometry args={[500, 100, 100]}/>
+                    <meshPhongMaterial/>
+                    <meshStandardMaterial
+                        map={spacebackground}
+                        metalness={0.85}
+                        roughness={1}
+                        side={THREE.DoubleSide} // Add this line
+                    />
+                </mesh>
+            </group>
 
             <OrbitControls
                 enableRotate={mouseLock ? !mouseLock : !zoomInLock}
@@ -455,7 +590,7 @@ const Earth = React.memo(({
 
 //도시 이름 입력 후 호출 시 클릭이벤트 생성
     function clickCity(cityName) {
-        if (cityName === " "){
+        if (cityName === " ") {
             return;
         }
         setFriendsNationally2(cityName);
@@ -487,19 +622,6 @@ const Earth = React.memo(({
         resetCityName(true);
     }
 
-    function resetCityColors() {
-        earthRef.current.children.forEach((child) => {
-            if (child.geometry.type === "SphereGeometry" && child !== selectedCity) {
-                child.material.color.set("white");
-            }
-        });
-    }
-
-    function AllresetCityColors() {
-        earthRef.current.children.forEach((child) => {
-            child.material.color.set("white");
-        });
-    }
 
     window.addEventListener('resize', () => {
         updateMouseCoordinates();
@@ -525,23 +647,6 @@ const Earth = React.memo(({
         const intersects = raycaster.intersectObjects(earthRef.current.children, true);
 
         let isOverCircle = false;
-        const currentOverCities = [];
-
-        if (intersects.length > 0) {
-            intersects.forEach((intersect) => {
-                if (intersect.object.geometry.type === "SphereGeometry" && !isOnMouseDownLock) {
-                    isOverCircle = true;
-                    intersect.object.material.color.set("#a62727");
-                    currentOverCities.push(intersect.object);
-                }
-            });
-        }
-        // 상호작용하지 않은 도시의 색을 처음 색상으로 변경
-        earthRef.current.children.forEach((child) => {
-            if (child.geometry.type === "SphereGeometry" && !currentOverCities.includes(child) && child !== selectedCity) {
-                child.material.color.set("white");
-            }
-        });
 
         if (isOverCircle) {
             document.body.style.cursor = "pointer";
@@ -597,14 +702,12 @@ const Earth = React.memo(({
 
     function addRedCircle(position, city_name) {
         const mapTexture = countryTextures[city_name];
-        // const geometry = new THREE.TorusGeometry(0.017, 0.007, 10, 10);
         const geometry = new THREE.CircleGeometry(0.015, 100);
-        // const geometry = new THREE.CylinderGeometry(0.05, 0.05, 0.05, 32);
-        // const geometry = new THREE.BoxGeometry(0.02, 0.02, 0.02);
-        //
-        // const geometry = new THREE.PlaneGeometry(0.05, 0.05); // Plane geometry 사용
-        // const geometry = new THREE.SphereGeometry(0.01, 32, 32);
-        const material = new THREE.MeshBasicMaterial({map: mapTexture, side: THREE.DoubleSide});
+        const material = new THREE.MeshBasicMaterial({
+            map: mapTexture,
+            side: THREE.DoubleSide,
+            color: 'rgb(170, 150,150)'
+        });
 
         const circle = new THREE.Mesh(geometry, material);
 

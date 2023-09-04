@@ -35,7 +35,7 @@ body {
 
 .loading {
     overflow: hidden;
-    z-index: 2;
+    z-index: 10;
     width: 100vw;
     height: 100vh;
     background-color: black;
@@ -772,7 +772,7 @@ a {
 }
 
 .loginDiv_2 {
-    width: 90%;
+    width: 75%;
 }
 .login_img_div{
     width: 100%;
@@ -782,7 +782,7 @@ a {
 .login_img{
     width: 45%;
     height: 35px;
-    margin-bottom: 40px;
+    margin-bottom: 70px;
 }
 .signup_img{
     width: 50%;
@@ -1088,6 +1088,29 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
     box-sizing: border-box;
     margin-top: 5px !important;
 }
+.line{
+    margin: auto;
+    width: 82%;
+    height: 1px;
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.line_1{
+    width: 42%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+.line_text{
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    width: 16%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .login_btn_google_div{
     width: 100% !important;
     height: 60px;
@@ -1097,7 +1120,7 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
     padding-left: 33px;
     padding-right: 33px;
     box-sizing: border-box;
-    margin-top: 40px;
+    margin-top: 30px;
 }
 .social_login_box.google{
     width: 100%;

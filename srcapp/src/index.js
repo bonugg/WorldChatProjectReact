@@ -9,12 +9,20 @@ import { store } from "./store";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 
-
+function Fallback() {
+    return (
+        <>
+            <div className={"loading"}>
+                <div className="spinner"></div>
+            </div>
+        </>
+    );
+}
 const persistor = persistStore(store);
 
 createRoot(document.getElementById('root')).render(
     <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
+        <PersistGate loading={<Fallback/>} persistor={persistor}>
             <BrowserRouter>
                 <App />
             </BrowserRouter>

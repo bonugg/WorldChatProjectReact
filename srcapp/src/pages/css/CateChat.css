@@ -840,6 +840,32 @@ input[type='number'] {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+.like_btn{
+    position: absolute !important;
+    bottom: 5px !important;
+    right: -18px !important;
+    color: indianred !important;
+    font-size: small !important;
+    transition: all 0.5s ease-in-out !important;
+    cursor: pointer;
+}
+.like_btn.one{
+    color: white !important;
+    transition: all 0.5s ease-in-out !important;
+}
+
+.like_btn2{
+    position: absolute !important;
+    bottom: 5px !important;
+    left: -18px !important;
+    color: indianred !important;
+    font-size: small !important;
+    transition: all 0.5s ease-in-out !important;
+}
+.like_btn2.one{
+    color: white !important;
+    transition: all 0.5s ease-in-out !important;
+}
 
 .message-user {
     font-size: 15px;
@@ -959,13 +985,19 @@ input[type='number'] {
     background-color: rgb(67, 76, 98, 0.4) !important;
 }
 .Cate_btn.one.active {
-    background-color: rgb(37, 44, 65) !important;
+    background-color: rgb(23, 35, 77) !important;
+}
+.Cate_btn.one.active:hover{
+    background-color: rgba(23, 35, 77, 0.65) !important;
+}
+.Cate_btn.two.active:hover{
+    background-color: rgba(23, 35, 77, 0.65) !important;
 }
 .Cate_btn.two{
     background-color: rgb(67, 76, 98, 0.4) !important;
 }
 .Cate_btn.two.active {
-    background-color: rgb(37, 44, 65) !important;
+    background-color: rgb(23, 35, 77) !important;
 }
 .Cate_btn_R{
     margin-right: 1px !important;
