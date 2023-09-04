@@ -23,6 +23,12 @@ function Drag({show, onClose, remoteAudio, localRoom, exitRoom,receiverIsTalking
     const trackPos = (data) => {
         setPosition({x: data.x, y: data.y});
     };
+    const Language = (language)=>{
+        console.log("선택언어: " + language)
+        // setSelectLang(language);
+        // lang(language);
+        localStorage.setItem('language', language);
+    }
 
     // useEffect로 isRecording 상태가 변경될 때 타이머 설정/해제
 useEffect(() => {
@@ -51,6 +57,7 @@ useEffect(() => {
 const buttonText = isRecording ? `번역중${'.'.repeat(dotCount)}` : '녹음 번역';
 const buttonColor = isRecording ? 'lightcoral' : '';  // 녹음 중일 때 빨간색 배경, 아니면 기본 배경색
 const textColor = isRecording ? 'black' : 'white';
+
 
 
 
@@ -257,9 +264,14 @@ const textColor = isRecording ? 'black' : 'white';
                                     }}
                                 >
                                     {buttonText}
-                                  
-                                   
+
                                 </Button>
+                                <div style={{position: 'absolute', backgroundColor: '#fff', border: '1px solid #ccc'}}>
+                                    <div onClick={() => Language('Kor')}>Kor</div>
+                                    <div onClick={() => Language('Eng')}>Eng</div>
+                                    <div onClick={() => Language('Jpn')}>Jpn</div>
+                                    <div onClick={() => Language('Chn')}>Chn</div>
+                                </div>
 
                                 {/*<Button*/}
                                 {/*    style={{*/}
@@ -295,6 +307,6 @@ const textColor = isRecording ? 'black' : 'white';
             )}
         </div>
     );
-}
+                        }
 
 export default Drag;

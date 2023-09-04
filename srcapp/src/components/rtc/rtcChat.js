@@ -8,9 +8,12 @@ import RtcChatDrag from "./RtcChatDrag";
 
 // const addr = "localhost:3001"
 
-const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
+const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) => {
     const [rtcChatDrag, setRtcChatDrag] = useState(false);
     const [socket,setSocket] = useState(null);
+
+    const [isRecording, setIsRecording] = useState(false);
+    const [mediaRecorder, setMediaRecorder] = useState(null);
 
     const handleRtcShowDrag = () => {
         setRtcChatDrag(true);
@@ -106,13 +109,13 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
     //         remoteVideo.current.srcObject = localStream;
     //     }
     // }, [remoteVideo])
-    
+
 
     if(socket){
-    socket.onerror = function (error) {
-        console.log("WebSocket Error: ", error);
-    };
-}
+        socket.onerror = function (error) {
+            console.log("WebSocket Error: ", error);
+        };
+    }
 
     // 비디오 켜기/끄기 함수
     // const toggleVideo = () => {
@@ -186,12 +189,13 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
 
     // 페이지 시작시 실행되는 메서드 -> socket 을 통해 server 와 통신한다
     if(socket){
-    socket.onmessage = function (msg) {
-        console.log("peertest !!!!!!!!!!!!!!!!!!!!!!!!!");
-        let message = JSON.parse(msg.data);
-        console.log("메시지 타입: " + message.type);
-        console.log("메세지 프롬 : " + message.from);
-        console.log("localUsername : " + localUserName);
+        socket.onmessage = function (msg) {
+            console.log("peertest !!!!!!!!!!!!!!!!!!!!!!!!!");
+            let message = JSON.parse(msg.data);
+            console.log("메시지 타입: " + message.type);
+            console.log("메세지 프롬 : " + message.from);
+            console.log("localUsername : " + localUserName);
+
 
         switch (message.type) {
             case 'video-toggle':
@@ -200,35 +204,36 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
                 // }
                 break;
 
-            case "offer":
-                log('Signal OFFER received');
-                handleOfferMessage(message);
-                break;
 
-            case "answer":
-                log('Signal ANSWER received');
-                handleAnswerMessage(message);
-                break;
+                case "offer":
+                    log('Signal OFFER received');
+                    handleOfferMessage(message);
+                    break;
 
-            case "ice":
-                log('Signal ICE Candidate received');
-                handleNewICECandidateMessage(message);
-                break;
+                case "answer":
+                    log('Signal ANSWER received');
+                    handleAnswerMessage(message);
+                    break;
 
-            case "join":
-                // ajax 요청을 보내서 userList 를 다시 확인함
-                console.log("join들어옴")
-                message.data = chatListCount();
-                log('Client is starting to ' + (message.data === "true") ? 'negotiate' : 'wait for a peer');
-                log("messageDATA : " + message.data)
-                handlePeerConnection(message);
-                break;
+                case "ice":
+                    log('Signal ICE Candidate received');
+                    handleNewICECandidateMessage(message);
+                    break;
 
-            case "leave":
-                console.log("User left message received");
-                //alert(message.message);  // "상대방과 연결이 끊겼습니다"를 알림으로 표시
-                stop();
-                break;
+                case "join":
+                    // ajax 요청을 보내서 userList 를 다시 확인함
+                    console.log("join들어옴")
+                    message.data = chatListCount();
+                    log('Client is starting to ' + (message.data === "true") ? 'negotiate' : 'wait for a peer');
+                    log("messageDATA : " + message.data)
+                    handlePeerConnection(message);
+                    break;
+
+                case "leave":
+                    console.log("User left message received");
+                    //alert(message.message);  // "상대방과 연결이 끊겼습니다"를 알림으로 표시
+                    stop();
+                    break;
 
                 case "decline":
                     console.log("Received decline message");
@@ -237,14 +242,14 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
                     stop();
                     break;
 
-            default:
-                handleErrorMessage('Wrong type message received from server');
-        }
-    };
-}
+                default:
+                    handleErrorMessage('Wrong type message received from server');
+            }
+        };
+    }
 
 
-    
+
 
     async function chatListCount() {
         const params = {
@@ -275,24 +280,24 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
 
     // 웹 소켓 연결 되었을 때 - open - 상태일때 이벤트 처리
     if(socket){
-    socket.onopen = function () {
-        log('WebSocket connection opened to Room: #' + localRoom);
-        sendToServer({
-            from: localUserName,
-            type: 'join',
-            data: localRoom
-        });
-    };
-}
+        socket.onopen = function () {
+            log('WebSocket connection opened to Room: #' + localRoom);
+            sendToServer({
+                from: localUserName,
+                type: 'join',
+                data: localRoom
+            });
+        };
+    }
 
     // 소켓이 끊겼을 때 이벤트처리
     if(socket){
-    socket.onclose = function (message) {
-        log('Socket has been closed');
-        // alert("연결이 끊어졌습니다.")
-        // exitRooms().then(r => {});
+        socket.onclose = function (message) {
+            log('Socket has been closed');
+            // alert("연결이 끊어졌습니다.")
+            // exitRooms().then(r => {});
+        }
     }
-}
 
     async function exitRooms(roomId) {
         const url = '/chat/delRoom';
@@ -316,10 +321,10 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
 
     // 에러 발생 시 이벤트 처리
     if(socket){
-    socket.onerror = function (message) {
-        handleErrorMessage("Error: " + message);
-    };
-}
+        socket.onerror = function (message) {
+            handleErrorMessage("Error: " + message);
+        };
+    }
     // }
 
     window.addEventListener('unload', stop);
@@ -339,7 +344,11 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
 
         setType2('');
 
-
+        sendToServer({
+            from: localUserName,
+            type: 'leave',
+            data: localRoom
+        });
         if (myPeerConnection) {
             log('Close the RTCPeerConnection');
 
@@ -348,6 +357,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
                 type: 'leave',
                 data: localRoom
             });
+
 
             // disconnect all our event listeners
             myPeerConnection.onicecandidate = null;
@@ -385,7 +395,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
             log("Send 'leave' message to server");
 
 
-            
+
 
             log('Close the socket');
             if (socket != null) {
@@ -585,7 +595,65 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
         //     });
         // }
     }
+    let recordedChunksArray = [];
+    const toggleRecording = (test) => {
+        console.log("허이야" + test)
+        if (!isRecording) {
+            const videoStream = localVideo.current.srcObject;
+            const audioTracks = videoStream.getAudioTracks();
+            // 녹음 시작
+            const audioStream = new MediaStream([audioTracks[0]]);
+            const recorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
+            console.log("녹음시작@@@@@@@@@@@@@@@");
+            console.log("녹음리코더 : ", recorder);
 
+
+            recorder.ondataavailable = event => {
+                if (event.data.size >= 0) {
+                    recordedChunksArray.push(event.data);
+                    console.log("음성내용@@@@@@@@@" + recordedChunksArray)
+                }
+            };
+
+
+
+            recorder.onstop = () => {
+                console.log("마지막 언어 체크: " + lang);
+                const blob = new Blob(recordedChunksArray, { type: 'audio/webm' });
+                console.log("sender: "+sendUser+" / receiver:"+receiverUser);
+                const formData = new FormData();
+                formData.append('sender', localStorage.getItem("userName") == sendUser? sendUser : receiverUser);
+                formData.append('receiver', localStorage.getItem("userName") == sendUser? receiverUser : sendUser);
+                formData.append('audio', blob, 'recorded_audio.wav');
+                formData.append('lang',test.toString());
+                fetch('/rtc/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => console.log(data))
+                    .catch(error => console.log('Error:', error));
+                // const audioURL = window.URL.createObjectURL(blob);
+                // console.log("녹음중지@@@@@@@");
+                //
+                // const tempLink = document.createElement('a');
+                // tempLink.href = audioURL;
+                // tempLink.download = 'recorded_audio.wav';
+                // tempLink.click();
+
+            };
+
+            recorder.start(100);
+            setMediaRecorder(recorder);
+            setIsRecording(true);
+
+
+        } else {
+            console.log("녹음중지@@@@@@@@@");
+            mediaRecorder.stop();
+            setIsRecording(false);
+        }
+    };
     function handleNewICECandidateMessage(message) {
         let candidate = new RTCIceCandidate(message.candidate);
         log("Adding received ICE candidate: " + JSON.stringify(candidate));
@@ -594,7 +662,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2}) => {
 
     return (
         <main role="main" className="container-fluid text-center">
-            <RtcChatDrag onClose={handleDragClose} localVideo={localVideo} remoteVideo={remoteVideo} show={rtcChatDrag} localRoom={localRoom} toggleVideo={toggleVideo} toggleAudio={toggleAudio} toggleMike={toggleMike} exitRoom={exitRoom}></RtcChatDrag>
+            <RtcChatDrag onClose={handleDragClose} localVideo={localVideo} remoteVideo={remoteVideo} show={rtcChatDrag} localRoom={localRoom} toggleVideo={toggleVideo} toggleAudio={toggleAudio} toggleMike={toggleMike} exitRoom={exitRoom} toggleRecording={toggleRecording} isRecording={isRecording} lang={lang}></RtcChatDrag>
             {/*<h1>ChatForYOU with WebRTC</h1>*/}
             {/*<div className="col-lg-12 mb-3">*/}
             {/*    <div className="mb-3">Local User Id</div>*/}

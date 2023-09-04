@@ -23,7 +23,6 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     //녹음기능 상태변수
     const [isRecording, setIsRecording] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState(null);
-    
 
     // const [isSender, setIsSender] = useState(null);
     // let isSender = useRef(false);
@@ -65,7 +64,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
             console.log("녹음시작@@@@@@@@@@@@@@@");
             console.log("녹음리코더 : ", recorder);
 
-    
+
             recorder.ondataavailable = event => {
                 if (event.data.size >= 0) {
                     recordedChunksArray.push(event.data);
@@ -73,26 +72,34 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                 }
             };
 
-        
+
 
             recorder.onstop = () => {
                 const blob = new Blob(recordedChunksArray, { type: 'audio/webm' });
-                const audioURL = window.URL.createObjectURL(blob);
-                console.log("녹음중지@@@@@@@");
-
-                if (blob.size < 1024) {
-                    console.log("녹음된 파일 크기가 너무 작아 저장되지 않습니다.");
-                    return;  // 저장 로직을 더 이상 진행하지 않음
-                }
-    
-                const tempLink = document.createElement('a');
-                tempLink.href = audioURL;
-                tempLink.download = 'recorded_audio.wav';
-                tempLink.click();
+                console.log("sender: "+sendUser+" / receiver:"+receiverUser);
+                const formData = new FormData();
+                formData.append('sender', localStorage.getItem("userName") == sendUser? sendUser : receiverUser);
+                formData.append('receiver', localStorage.getItem("userName") == sendUser? receiverUser : sendUser);
+                formData.append('audio', blob, 'recorded_audio.wav');
+                formData.append('lang',localStorage.getItem("language")?localStorage.getItem("language"):"Eng");
+                fetch('/rtc/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => console.log(data))
+                    .catch(error => console.log('Error:', error));
+                // const audioURL = window.URL.createObjectURL(blob);
+                // console.log("녹음중지@@@@@@@");
+                //
+                // const tempLink = document.createElement('a');
+                // tempLink.href = audioURL;
+                // tempLink.download = 'recorded_audio.wav';
+                // tempLink.click();
 
             };
 
-            recorder.start(50);
+            recorder.start(100);
             setMediaRecorder(recorder);
             setIsRecording(true);
 
@@ -103,7 +110,6 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
             setIsRecording(false);
         }
     };
-    
 
 
 
@@ -186,52 +192,52 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 
     useEffect(() => {
         if (socket){
-        socket.onerror = function (error) {
-            console.log("WebSocket Error: ", error);
-        };
+            socket.onerror = function (error) {
+                console.log("WebSocket Error: ", error);
+            };
 
-        socket.onmessage = function (msg) {
-            console.log("peertest 시작");
-            let message = JSON.parse(msg.data);
-            console.log("메시지 타입: " + message.type);
+            socket.onmessage = function (msg) {
+                console.log("peertest 시작");
+                let message = JSON.parse(msg.data);
+                console.log("메시지 타입: " + message.type);
 
-            switch (message.type) {
-                // case 'Audio-toggle':
-                //     if (remoteAudio.current.srcObject) {
-                //         remoteAudio.current.srcObject.getAudioTracks()[0].enabled = message.enabled;
-                //     }
-                //     break;
+                switch (message.type) {
+                    // case 'Audio-toggle':
+                    //     if (remoteAudio.current.srcObject) {
+                    //         remoteAudio.current.srcObject.getAudioTracks()[0].enabled = message.enabled;
+                    //     }
+                    //     break;
 
-                case "offer":
-                    setToggleAudio(!toggleAudio);
-                    log('Signal OFFER received');
-                    handleOfferMessage(message);
-                    break;
+                    case "offer":
+                        setToggleAudio(!toggleAudio);
+                        log('Signal OFFER received');
+                        handleOfferMessage(message);
+                        break;
 
-                case "answer":
-                    setToggleAudio(!toggleAudio);
-                    log('Signal ANSWER received');
-                    handleAnswerMessage(message);
-                    break;
+                    case "answer":
+                        setToggleAudio(!toggleAudio);
+                        log('Signal ANSWER received');
+                        handleAnswerMessage(message);
+                        break;
 
-                case "ice":
-                    log('Signal ICE Candidate received');
-                    handleNewICECandidateMessage(message);
-                    break;
+                    case "ice":
+                        log('Signal ICE Candidate received');
+                        handleNewICECandidateMessage(message);
+                        break;
 
-                case "join":
-                    // ajax 요청을 보내서 userList 를 다시 확인함
-                    console.log("join들어옴")
-                    message.data = chatListCount();
-                    log('Client is starting to ' + (message.data === "true") ? 'negotiate' : 'wait for a peer');
-                    log("messageDATA : " + message.data)
-                    handlePeerConnection(message);
-                    break;
+                    case "join":
+                        // ajax 요청을 보내서 userList 를 다시 확인함
+                        console.log("join들어옴")
+                        message.data = chatListCount();
+                        log('Client is starting to ' + (message.data === "true") ? 'negotiate' : 'wait for a peer');
+                        log("messageDATA : " + message.data)
+                        handlePeerConnection(message);
+                        break;
 
-                case "leave":
+                    case "leave":
 
-                    stop();
-                    break;
+                        stop();
+                        break;
 
                     case "decline":
                         console.log("Received decline message");
@@ -241,34 +247,34 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                         break;
 
 
-                default:
-                    handleErrorMessage('Wrong type message received from server');
+                    default:
+                        handleErrorMessage('Wrong type message received from server');
+                }
             }
-        }
-        
 
 
-        socket.onopen = function () {
-            log('WebSocket connection opened to Room: #' + localRoom);
-            console.log(localUserName + "이거 나오냐?????????");
-            sendToServer({
-                from: localUserName,
-                type: 'join',
-                data: localRoom
-            });
 
+            socket.onopen = function () {
+                log('WebSocket connection opened to Room: #' + localRoom);
+                console.log(localUserName + "이거 나오냐?????????");
+                sendToServer({
+                    from: localUserName,
+                    type: 'join',
+                    data: localRoom
+                });
+
+            };
+
+            // 소켓이 끊겼을 때 이벤트처리
+            socket.onclose = function (message) {
+                log('Socket has been closed');
+                // alert("연결이 끊어졌습니다.")
+                // exitRooms().then(r => {});
+            }
+            socket.onerror = function (message) {
+                handleErrorMessage("Error: " + message);
+            };
         };
-
-        // 소켓이 끊겼을 때 이벤트처리
-        socket.onclose = function (message) {
-            log('Socket has been closed');
-            // alert("연결이 끊어졌습니다.")
-            // exitRooms().then(r => {});
-        }
-        socket.onerror = function (message) {
-            handleErrorMessage("Error: " + message);
-        };
-    };
     }, [socket])
 
 //음성감지
@@ -354,7 +360,8 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                 audioContext.close();
             }
         };
-    
+
+
 
 
     }, [remoteAudio, remoteAudio?.current, remoteAudio?.current?.srcObject, disconnect]);  // remoteAudio가 변경될 때마다 useEffect를 다시 실행합니다.
@@ -435,90 +442,91 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         if(!localAudio.srcObject){return;}
         // navigator.mediaDevices.getUserMedia({audio: true})
         //     .then(stream => {
-                //LocalAudioRef.current.srcObject = stream;
+
+        //LocalAudioRef.current.srcObject = stream;
         const stream = localAudio.srcObject;
-                let audioContext = new (window.AudioContext || window.stream)();
-                let analyser = audioContext.createAnalyser();
-                console.log("에러2");
-                let microphone = audioContext.createMediaStreamSource(stream);
-                let javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+        let audioContext = new (window.AudioContext || window.stream)();
+        let analyser = audioContext.createAnalyser();
+        console.log("에러2");
+        let microphone = audioContext.createMediaStreamSource(stream);
+        let javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
 
-                analyser.smoothingTimeConstant = 0.8;
-                analyser.fftSize = 1024;
+        analyser.smoothingTimeConstant = 0.8;
+        analyser.fftSize = 1024;
 
-                microphone.connect(analyser);
-                analyser.connect(javascriptNode);
-                javascriptNode.connect(audioContext.destination);
-                let lastEventTimestamp = 0;
-                const THROTTLE_INTERVAL = 100; // 0.2초
-                javascriptNode.onaudioprocess = () => {
-                    const currentTime = Date.now();
+        microphone.connect(analyser);
+        analyser.connect(javascriptNode);
+        javascriptNode.connect(audioContext.destination);
+        let lastEventTimestamp = 0;
+        const THROTTLE_INTERVAL = 100; // 0.2초
+        javascriptNode.onaudioprocess = () => {
+            const currentTime = Date.now();
 
-                    // 마지막 이벤트로부터 0.2초 이상 경과한 경우에만 처리
-                    if (currentTime - lastEventTimestamp > THROTTLE_INTERVAL) {
-                        lastEventTimestamp = currentTime;
+            // 마지막 이벤트로부터 0.2초 이상 경과한 경우에만 처리
+            if (currentTime - lastEventTimestamp > THROTTLE_INTERVAL) {
+                lastEventTimestamp = currentTime;
 
-                        var array = new Uint8Array(analyser.frequencyBinCount);
-                        analyser.getByteFrequencyData(array);
-                        var values = 0;
+                var array = new Uint8Array(analyser.frequencyBinCount);
+                analyser.getByteFrequencyData(array);
+                var values = 0;
 
-                        var length = array.length;
-                        for (var i = 0; i < length; i++) {
-                            values += array[i];
-                        }
-                        var average = values / length;
+                var length = array.length;
+                for (var i = 0; i < length; i++) {
+                    values += array[i];
+                }
+                var average = values / length;
 
-                        // if (average > 200) { // 임계값을 조정하여 적절한 민감도로 설정하십시오.
-                        //     setSenderIsTalking(true);
-                        // } else if(average < 10) {
-                        //     setSenderIsTalking(false);
-                        // }
-                        console.log(average)
-                        console.log(localStorage.getItem('userName'));
-                        console.log(sendUser);
-                        console.log(localStorage.getItem('userName') == sendUser);
-                        setToggleAudio(!toggleAudio);
-                        setToggleAudio(!toggleAudio);
+                // if (average > 200) { // 임계값을 조정하여 적절한 민감도로 설정하십시오.
+                //     setSenderIsTalking(true);
+                // } else if(average < 10) {
+                //     setSenderIsTalking(false);
+                // }
+                console.log(average)
+                console.log(localStorage.getItem('userName'));
+                console.log(sendUser);
+                console.log(localStorage.getItem('userName') == sendUser);
+                setToggleAudio(!toggleAudio);
+                setToggleAudio(!toggleAudio);
 
-                        // console.log(isSender);
-                        if(disconnect2){
-                            return;
-                        }
+                // console.log(isSender);
+                if(disconnect2){
+                    return;
+                }
 
-                        if (average > 15) {
-                            if(localStorage.getItem('userName') == sendUser) {
-                                setSenderIsTalking(true);
-                            } else {
-                                setReceiverIsTalking(true);
-                            }
-                        } else if (average < 10) {
-                            if(localStorage.getItem('userName') == sendUser) {
-                                setSenderIsTalking(false);
-                            } else {
-                                setReceiverIsTalking(false);
-                            }
-                        }
-
+                if (average > 15) {
+                    if(localStorage.getItem('userName') == sendUser) {
+                        setSenderIsTalking(true);
+                    } else {
+                        setReceiverIsTalking(true);
                     }
+                } else if (average < 10) {
+                    if(localStorage.getItem('userName') == sendUser) {
+                        setSenderIsTalking(false);
+                    } else {
+                        setReceiverIsTalking(false);
+                    }
+                }
 
-                };
+            }
 
-                return () => {
-                    if (javascriptNode) {
-                        javascriptNode.disconnect();
-                    }
-                    if (analyser) {
-                        analyser.disconnect();
-                    }
-                    if (microphone) {
-                        microphone.disconnect();
-                    }
-                    if (audioContext) {
-                        audioContext.close();  // 오디오 컨텍스트 종료
-                    }
-                };
-            // })
-            // .catch(error => console.error('Error accessing audio stream:', error));
+        };
+
+        return () => {
+            if (javascriptNode) {
+                javascriptNode.disconnect();
+            }
+            if (analyser) {
+                analyser.disconnect();
+            }
+            if (microphone) {
+                microphone.disconnect();
+            }
+            if (audioContext) {
+                audioContext.close();  // 오디오 컨텍스트 종료
+            }
+        };
+        // })
+        // .catch(error => console.error('Error accessing audio stream:', error));
 
         let timerId;
         // return () => {
@@ -553,7 +561,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         if (remoteStream) {
             remoteStream.getTracks().forEach(track => track.stop());
         }
-        
+
         cleanupAudioResources();
 
         console.log(localUserName + "exit")
@@ -571,7 +579,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 
         setShowRtcVoiceChat(false);
 
-        
+
         remoteAudio.current = null;
         localAudio.current = null;
 

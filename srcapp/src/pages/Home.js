@@ -206,6 +206,7 @@ const Home = React.memo(() => {
         //     setShowRtcChat(true); // RtcChat 상태를 true로 설정
         // }
         const [socket, setSocket] = useState(null);
+        const [lang, setLang] = useState(localStorage.getItem("language")?localStorage.getItem("language"):"Eng");
 
         //friendList Context API
         const [userList, setUserList] = useState([]);
@@ -251,23 +252,6 @@ const Home = React.memo(() => {
             }
             
         }
-
-       
-        
-        // let socket;
-        // useEffect(() => {
-        //     if (socket) {
-        //         socket.onmessage = function (event) {
-        //             const receivedMessage = event.data;
-                    
-        //             console.log("receivedMessage ::::" + receivedMessage );
-        //             setModalContent(receivedMessage);
-                  
-
-        //         };
-        //     }
-        // }, [socket]);
-        
 
         const onPasswordChange = (newValue) => {
             setIsPasswordChangeDiv(newValue);
@@ -350,41 +334,111 @@ useEffect(() => {
 }, [showModal, modalContent]);
 
 
-useEffect(() => {
-    const userName = localStorage.getItem('userName');
-    let host = "";
-    host = window.location.host;
-    console.log(host)
-    host = host.slice(0, -4);
-    if (userName) {
-        //const ws = new WebSocket(`wss://localhost:9002/test`)
-        const ws = new WebSocket(`wss://${host}9002/test?userName=${userName}`);
-        console.log("새로고침 - " + `wss://${host}9002/test?userName=${userName}`);
-        setRtcUserName(userName);
+        useEffect(() => {
+            const userName = localStorage.getItem('userName');
+            let host = "";
+            host = window.location.host;
+            console.log(host)
+            host = host.slice(0, -4);
+            if (userName) {
+                //const ws = new WebSocket(`wss://localhost:9002/test`)
+                const ws = new WebSocket(`wss://${host}9002/test?userName=${userName}`);
+                console.log("새로고침 - " + `wss://${host}9002/test?userName=${userName}`);
+                setRtcUserName(userName);
 
-        ws.onopen = (event) => {
-            console.log("WebSocket 연결 성공:", event);
-        };
+                ws.onopen = (event) => {
+                    console.log("WebSocket 연결 성공:", event);
+                };
 
-        ws.onmessage = (event) => {
-            console.log("서버로부터 메시지 수신:", event.data);
-        };
+                ws.onmessage = (event) => {
+                    console.log("서버로부터 메시지 수신:", event.data);
+                };
 
-        ws.onerror = (event) => {
-            console.error("WebSocket 오류 발생:", event);
-        };
+                ws.onerror = (event) => {
+                    console.error("WebSocket 오류 발생:", event);
+                };
 
-        ws.onclose = (event) => {
-            console.log("WebSocket 연결 종료:", event);
-        };
+                ws.onclose = (event) => {
+                    console.log("WebSocket 연결 종료:", event);
+                };
 
-        setSocket(ws);
-       
-    }
-}, []);  // 이 배열이 비어 있으므로 이 useEffect는 컴포넌트가 마운트될 때만 실행되게
+                setSocket(ws);
+            }
+        }, []);  // 이 배열이 비어 있으므로 이 useEffect는 컴포넌트가 마운트될 때만 실행되게
 
 
-const localRoom = sendUser + "님과 " + receiverUser + "님의 음성채팅방"
+        const localRoom = sendUser + "님과 " + receiverUser + "님의 음성채팅방"
+
+
+        useEffect(() => {
+            console.log("receiver2");
+            if (socket) {
+                socket.onmessage = function (event) {
+                    let receivedMessage = event.data;
+                    let sendLang = "";
+                    console.log("receivedMessage ::::" + receivedMessage );
+                    if (receivedMessage.includes("번역")) {
+                        receivedMessage = receivedMessage.substring(2);
+                        sendLang = receivedMessage.slice(0, 3);
+                        receivedMessage = receivedMessage.substring(3);
+                        console.log("번역 들어옴!");
+                        const response = async () => {
+                            try {
+                            console.log("번역 요청 들어옴! : " + localStorage.getItem("language")?localStorage.getItem("language").toString():"Eng");
+                                const response = await fetch('/rtc/translate', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        text: receivedMessage,
+                                        lang: localStorage.getItem("language") ? localStorage.getItem("language").toString() : "Eng",
+                                        sendLang: sendLang
+                                    })
+                                });
+
+                                if (response.ok) {
+                                    const blob = await response.blob(); // response를 blob으로 변환
+                                    const audioUrl = URL.createObjectURL(blob); // Blob 객체를 사용하여 Object URL을 생성한다.
+
+                                    // Object URL을 audio 태그의 src에 설정한다.
+                                    const audioElement = document.createElement('audio');
+                                    audioElement.src = audioUrl;
+                                    audioElement.controls = true;  // 재생, 일시정지 등의 컨트롤을 활성화한다.
+
+                                    // audio 태그를 DOM에 추가한다.
+                                    document.body.appendChild(audioElement);
+
+                                    // 재생한다.
+                                    audioElement.play();
+                                } else {
+                                    throw new Error(`Decline request failed with status: ${response.status}`);
+                                }
+                            } catch (error) {
+                                console.error("Error during decline request:", error);
+                            }
+                        }
+                        response();
+                    }
+                    else if (receivedMessage.includes("거절")) {
+                        // 거절 메시지를 받았을 때의 로직
+                        setShowRtcChat(false);
+                        setShowRtcVoiceChat(false);
+                        setModalContent(receivedMessage);
+                        //setShowModal(false);
+                        setShowDeclineModal(true);
+                        setChatType('');
+                    } else {
+                        // 기존의 메시지 처리 로직
+                        setModalContent(receivedMessage);
+                        setShowModal(true);
+                    }
+                };
+            }
+        }, [socket]);
+
+        console.log("샌드유저 스테이트 확인값 @@@@@@@@@@@@@@@@@" + sendUser);
+        console.log("리시버유버 스테이트 확인값 @@@@@@@@@@@@@@@@" + receiverUser);
 
 const handleDecline = async (sender) => {
 
@@ -421,27 +475,28 @@ const handleDecline = async (sender) => {
     setShowModal(false);
 };
 
-useEffect(() => {
-    if (socket) {
-        socket.onmessage = function (event) {
-            const receivedMessage = event.data;
+// useEffect(() => {
+//     if (socket) {
+//         socket.onmessage = function (event) {
+//             const receivedMessage = event.data;
 
-            if (receivedMessage.includes("거절")) {
-                // 거절 메시지를 받았을 때의 로직
-                setShowDeclineModal(true);
-                setShowModal(false);
-                setShowRtcChat(false);
-                setShowRtcVoiceChat(false);
-                setModalContent(receivedMessage);
-                setChatType('');
-            } else {
-                // 기존의 메시지 처리 로직
-                setModalContent(receivedMessage);
-                setShowModal(true);
-            }
-        };
-    }
-}, [socket]);
+//             if (receivedMessage.includes("거절")) {
+//                 // 거절 메시지를 받았을 때의 로직
+//                 setShowDeclineModal(true);
+//                 setShowModal(false);
+//                 setShowRtcChat(false);
+//                 setShowRtcVoiceChat(false);
+//                 setModalContent(receivedMessage);
+//                 setChatType('');
+//             } else {
+//                 // 기존의 메시지 처리 로직
+//                 setModalContent(receivedMessage);
+//                 setShowModal(true);
+//             }
+//         };
+//     }
+// },[socket]);
+
 
 
 const sendUserProfile = userList.find(u => u.userName === sendUser)?.userProfileName;
@@ -529,30 +584,30 @@ const handleGrandchildData = (data) => {
                 localStorage.setItem('userName', userName);
                 console.log("로그인 사용자: " + userName);
                 setRtcUserName(userName);
-                
+
                 if(username){
-                //const ws = new WebSocket(`wss://localhost:9002/test`)
-                const ws = new WebSocket(`wss://${host}9002/test?userName=${userName}`);
+                    //const ws = new WebSocket(`wss://localhost:9002/test`)
+                    const ws = new WebSocket(`wss://${host}9002/test?userName=${userName}`);
 
-                setSocket(ws)
-                // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
-                ws.onopen = (event) => {
-                    console.log("WebSocket 연결 성공:", event);
-                };
+                    setSocket(ws)
+                    // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
+                    ws.onopen = (event) => {
+                        console.log("WebSocket 연결 성공:", event);
+                    };
 
-                // 다른 이벤트 리스너들도 추가할 수 있습니다.
-                ws.onmessage = (event) => {
-                    console.log("서버로부터 메시지 수신:", event.data);
-                };
+                    // 다른 이벤트 리스너들도 추가할 수 있습니다.
+                    ws.onmessage = (event) => {
+                        console.log("서버로부터 메시지 수신:", event.data);
+                    };
 
-                ws.onerror = (event) => {
-                    console.error("WebSocket 오류 발생:", event);
-                };
+                    ws.onerror = (event) => {
+                        console.error("WebSocket 오류 발생:", event);
+                    };
 
-                ws.onclose = (event) => {
-                    console.log("WebSocket 연결 종료:", event);
-                };
-            }
+                    ws.onclose = (event) => {
+                        console.log("WebSocket 연결 종료:", event);
+                    };
+                }
 
                 // setSocket(ws);
                 // 페이지 이동
@@ -1132,16 +1187,16 @@ const handleGrandchildData = (data) => {
 
                         <DivStyledMenu2 visible={FriendsList ? "visible" : ""}>
 
-                        <UserListContext.Provider value={{ userList, setUserList }}>
-                            <FreindsList
-                                onData={handleGrandchildData}
-                                setChatType={setChatType}
-                                FriendsList={FriendsList}
-                                FriendNationally={FriendNationally}
-                                logoutApi3={logoutApi3}
-                                isOneOnOneChatDiv={isOneOnOneChatDiv}
-                            />
-                        </UserListContext.Provider>
+                            <UserListContext.Provider value={{ userList, setUserList }}>
+                                <FreindsList
+                                    onData={handleGrandchildData}
+                                    setChatType={setChatType}
+                                    FriendsList={FriendsList}
+                                    FriendNationally={FriendNationally}
+                                    logoutApi3={logoutApi3}
+                                    isOneOnOneChatDiv={isOneOnOneChatDiv}
+                                />
+                            </UserListContext.Provider>
 
                             {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>
@@ -1207,12 +1262,12 @@ const handleGrandchildData = (data) => {
 
                         {/*rtc*/}
                         <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat} type2={type2} setType2={setType2} onClose={handleRtcShowDragClose}/>}
+                            {showRtcChat && <ChatComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcChat={setShowRtcChat} type2={type2} setType2={setType2} onClose={handleRtcShowDragClose} lang={setLang}/>}
                         </DivStyledMenu>
 
                         <UserListContext.Provider value={{ userList, setUserList }}>
                             <DivStyledMenu visible={showRtcVoiceChat}>
-                                {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcVoiceChat={setShowRtcVoiceChat} type2={type2} setType2={setType2}/>}
+                                {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser} setShowRtcVoiceChat={setShowRtcVoiceChat} type2={type2} setType2={setType2} lang={setLang}/>}
                             </DivStyledMenu>
                         </UserListContext.Provider>
 
