@@ -3,11 +3,11 @@ FROM node:18.16.1 AS build
 WORKDIR /srcapp
 COPY package*.json ./
 #RUN npm cache clean -f
-RUN npm install --legacy-peer-deps
+#RUN npm install --legacy-peer-deps
 #RUN npm install -g npm@latest
+RUN npm install
 COPY . .
 RUN npm run build
-
 #RUN npm install -g serve
 
 #CMD ["serve", "-s", "build", "-l", "3001"]
