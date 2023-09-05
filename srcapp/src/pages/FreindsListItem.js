@@ -50,7 +50,33 @@ const DivStyledMenu = styled.div`
 `;
 const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setChatType, socket}) => {
     const {id, user, friends, statement} = frd;
+    //
+    const [status, setStatus] = useState(false);
+    async function checkOnlineStatus(name) {
+        //친구목록 확인 시 온라인 유저 확인하는 비동기 요청
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        };
+        const response = await fetch('/online', requestOptions);
+        const isOnline = await response.json();
+
+        if (isOnline) {
+            console.log("The user is online.");
+            setStatus(true);
+        } else {
+            console.log("The user is not online.");
+            setStatus(false);
+        }
+    }
+    
+    
+    
+    checkOnlineStatus(friends.userName);
+    //
     console.log("친구가 어떤 형식으로 오냐?")
+
     console.log(friends);
     const [deleteDiv, setDeleteDiv] = useState(false);
     const [statements, setStatements] = useState(false);
@@ -182,18 +208,21 @@ const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setC
                 <div className={"friendsList_item_btn_div"}>
                     <Button
                         className={"friendsList_item_btn"}
+                        style={status ? {opacity: 1} : {opacity: 0.3,pointerEvents: 'none'}}
                         onClick={() => friendsChatDivOn(friends.userId, friends.userNickName)}
                     >
                         <ChatIcon/>
                         {unreadCount > 0 && <span className="unread-count">{unreadCount}</span>}
                     </Button>
                     <Button
+                        style={status ? {opacity: 1} : {opacity: 0.3,pointerEvents: 'none'}}
                         onClick={() => Rtc("video")}
                         className={"friendsList_item_btn2"}
                     >
                         <VideoChatIcon/>
                     </Button>
                     <Button
+                        style={status ? {opacity: 1} : {opacity: 0.3,pointerEvents: 'none'}}
                         onClick={() => Rtc("voice")}
                         className={"friendsList_item_btn2"}
                     >
