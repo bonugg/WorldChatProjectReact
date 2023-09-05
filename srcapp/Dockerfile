@@ -3,6 +3,7 @@
 FROM node:18 AS build-stage
 COPY package*.json ./
 ## 필요한 모듈 가져옴
+RUN npm cache clean -f
 RUN npm install
 COPY . .
 RUN npm run build
