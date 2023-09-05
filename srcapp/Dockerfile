@@ -17,4 +17,5 @@ COPY --from=build-stage /path/to/your/build/output /desired/path/in/container
 EXPOSE 3001
 ## 이미지 안 작업 디렉토리 생성
 ## 컨테이너 시작 시 실행할 명령어
-CMD ["node", "server.js"]
+#CMD ["node", "server.js"]
+CMD ["npm", "start"]
