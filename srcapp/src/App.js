@@ -2,8 +2,6 @@ import { Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import "./App.css";
-import RandomStart from './pages/random/RandomStart';
-import RandomChat from './pages/random/RandomChat';
 import Friends from "./pages/friends/Friends";
 import Test from "./pages/Test";
 import Accept from "./pages/friends/Accept";
