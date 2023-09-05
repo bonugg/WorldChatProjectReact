@@ -1,9 +1,7 @@
 #빌드 스테이지
-## 베이스 이미지 지정
 FROM node:18 AS build-stage
-WORKDIR ./srcapp
+WORKDIR /srcapp
 COPY package*.json ./
-## 필요한 모듈 가져옴
 #RUN npm cache clean -f
 RUN npm install
 #RUN npm install -g npm@latest
