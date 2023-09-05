@@ -328,11 +328,69 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                 (error) => onError(error)
             );
         };
+
+        const leaveRandom = async (retry = true) => {
+            console.log("leaveRandom 실행");
+            try {
+                const response = await fetch("/randomRoom/leave", {
+                    method: 'DELETE',
+                    headers: {
+                        "Content-Type": "application/json",
+                        'Authorization': localStorage.getItem('Authorization'),
+                        'userName': localStorage.getItem('userName'),
+                    },
+                });
+
+                const accessToken = response.headers.get('Authorization');
+                if (accessToken != null) {
+                    localStorage.setItem('Authorization', accessToken);
+                }
+                if (response.headers.get('refresh') != null) {
+                    //로그아웃 처리
+                    alert("로그아웃 leaveRandom");
+                    return;
+                }
+
+                if (!response.ok) {
+                    if (retry) {
+                        await leaveRandom(false);
+                    }
+                    return console.error(`Error: ${response.status}`)
+                }
+
+                const result = await response.json();
+                if (!result) {
+                    if (retry) {
+                        await leaveRandom(false);
+                    }
+                    return console.error(result.errorMessage);
+                }
+                console.log(`leaved random room name: ${result}`);
+                if (result.status == 'success') {
+                    console.log("방 삭제 완료");
+                } else {
+                    console.log("방 삭제 실패");
+                }
+
+                return result;
+                // navigate(`/random/${result.randomRoomId}`, {state: {room: result}});
+
+            } catch (error) {
+                console.log(error);
+                if (retry) {
+                    await leaveRandom(false);
+                }
+                return;
+            }
+        };
         const disconnect = () => {
+            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@")
             if (client.current && typeof client.current.disconnect === "function") {
+                console.log("!!!!!!!!!!!!!!!!!!!!!!!!")
                 leaveEvent();
-                leaveRandom();
                 client.current.disconnect(() => {
+                    console.log("33333333333333333333333333")
+                    leaveRandom();
                     setMessages([]);
                     setSelectedLanguage(" ");
                     setIsChatReadOnly(false);
@@ -460,15 +518,15 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
         };
 
         const handleCloseClick = () => {
+            console.log("-=-=-")
+            disconnect();
             setIsChatDiv(false);
-            setIsClosed(true);
             dispatch({type: "SET_RANDOMDRAG_POSITION", payload: initialPosition});
-            if (isChatDiv) {
-                disconnect();
-            }
             if (onClose) {
-                setRandomStartText("start a random chat");
+                console.log("-=-45233=-")
+                setIsClosed(true);
                 onClose();
+                console.log("-=-=1-")
             }
         };
 
@@ -539,61 +597,6 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
             };
             startRandomC();
         }
-
-        const leaveRandom = async (retry = true) => {
-            console.log("leaveRandom 실행");
-            try {
-                const response = await fetch("/randomRoom/leave", {
-                    method: 'DELETE',
-                    headers: {
-                        "Content-Type": "application/json",
-                        'Authorization': localStorage.getItem('Authorization'),
-                        'userName': localStorage.getItem('userName'),
-                    },
-                });
-
-                const accessToken = response.headers.get('Authorization');
-                if (accessToken != null) {
-                    localStorage.setItem('Authorization', accessToken);
-                }
-                if (response.headers.get('refresh') != null) {
-                    //로그아웃 처리
-                    alert("로그아웃 leaveRandom");
-                    return;
-                }
-
-                if (!response.ok) {
-                    if (retry) {
-                        await leaveRandom(false);
-                    }
-                    return console.error(`Error: ${response.status}`)
-                }
-
-                const result = await response.json();
-                if (!result) {
-                    if (retry) {
-                        await leaveRandom(false);
-                    }
-                    return console.error(result.errorMessage);
-                }
-                console.log(`leaved random room name: ${result}`);
-                if (result.status == 'success') {
-                    console.log("방 삭제 완료");
-                } else {
-                    console.log("방 삭제 실패");
-                }
-
-                return result;
-                // navigate(`/random/${result.randomRoomId}`, {state: {room: result}});
-
-            } catch (error) {
-                console.log(error);
-                if (retry) {
-                    await leaveRandom(false);
-                }
-                return;
-            }
-        };
 
 
         const exitChatDiv = () => {

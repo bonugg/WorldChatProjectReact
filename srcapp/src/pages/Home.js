@@ -503,7 +503,7 @@ const Home = React.memo(() => {
                         //setShowModal(false);
                         setShowDeclineModal(true);
                         setChatType('');
-                    } else {
+                    }else if(receivedMessage.includes("요청")){
                         // 기존의 메시지 처리 로직
                         setModalContent(receivedMessage);
                         setShowModal(true);

@@ -648,10 +648,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                 setDots("");
             } else {
                 if(messageOutput.type == "LIKE"){
-                    setLikes(prevLikes => ({
-                        ...prevLikes,
-                        [messageOutput.id]: !prevLikes[messageOutput.id],
-                    }));
+                    setMessages(prevMessages => prevMessages.map(item => item.id === messageOutput.id ? {...item, liked : messageOutput.liked} : item));
                 }
                 else {
                     setTyping(prevList => prevList.filter(item => !item.includes(messageOutput.sender)));
@@ -672,11 +669,6 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
         };
 //--------------채팅창 최소화 -----------------------
         const likeOn = (data, isLike) => {
-            console.log(data)
-            // setLikes({
-            //     ...likes,
-            //     [data]: !likes[data],  // 기존에 좋아요가 눌러져 있었다면 false로, 아니라면 true로 설정
-            // });
             const message = {
                 roomId: roomIdRef.current,
                 id: data,
@@ -866,12 +858,11 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                             <div className={"EnterRoomChat_content_one"}>
 
                                                 <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
-                                                    {messages.map((message, index) => {
+                                                    {messages.map((message) => {
                                                         const isMyMessage = message.sender === userNickNameRef.current;
-                                                        console.log(message.liked);
                                                         return (
                                                             <MessageStyled
-                                                                key={index}
+                                                                key={message.id}
                                                                 className={isMyMessage ? "userY" : "userX"}
                                                             >
                                                                 {isMyMessage ? (
@@ -912,16 +903,19 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                                             className="content_user">{message.message}</span>
                                                                         <span
                                                                             className="message-regdate">{message.createdAt}&nbsp;{message.checkRead ? (<div className={"on"}></div>) : (<div className={"off"}></div>)}</span>
-                                                                        {likes[message.randomChatId] ?
+                                                                        {message.liked ?
                                                                             (
                                                                                 <FavoriteIcon
                                                                                     className={"like_btn2"}
                                                                                 />
-                                                                            ) : (
+                                                                            )
+                                                                            :
+                                                                            (
                                                                                 <FavoriteBorderIcon
                                                                                     className={"like_btn2 one"}
                                                                                 />
-                                                                            )}
+                                                                            )
+                                                                        }
                                                                     </div>
                                                                 ) : (
                                                                     <div>
@@ -976,13 +970,7 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                                                     onClick={() => likeOn(message.id, "off")}
                                                                                 />
                                                                             )
-                                                                            : likes[message.id] ?
-                                                                                (
-                                                                                    <FavoriteIcon
-                                                                                        className={"like_btn"}
-                                                                                        onClick={() => likeOn(message.id, "off")}
-                                                                                    />
-                                                                                ):
+                                                                            :
                                                                                 (
                                                                                     <FavoriteBorderIcon
                                                                                         className={"like_btn one"}

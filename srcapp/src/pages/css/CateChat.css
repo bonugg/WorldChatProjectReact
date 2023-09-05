@@ -849,6 +849,22 @@ input[type='number'] {
     transition: all 0.5s ease-in-out !important;
     cursor: pointer;
 }
+.like_cnt2{
+    position: absolute !important;
+    bottom: 2px !important;
+    left: -30px !important;
+    color: #ffb700 !important;
+    font-size: small !important;
+    transform: scale(0.7);
+}
+.like_cnt{
+    position: absolute !important;
+    bottom: 2px !important;
+    right: -30px !important;
+    color: #ffb700 !important;
+    font-size: small !important;
+    transform: scale(0.7);
+}
 .like_btn.one{
     color: white !important;
     transition: all 0.5s ease-in-out !important;

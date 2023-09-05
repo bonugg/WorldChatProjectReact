@@ -141,7 +141,6 @@ const Earth = React.memo(({
 
     useEffect(() => {
         if (loggedIn) {
-            console.log("실행");
             handleEarthClick();
             if (FrdId2 == 0) {
                 setZoomIn(false);
@@ -163,7 +162,7 @@ const Earth = React.memo(({
     useFrame(({clock}) => {
         // if (!earthR) {
         const elapsedTime = clock.getElapsedTime();
-        spackBackgroundRef.current.rotation.y = elapsedTime / 50;
+        spackBackgroundRef.current.rotation.y = elapsedTime / 300;
         sunRef.current.rotation.y = elapsedTime / 20;
         marsRef.current.rotation.y = elapsedTime / 50;
         specularRef.current.rotation.y = elapsedTime / 20;
@@ -209,7 +208,6 @@ const Earth = React.memo(({
                     setIsAtInitialPosition(false);
 
                     let currentDistance = camera.position.distanceTo(target);
-                    console.log(currentDistance);
                     if (currentDistance <= zoomInDistance) {
                         distanceWithinThresholdTime.current += deltaTime * 1000; // ms로 변환
 
@@ -549,9 +547,6 @@ void main() {
         mouse.x = ((event.nativeEvent.clientX - rect.left) / rect.width) * 2 - 1;
         mouse.y = -((event.nativeEvent.clientY - rect.top) / rect.height) * 2 + 1;
         raycaster.setFromCamera(mouse, camera);
-        console.log(earthRef.current.children);
-        console.log('Ray origin (camera space):', raycaster.ray.origin);
-        console.log('Ray direction (camera space):', raycaster.ray.direction);
         const intersects = raycaster.intersectObjects(earthRef.current.children, true);
         if (intersects.length > 0) {
             const intersection = intersects[0].point;
@@ -637,7 +632,6 @@ void main() {
     }
 
     function onMouseMove(event) {
-        console.log("1")
         if (isOnMouseDownLock) return;
         event.stopPropagation();
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -675,8 +669,6 @@ void main() {
                     return;
                 }
                 const data = await response.json();
-                console.log(data);
-                console.log(data.items);
                 removeAllCircles();
                 if (data && data.items) {
                     NationallyList(data.items);
