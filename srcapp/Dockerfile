@@ -17,7 +17,7 @@ RUN npm run build
 # FROM node:18
 # COPY --from=build-stage /srcapp/build /srcapp
 # WORKDIR /srcapp
-# EXPOSE 3001
+EXPOSE 3001
 # ## 이미지 안 작업 디렉토리 생성
 # ## 컨테이너 시작 시 실행할 명령어
 # #CMD ["node", "server.js"]
