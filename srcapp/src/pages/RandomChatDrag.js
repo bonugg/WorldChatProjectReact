@@ -331,7 +331,11 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                 setSelectedLanguage(" ");
                 setMessages([]);
                 setIsChatReadOnly(false);
+                //나갔다고 메시지는 보내줌
                 leaveEvent();
+
+                //여기서 웹소켓 해제하지 않고 백엔드에 웹소켓 해제 요청 및 채팅방 삭제 요청
+                
                 client.current.disconnect(() => {
                     console.log("websocket disconnected");
                 });
@@ -514,7 +518,6 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                     setIsChatDiv(true);
 
                     return result;
-                    // navigate(`/random/${result.randomRoomId}`, {state: {room: result}});
 
                 } catch (error) {
                     console.log(error);
