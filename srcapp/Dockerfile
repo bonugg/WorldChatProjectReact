@@ -6,7 +6,7 @@ COPY package*.json ./
 RUN npm install --legacy-peer-deps
 #RUN npm install -g npm@latest
 COPY . .
-RUN npm run build
+RUN npm react-scripts build
 
 #RUN npm install -g serve
 
