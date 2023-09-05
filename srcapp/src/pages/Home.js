@@ -331,6 +331,8 @@ const Home = React.memo(() => {
         const [rtcUserName, setRtcUserName] = useState(null);
         const [sendUser, setSendUser] = useState(null);
         const [receiverUser, setReceiverUser] = useState(null);
+        const [friendListUpdated, setFriendListUpdated] = useState(false);
+        const [profile, setProfile] = useState([]);
         // let rtcUserName = "";
         // const Rtc = () => {
         //     console.log("Rtc실행됨");
@@ -350,7 +352,7 @@ const Home = React.memo(() => {
         //const [sendUserProfile,setSendUserProfile] = useState(null);
 
 
-        //const sendUserProfile2 = userList.find(u => u.userName === sendUser)?.userProfileName;
+        const sendUserProfile = userList.find(u => u.userName === sendUser)?.userProfileName;
 
 
         const handleModalConfirm = () => {
@@ -416,9 +418,22 @@ const Home = React.memo(() => {
                 const ws = new WebSocket(`wss://${host}9002/test?userName=${userName}`);
                 console.log("새로고침 - " + `wss://${host}9002/test?userName=${userName}`);
                 setRtcUserName(userName);
-
                 ws.onopen = (event) => {
-                    console.log("WebSocket 연결 성공:", event);
+                    console.log("요청 전");
+                    fetch('/webrtc/request', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            sender: localStorage.getItem('userName'),
+                            // receivers: friend,
+                            type: "online"
+                        })
+                    });
+
+                    console.log("요청 후")
+                    console.log("WebSocket 연결 성공1:", event);
                 };
 
                 ws.onmessage = (event) => {
@@ -439,6 +454,7 @@ const Home = React.memo(() => {
 
 
         const localRoom = sendUser + "님과 " + receiverUser + "님의 음성채팅방"
+
 
 
         useEffect(() => {
@@ -499,7 +515,11 @@ const Home = React.memo(() => {
                         //setShowModal(false);
                         setShowDeclineModal(true);
                         setChatType('');
-                    }else if(receivedMessage.includes("요청")){
+
+                    } else if(receivedMessage.includes("접속")){
+                        console.log("접속 들어옴")
+                        setFriendListUpdated(prevState => !prevState);
+                    } else {
                         // 기존의 메시지 처리 로직
                         setModalContent(receivedMessage);
                         setShowModal(true);
@@ -863,7 +883,6 @@ const Home = React.memo(() => {
                 }
             }
         }
-
         const OauthLoginUser = async (username, password) => {
             let host = "";
             host = window.location.host;
@@ -888,11 +907,25 @@ const Home = React.memo(() => {
 
                 if (username) {
                     //const ws = new WebSocket(`wss://localhost:9002/test`)
+                    // response();
                     const ws = new WebSocket(`wss://${host}9002/test?userName=${userName}`);
                     setSocket(ws)
                     // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
                     ws.onopen = (event) => {
-                        console.log("WebSocket 연결 성공:", event);
+                        console.log("요청 전");
+                        fetch('/webrtc/request', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                sender: localStorage.getItem('userName'),
+                                // receivers: friend,
+                                type: "online"
+                            })
+                        });
+                        console.log("요청 후")
+                        console.log("WebSocket 연결 성공2:", event);
                     };
 
                     // 다른 이벤트 리스너들도 추가할 수 있습니다.
@@ -907,6 +940,7 @@ const Home = React.memo(() => {
                     ws.onclose = (event) => {
                         console.log("WebSocket 연결 종료:", event);
                     };
+
                 }
 
                 //열린 메뉴 닫음
@@ -963,7 +997,20 @@ const Home = React.memo(() => {
                     setSocket(ws)
                     // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
                     ws.onopen = (event) => {
-                        console.log("WebSocket 연결 성공:", event);
+                        console.log("요청 전");
+                        fetch('/webrtc/request', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                sender: localStorage.getItem('userName'),
+                                // receivers: friend,
+                                type: "online"
+                            })
+                        });
+                        console.log("요청 후")
+                        console.log("WebSocket 연결 성공3:", event);
                     };
 
                     // 다른 이벤트 리스너들도 추가할 수 있습니다.
@@ -1131,6 +1178,19 @@ const Home = React.memo(() => {
                     alert("Logout");
                     setLoggedIn(false);
                     setLoggedOut(true);
+                    console.log("로그아웃 요청 전");
+                    fetch('/webrtc/request', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            sender: localStorage.getItem('userName'),
+                            // receivers: friend,
+                            type: "online"
+                        })
+                    });
+                    console.log("로그아웃 요청 후")
                     try {
                         const response = await fetch('/webrtc/logout', {
                             method: 'POST',
@@ -1693,6 +1753,7 @@ const Home = React.memo(() => {
                                 isOneOnOneChatDiv={isOneOnOneChatDiv}
                                 onRemove={removeItemFromHomeComponent2}
                                 socket={socket}
+                                friendListUpdated={friendListUpdated}
                             />
                             {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>
@@ -1888,7 +1949,7 @@ const Home = React.memo(() => {
                                 onAccept={handleModalConfirm}
                                 onDecline={handleModalDecline}
                                 message={modalContent}
-                                //sendUserProfile={sendUserProfile}
+                               sendUserProfile={sendUserProfile}
                             />
                         </UserListContext.Provider>
                         {/*rtc*/}

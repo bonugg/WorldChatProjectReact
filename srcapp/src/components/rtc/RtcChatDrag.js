@@ -242,14 +242,14 @@ const toggleLang=()=>{
                                     // onMouseLeave={() => setShowLanguageMenu(false)}
                                 >
 
-                                    {1 && (
+
                                         <div style={{position: 'absolute', backgroundColor: '#fff', border: '1px solid #ccc'}}>
                                             <div onClick={() => Language('Kor')}>Kor</div>
                                             <div onClick={() => Language('Eng')}>Eng</div>
                                             <div onClick={() => Language('Jpn')}>Jpn</div>
                                             <div onClick={() => Language('Chn')}>Chn</div>
                                         </div>
-                                    )}
+
                                 </div>
                             </div>
                             {/*<Button style={{right:'10%', textAlign:'center'}}>test</Button>*/}

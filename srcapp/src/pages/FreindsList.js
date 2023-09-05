@@ -15,10 +15,9 @@ import "./css/FreindsList.css";
 import axios from "axios";
 
 
-const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType, socket}) => {
+const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType, socket, friendListUpdated}) => {
     const [userList, setUserList] = useState([]);
     const [unreadCount, setUnreadCount] = useState({});
-
     const freindsList = async (retry = true) => {
         try {
             console.log(FriendNationally);
@@ -59,7 +58,7 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
         }else {
             setUserList([]);
         }
-    }, [FriendNationally]);
+    }, [FriendNationally,friendListUpdated]);
 
     // 국적 이미지 대응
     const flagImage = {

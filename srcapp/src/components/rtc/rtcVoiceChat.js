@@ -115,7 +115,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 
     const {userList, setUserList} = useContext(UserListContext);
     // let localUserName = "";
-
+    console.log(userList+"TLQKF");
     const sendUserProfile = userList.find(u => u.userName === sendUser)?.userProfileName;
     const receiverUserProfile = userList.find(u => u.userName === receiverUser)?.userProfileName;
 
@@ -644,26 +644,20 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 
     const updateUserList = async (retry = true) => {
         try {
-            const response = await fetch('/api/v1/user/friendsList', {
+            fetch('/webrtc/getFriendsList', {
                 method: 'POST',
                 headers: {
-                    Authorization: localStorage.getItem('Authorization'),
-                    'userName': localStorage.getItem('userName'),
+                    'Content-Type': 'text/plain'
                 },
+                body: localStorage.getItem('userName')
+            }).then(response => response.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        setUserList(data);
+                    }
+                }).catch(error => {
+                console.error('Error:', error);
             });
-            const accessToken = response.headers.get('Authorization');
-            if (accessToken != null) {
-                localStorage.setItem('Authorization', accessToken);
-            }
-            if (response.headers.get('refresh') != null) {
-                // 이 부분은 로그아웃 로직에 맞게 처리해야 합니다.
-                // 예: logoutApi3(true);
-                return;
-            }
-            const data = await response.json();
-            if (data) {
-                setUserList(data.items);
-            }
         } catch (error) {
             if (retry) {
                 await updateUserList(false);
