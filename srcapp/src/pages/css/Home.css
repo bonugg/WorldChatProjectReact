@@ -43,6 +43,16 @@ body {
     justify-content: center;
     align-items: center;
 }
+.loading_copy {
+    overflow: hidden;
+    z-index: 10;
+    width: 100vw;
+    height: 100vh;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
 .loading_2 {
     width: 100px;

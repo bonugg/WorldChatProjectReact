@@ -9,7 +9,6 @@ const FriendsListItem = ({frds}) => {
 
     const createChat = useCallback((e) => {
         const id = e.target.dataset.id;
-        console.log("채팅방만들래래래래래래ㅐ래래래래랠")
         const createChatAxios = async() => {
             try {
                 const response = await axios.post('/chat/create', {userId: id},
@@ -17,12 +16,8 @@ const FriendsListItem = ({frds}) => {
                             'Authorization': localStorage.getItem('Authorization')
                            }
                     });
-                console.log(response);
-                console.log(response.data.item.chatroom)
-                console.log(response.data.item.chatroom.id)
                 if(response.data && response.data.item.chatroom.id) {
                     const roomId = response.data.item.chatroom.id;
-                    console.log(roomId + "얜 재정렬한 roomId");
                     navi(`/chat/${roomId}`);
                 }
             } catch (e) {

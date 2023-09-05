@@ -22,7 +22,7 @@ const RequestedListItem = ({list, onRemove}) => {
                 console.log(response.data.item);
                 if (response.data && response.data.item) {
                     setStatements('CANCLE');
-                    setTimeout(() => onRemove(id), 1000);  // Add this line
+                    onRemove(id);
                 }
             } catch (e) {
                 console.log(e);

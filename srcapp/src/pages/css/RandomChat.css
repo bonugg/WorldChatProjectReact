@@ -14,6 +14,79 @@
     margin-left: 10px;
     margin-right: 10px;
 }
+.friendAdd_true{
+    position: absolute;
+    top: 40px;
+    left: 0;
+    z-index: 20;
+    width: 100%;
+    height: calc(100% - 40px);
+    background-color: rgba(11, 11, 14, 0.9);
+    border: 1px solid #222526;
+    border-top-width: 0px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+    visibility: visible;
+    opacity: 1;
+    transition: all 0.3s ease-in-out;
+}
+.friendAdd_true.false{
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+.friendAdd_text{
+    color: white;
+    font-size: 15px;
+    line-height: 15px;
+}
+.friendAdd_btn_div{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+.received_btn_random {
+    width: 90px !important;
+    min-width: 90px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    background-color: rgba(0, 128, 0, 1) !important;
+    color: white !important;
+    font-size: 10px !important;
+    font-family: 'Russo One', sans-serif !important;
+    padding-right: 13px !important;
+    padding-left: 2px !important;
+    box-sizing: border-box !important;
+}
+
+.received_btn_random:hover {
+    background-color: rgb(0, 145, 0) !important;
+}
+
+.received_btn_random.one {
+    margin-left: 20px !important;
+    background-color: rgba(205, 92, 92, 1) !important;
+}
+
+.received_btn_random.one:hover {
+    background-color: rgb(201, 82, 82) !important;
+}
+.received_btn_random.two {
+    padding-left: 10px !important;
+    box-sizing: border-box !important;
+    margin-left: 20px !important;
+    background-color: rgb(114, 114, 114) !important;
+}
+
+.received_btn_random.two:hover {
+    background-color: rgb(107, 107, 107) !important;
+}
+
 .contentChat_true{
     width: 100%;
     height: calc(100% - 40px);

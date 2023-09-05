@@ -500,7 +500,6 @@ input[type='number'] {
 }
 .userAdd_btn{
     min-width: 31px !important;
-    width: 31px !important;
     color: white !important;
     height: 31px !important;
     font-size: 12px !important;
@@ -509,9 +508,26 @@ input[type='number'] {
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     border-radius: 4px !important;
     margin-right: 7px !important;
+    transition: all 0.25s ease-in-out !important;
 }
 .userAdd_btn:hover{
     background-color: #18181f !important;
+}
+.userAdd_btn.one{
+    min-width: 200px !important;
+    max-width: 300px !important;
+    font-size: 10px !important;
+    background-color: rgba(0, 128, 0, 0.8) !important;
+    transition: all 0.25s ease-in-out !important;
+    white-space: nowrap;
+}
+.userAdd_btn.two{
+    min-width: 250px !important;
+    max-width: 300px !important;
+    font-size: 10px !important;
+    background-color: rgba(205, 92, 92, 0.8) !important;
+    transition: all 0.25s ease-in-out !important;
+    white-space: nowrap;
 }
 .Close_btn {
     min-width: 30px !important;

@@ -12,8 +12,8 @@ import { persistStore } from "redux-persist";
 function Fallback() {
     return (
         <>
-            <div className={"loading"}>
-                <div className="spinner"></div>
+            <div className={"loading_copy"}>
+                {/*<div className="spinner"></div>*/}
             </div>
         </>
     );

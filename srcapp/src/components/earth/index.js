@@ -38,6 +38,8 @@ const Earth = React.memo(({
                               isSignUpZoom,
                               FrdId,
                               FrdId2,
+                              FrdId3,
+                              FrdId4,
                               NationallyList,
                               selectedNationallyMove,
                               resetCityName
@@ -148,7 +150,7 @@ const Earth = React.memo(({
         } else {
             removeAllCircles();
         }
-    }, [loggedIn, FrdId, FrdId2, isMapageZoom]);
+    }, [loggedIn, FrdId, FrdId2, FrdId3, FrdId4, isMapageZoom]);
 
 
     // 5초 뒤 강제 클릭 이벤트
@@ -585,7 +587,7 @@ void main() {
 
 //도시 이름 입력 후 호출 시 클릭이벤트 생성
     function clickCity(cityName) {
-        if (cityName === " ") {
+        if (cityName === " " || cityName === "") {
             return;
         }
         setFriendsNationally2(cityName);

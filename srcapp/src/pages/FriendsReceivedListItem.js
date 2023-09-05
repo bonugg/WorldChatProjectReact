@@ -18,8 +18,10 @@ const FriendsReceivedListItem = ({list, onRemove}) => {
                         }
                     });
                 console.log(response);
-                setStatements('APPROVED');
-                setTimeout(() => onRemove(id), 1000);  // Add this line
+                if (response.data.item.msg == 'request approved') {
+                    setStatements('APPROVED');
+                    onRemove(id);
+                }
             } catch (e) {
                 console.log(e);
             }
@@ -37,8 +39,10 @@ const FriendsReceivedListItem = ({list, onRemove}) => {
                         }
                     });
                 console.log(response);
-                setStatements('DECLINE');
-                setTimeout(() => onRemove(id), 1000);  // Add this line
+                if (response.data.item.msg == 'request denied') {
+                    setStatements('DECLINE');
+                    onRemove(id);
+                }
             } catch (e) {
                 console.log(e);
             }

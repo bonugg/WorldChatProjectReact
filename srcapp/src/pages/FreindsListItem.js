@@ -48,60 +48,37 @@ const DivStyledMenu = styled.div`
   z-index: ${props => (props.visible ? "2" : "0")};
   opacity: ${props => (props.visible ? "1" : "0")};
 `;
-const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setChatType, socket}) => {
+const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setChatType, unreadCount}) => {
     const {id, user, friends, statement} = frd;
     console.log("친구가 어떤 형식으로 오냐?")
-    console.log(friends);
+    console.log(friends.userNickName);
+    console.log("안읽은 메시지 개수");
+    console.log(unreadCount);
     const [deleteDiv, setDeleteDiv] = useState(false);
     const [statements, setStatements] = useState(false);
 
     //메시지 개수 표시
-    const [unreadCount, setUnreadCount] = useState(0);
+    // const [unreadCount, setUnreadCount] = useState(0);
 
-    useEffect(() => {
-        const getUnreadMessageCount = async () => {
-            try {
-                const response = await axios.post('/chatroom/unread-messages',
-                    {userNickName: friends.userNickName},
-                    {
-                        headers: {
-                            "Authorization": localStorage.getItem("Authorization")
-                        }
-                    })
-                console.log("안읽은 메시지 개수")
-                console.log(response);
-                setUnreadCount(response.data.item);
-            } catch (e) {
-                console.log(e);
-            }
-        }
-        getUnreadMessageCount();
-    },[]);
-
-    useEffect(() => {
-        if (socket) {
-            console.log("소켓상태는?")
-            console.log(socket)
-            socket.onmessage = (event) => {
-                console.log("이벤트 찍히냐?")
-                console.log(event);
-                const data = event.data;
-                console.log("데이타 받아오냐?")
-                console.log(data);
-
-                if (data === '1') {
-                    setUnreadCount(prevCount => prevCount + 1);
-                }
-            };
-        }
-
-        return () => {
-            if (socket) {
-                socket.onmessage = null;
-                console.log("이게 찍히는건가?")
-            }
-        };
-    }, [socket]);
+    // useEffect(() => {
+    //     const getUnreadMessageCount = async () => {
+    //         try {
+    //             const response = await axios.post('/chatroom/unread-messages',
+    //                 {userNickName: friends.userNickName},
+    //                 {
+    //                     headers: {
+    //                         "Authorization": localStorage.getItem("Authorization")
+    //                     }
+    //                 })
+    //             console.log("안읽은 메시지 개수")
+    //             console.log(response);
+    //             setUnreadCount(response.data.item);
+    //         } catch (e) {
+    //             console.log(e);
+    //         }
+    //     }
+    //     getUnreadMessageCount();
+    // },[]);
 
     const friendsChatDivOn = (userId, userNickName) => {
         friendsChatDiv(true, userId, userNickName);
@@ -185,7 +162,7 @@ const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setC
                         onClick={() => friendsChatDivOn(friends.userId, friends.userNickName)}
                     >
                         <ChatIcon/>
-                        {unreadCount > 0 && <span className="unread-count">{unreadCount}</span>}
+                        {unreadCount > 0 && <span className="unread-count">{Math.min(unreadCount, 99)}</span>}
                     </Button>
                     <Button
                         onClick={() => Rtc("video")}

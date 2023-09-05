@@ -110,17 +110,6 @@ const DivStyledMenu2 = styled.div`
   height: ${props => props.visible ? '450px' : '0'}; // 새로 추가된 속성
 `;
 
-const DivStyled = styled.div`
-  visibility: ${props => props.visible === "visible" ? 'visible' : props.visible === "" ? "" : "hidden"};
-  animation: ${props => props.visible === "visible" ? slideDown : props.visible === "" ? slideUp : 'hidden'} 0.35s ease-in-out;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform-origin: center;
-  transform: ${props => props.visible === "visible" ? 'translate(-50%, -50%) scaleY(1)' : 'translate(-50%, -50%) scaleY(0)'};
-  /* Add other CSS properties for the loginDiv here */
-`;
-
 const Home = React.memo(() => {
         const [firstLogin, setFirstLogin] = useState(null);
         const [showSelectCountry, setShowSelectCountry] = useState(false);
@@ -133,9 +122,6 @@ const Home = React.memo(() => {
         const cateDrag = useSelector((state) => state.chatminimumCate.cateChatDrag);
         const firendMini = useSelector((state) => state.chatminimumFriend.firendMax);
         const firendDrag = useSelector((state) => state.chatminimumFriend.firendChatDrag);
-        const [showDrag, setShowDrag] = useState(false);
-        const [randomChatDrag, setRandomChatDrag] = useState(false);
-        const [oneononeChatDrag, setOneononeChatDrag] = useState(false);
         const [rtcChatDrag, setRtcChatDrag] = useState(false);
         //드래그 채팅창 기능
         const [oneOnOneUserId, setOneOnOneUserId] = useState('');
@@ -152,6 +138,8 @@ const Home = React.memo(() => {
 
         const [FrdId, setFrdId] = useState('');
         const [FrdId2, setFrdId2] = useState('');
+        const [FrdId3, setFrdId3] = useState('');
+        const [FrdId4, setFrdId4] = useState('');
 
         const [selectedNationally, setSelectedNationally] = useState(" ");
         const [selectedNationallyMove, setSelectedNationallyMove] = useState("");
@@ -224,6 +212,12 @@ const Home = React.memo(() => {
         };
         const removeItemFromHomeComponent2 = (id) => {
             setFrdId2(id);
+        };
+        const frdaddHanddle = (id) => {
+            setFrdId3(id);
+        };
+        const frdaddResponseHanddle = (id) => {
+            setFrdId4(id);
         };
 
         const handleDragClose = () => {
@@ -343,6 +337,7 @@ const Home = React.memo(() => {
         //     setShowRtcChat(true); // RtcChat 상태를 true로 설정
         // }
         const [socket, setSocket] = useState(null);
+        const [ms, setms] = useState(null);
         const [lang, setLang] = useState(localStorage.getItem("language") ? localStorage.getItem("language") : "Eng");
 
         //friendList Context API
@@ -449,6 +444,7 @@ const Home = React.memo(() => {
         useEffect(() => {
             console.log("receiver2");
             if (socket) {
+                console.log(socket);
                 socket.onmessage = function (event) {
                     let receivedMessage = event.data;
                     let sendLang = "";
@@ -916,8 +912,6 @@ const Home = React.memo(() => {
                 //열린 메뉴 닫음
                 setMenutoggle(false);
                 setMenutoggle2(false);
-                // setSocket(ws);
-                // 페이지 이동
                 setUsername('');
                 setPassword('');
                 setSelectedNationally(" ");
@@ -1445,8 +1439,8 @@ const Home = React.memo(() => {
                         </div>
                         <RandomChatDrag style={{visibility: displayStyle}} randomMax={randomMini}
                                         isMinimize={handleIsMinimized} show={randomDrag}
-                                        logoutApiCate={logoutApiCate}
-                                        onClose={handleRandomShowDragClose}/>
+                                        logoutApiCate={logoutApiCate} frdadd={frdaddHanddle} frdaddResponse={frdaddResponseHanddle}
+                                        onClose={handleRandomShowDragClose} socket={socket}/>
 
                         <OneOnOneChatDrag style={{visibility: displayStyle}} friendMax={firendMini}
                                           isMinimize={handleIsMinimizedFriend}
@@ -1668,6 +1662,8 @@ const Home = React.memo(() => {
                                     FriendListApiOn={FriendListApiOn}
                                     FrdId={FrdId}
                                     FrdId2={FrdId2}
+                                    FrdId3={FrdId3}
+                                    FrdId4={FrdId4}
                                     NationallyList={handleNationallyList}
                                     selectedNationallyMove={selectedNationallyMove}
                                     resetCityName={handleResetCityName}
@@ -1696,6 +1692,7 @@ const Home = React.memo(() => {
                                 logoutApi3={logoutApi3}
                                 isOneOnOneChatDiv={isOneOnOneChatDiv}
                                 onRemove={removeItemFromHomeComponent2}
+                                socket={socket}
                             />
                             {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>
@@ -1891,7 +1888,7 @@ const Home = React.memo(() => {
                                 onAccept={handleModalConfirm}
                                 onDecline={handleModalDecline}
                                 message={modalContent}
-                               //sendUserProfile={sendUserProfile}
+                                //sendUserProfile={sendUserProfile}
                             />
                         </UserListContext.Provider>
                         {/*rtc*/}

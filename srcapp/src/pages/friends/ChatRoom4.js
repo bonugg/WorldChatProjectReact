@@ -68,26 +68,9 @@ const ChatRoom4 = () => {
             }
         } catch (e) {
             console.log(e);
-        }
-    }
+        };
+    };
 
-    const checkOther = async () => {
-        try {
-            const response = await axios.get(`/chatroom/check-other/${roomId}`, {
-                headers: {
-                    Authorization: `${localStorage.getItem('Authorization')}`
-                }
-            });
-            console.log(response);
-            if(response.data.item.msg == "friend is offline") {
-                alert("친구가 채팅방에 없음");
-            } else {
-                alert("친구가 채팅방에 있음");
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    }
 
     const connect = () => {
         client.current = new StompJs.Client({
@@ -107,12 +90,22 @@ const ChatRoom4 = () => {
                     const receivedMessage = JSON.parse(body);
                     console.log("여기서 타입을 어떻게 지정했지?")
                     console.log(receivedMessage);
-                    //상대가 들어오면 이벤트 리스너를 통해 들어옴을 받는다.
-                    if (receivedMessage.type === "status") {
-                        if (receivedMessage.content === "online") {
-                            //들어왔으면 읽음을 업데이트 시킨다.
-                            updateReads();
-                        }
+                    console.log(receivedMessage.msg)
+                    // 상대가 들어오면 이벤트 리스너를 통해 들어옴을 받는다.
+                    // if (receivedMessage.type === "status") {
+                    //     if (receivedMessage.content === "online") {
+                    //         //들어왔으면 읽음을 업데이트 시킨다.
+                    //         updateReads();
+                    //     }
+                    //} else {
+                    if (receivedMessage.msg === "updated") {
+                        const updatedMessages = receivedMessage.updatedMsgList;
+                        console.log("업데이트된 메시지 리스트")
+                        console.log(updatedMessages);
+                        setMessages(prevMessages => prevMessages.map(msg => {
+                            const updateMsg = updatedMessages.find(uMsg => uMsg.id === msg.id);
+                            return updateMsg ? updateMsg : msg;
+                        }));
                     } else {
                         if (receivedMessage.sender !== "qwe" && shouldDetectLanguageRef.current) {
                             const translatedText = await detectAndTranslate(receivedMessage.message);
@@ -121,6 +114,7 @@ const ChatRoom4 = () => {
                             }
                         }
                         setMessages((messages) => [...messages, receivedMessage]);
+                    //}
                     }
                 });
             },
@@ -294,26 +288,26 @@ const ChatRoom4 = () => {
         console.log(e.target.value);
     };
 
-    const updateReads = async () => {
-        try {
-            const response = await axios.put(`/chatroom/${roomId}`, null, {
-                headers: {
-                    Authorization: `${localStorage.getItem('Authorization')}`
-                }
-            });
-            console.log(response.data.items);
-            console.log("안읽은거 읽음처리 됐냐???")
-            if(response.data && response.data.items) {
-                const updatedMessages = response.data.items;
-                setMessages(prevMessages => prevMessages.map(msg => {
-                    const updateMsg = updatedMessages.find(uMsg => uMsg.id == msg.id);
-                    return updateMsg ? updateMsg : msg;
-                }));
-            };
-        } catch (e) {
-            console.log(e);
-        }
-    }
+    // const updateReads = async () => {
+    //     try {
+    //         const response = await axios.put(`/chatroom/${roomId}`, null, {
+    //             headers: {
+    //                 Authorization: `${localStorage.getItem('Authorization')}`
+    //             }
+    //         });
+    //         console.log(response.data.items);
+    //         console.log("안읽은거 읽음처리 됐냐???")
+    //         if(response.data && response.data.items) {
+    //             const updatedMessages = response.data.items;
+    //             setMessages(prevMessages => prevMessages.map(msg => {
+    //                 const updateMsg = updatedMessages.find(uMsg => uMsg.id == msg.id);
+    //                 return updateMsg ? updateMsg : msg;
+    //             }));
+    //         };
+    //     } catch (e) {
+    //         console.log(e);
+    //     }
+    // }
 
     return (
         <div>
