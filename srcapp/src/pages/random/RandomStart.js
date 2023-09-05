@@ -13,11 +13,12 @@ const RandomStart = () => {
         }
 
         try {
-            const response = await fetch("/random/room", {
+            const response = await fetch("/randomRoom/enter", {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
                     'Authorization': authorization,
+                    'userName': localStorage.getItem('userName'),
                 },
                 body: JSON.stringify({ userName: username })
             });
@@ -31,8 +32,10 @@ const RandomStart = () => {
                 return console.error(result.errorMessage);
             }
 
-            console.log(`Created random room name: ${result.randomRoomName}`);
-            navigate(`/random/${result.randomRoomId}`, { state: { room: result } });
+            console.log(`Created random room name: ${result}`);
+            console.log(`Created random room name: ${result.randomRoomDTO}`);
+            
+            navigate(`/random/${result.randomRoomDTO.randomRoomId}`, { state: { room: result.randomRoomDTO } });
             return result;
 
         } catch (error) {
