@@ -8,9 +8,9 @@ RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build
 
-RUN npm install -g serve
+#RUN npm install -g serve
 
-CMD ["serve", "-s", "build", "-l", "3001"]
+#CMD ["serve", "-s", "build", "-l", "3001"]
 
 # #실행 스테이지
 # ## 포트지정
@@ -21,4 +21,4 @@ CMD ["serve", "-s", "build", "-l", "3001"]
 # ## 이미지 안 작업 디렉토리 생성
 # ## 컨테이너 시작 시 실행할 명령어
 # #CMD ["node", "server.js"]
-# CMD ["npm", "start"]
+CMD ["npm", "start"]
