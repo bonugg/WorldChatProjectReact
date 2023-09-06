@@ -8,16 +8,18 @@ import RtcChatDrag from "./RtcChatDrag";
 
 // const addr = "localhost:3001"
 
-const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) => {
+const ChatRoom = ({showRtcChat, sendUser, receiverUser, setShowRtcChat,type2,setType2,lang, isMinimize2, rtcMini}) => {
     const [rtcChatDrag, setRtcChatDrag] = useState(false);
     const [socket,setSocket] = useState(null);
+    const mypeerconnectionRef = useRef(null);
+    const localStreamRef = useRef(null);
 
     const [isRecording, setIsRecording] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState(null);
 
-    const handleRtcShowDrag = () => {
-        setRtcChatDrag(true);
-    };
+    // const handleRtcShowDrag = () => {
+    //     setRtcChatDrag(true);
+    // };
     const handleDragClose = () => {
         setRtcChatDrag(false);
     };
@@ -28,20 +30,26 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
     useEffect(() => {
-        let host = "";
-        host = window.location.host;
-        console.log(host)
-        host = host.slice(0, -4);
-        console.log("wss://" + host + "9002" + "/signal");
-        let sockets = new WebSocket("wss://" + host + "9002" + "/signal");
-        setSocket(sockets);
-    },[]);
+        if(showRtcChat){
+            let host = "";
+            host = window.location.host;
+            console.log(host)
+            host = host.slice(0, -4);
+            console.log("wss://" + host + "9002" + "/signal");
+            let sockets = new WebSocket("wss://" + host + "9002" + "/signal");
+            setSocket(sockets);
+        }else {
+            if(mypeerconnectionRef.current){
+                stop();
+            }
+        }
+    },[showRtcChat]);
 
     let localUserName = "";
-    useEffect(()=>{
-        handleRtcShowDrag();
-        // alert("드래그 실행");
-    },[])
+    // useEffect(()=>{
+    //     handleRtcShowDrag();
+    //     // alert("드래그 실행");
+    // },[])
     const localRoom = sendUser + "님과 " + receiverUser + "님의 화상채팅방";
     // let loginUserName = "";
     // console.log(rtcUserName+"이게 넘어온 이름")
@@ -96,10 +104,10 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
     const localVideo = useRef(null);
     useEffect(() => {
         console.log("stream test1");
-        if (localVideo.current && localStream) {
-            localVideo.current.srcObject = localStream;
+        if (localVideo.current && localStreamRef.current) {
+            localVideo.current.srcObject = localStreamRef.current;
         }
-    }, [localStream]);
+    }, [localStreamRef.current]);
 
     const remoteVideo = useRef(null);
     // useEffect(() => {
@@ -185,6 +193,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
         console.log("exit@@@@@@@@@@@@@@@@"+type2);
         stop(); // 웹소켓 연결 종료 및 비디오/오디오 정지
         setShowRtcChat(false);
+        isMinimize2(false);
     };
 
     // 페이지 시작시 실행되는 메서드 -> socket 을 통해 server 와 통신한다
@@ -270,7 +279,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
             const response = await axios.post('/webrtc/usercount', qs.stringify(params), config);
             console.log("방 인원수: " + response.data.toString())
             if (response.data.toString() === "true") {
-                myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
+                mypeerconnectionRef.current.onnegotiationneeded = handleNegotiationNeededEvent;
             }
             return response.data;
         } catch (error) {
@@ -311,7 +320,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
             const response = await axios.post(url, roomId, config);
             console.log(response.data);
             if (response.data === "true") {
-                myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
+                mypeerconnectionRef.current.onnegotiationneeded = handleNegotiationNeededEvent;
             }
             return response.data;
         } catch (error) {
@@ -334,11 +343,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
         stop();
     }
 
-
     function stop() {
-
-        alert("상대방과 연결이 끊겼습니다.");
-
         console.log(localUserName+"exit")
         console.log(localRoom+"exit");
 
@@ -349,7 +354,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
             type: 'leave',
             data: localRoom
         });
-        if (myPeerConnection) {
+        if (mypeerconnectionRef.current) {
             log('Close the RTCPeerConnection');
 
             sendToServer({
@@ -360,14 +365,14 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
 
 
             // disconnect all our event listeners
-            myPeerConnection.onicecandidate = null;
-            myPeerConnection.ontrack = null;
-            myPeerConnection.onnegotiationneeded = null;
-            myPeerConnection.oniceconnectionstatechange = null;
-            myPeerConnection.onsignalingstatechange = null;
-            myPeerConnection.onicegatheringstatechange = null;
-            myPeerConnection.onnotificationneeded = null;
-            myPeerConnection.onremovetrack = null;
+            mypeerconnectionRef.current.onicecandidate = null;
+            mypeerconnectionRef.current.ontrack = null;
+            mypeerconnectionRef.current.onnegotiationneeded = null;
+            mypeerconnectionRef.current.oniceconnectionstatechange = null;
+            mypeerconnectionRef.current.onsignalingstatechange = null;
+            mypeerconnectionRef.current.onicegatheringstatechange = null;
+            mypeerconnectionRef.current.onnotificationneeded = null;
+            mypeerconnectionRef.current.onremovetrack = null;
 
             // 비디오 정지
             if (remoteVideo.srcObject) {
@@ -385,17 +390,14 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
             localVideo.current = null;
 
             // myPeerConnection 초기화
-            myPeerConnection.close();
-            myPeerConnection = null;
-            localStream = null;
-
+            mypeerconnectionRef.current.close();
+            mypeerconnectionRef.current = null;
+            localStreamRef.current = null;
             setShowRtcChat(false);
+            isMinimize2(false);
             //alert("상대방과 연결을 종료하시겠습니까?");
 
             log("Send 'leave' message to server");
-
-
-
 
             log('Close the socket');
             if (socket != null) {
@@ -426,8 +428,8 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
 // initialize media stream
     function getMedia(constraints) {
         console.log("stream test3");
-        if (localStream) {
-            localStream.getTracks().forEach(track => {
+        if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => {
                 track.stop();
             });
         }
@@ -443,15 +445,15 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
 
         if (message.data === "true") {
 
-            myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
+            mypeerconnectionRef.current.onnegotiationneeded = handleNegotiationNeededEvent;
         }
     }
 
     function createPeerConnection() {
-        myPeerConnection = new RTCPeerConnection(peerConnectionConfig);
+        mypeerconnectionRef.current = new RTCPeerConnection(peerConnectionConfig);
 
-        myPeerConnection.onicecandidate = handleICECandidateEvent;
-        myPeerConnection.ontrack = handleTrackEvent;
+        mypeerconnectionRef.current.onicecandidate = handleICECandidateEvent;
+        mypeerconnectionRef.current.ontrack = handleTrackEvent;
 
         // the following events are optional and could be realized later if needed
         // myPeerConnection.onremovetrack = handleRemoveTrackEvent;
@@ -462,9 +464,9 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
 
     function getLocalMediaStream(mediaStream) {
         console.log("stream test4");
-        localStream = mediaStream;
+        localStreamRef.current = mediaStream;
         localVideo.srcObject = mediaStream;
-        localStream.getTracks().forEach(track => myPeerConnection.addTrack(track, localStream));
+        localStreamRef.current.getTracks().forEach(track => mypeerconnectionRef.current.addTrack(track, localStreamRef.current));
     }
 
 // handle get media error
@@ -514,8 +516,8 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
 // 2. local media description 생성?
 // 3. 미디어 형식, 해상도 등에 대한 내용을 서버에 전달
     function handleNegotiationNeededEvent() {
-        myPeerConnection.createOffer().then(function (offer) {
-            return myPeerConnection.setLocalDescription(offer);
+        mypeerconnectionRef.current.createOffer().then(function (offer) {
+            return mypeerconnectionRef.current.setLocalDescription(offer);
         })
             .then(function () {
                 if (socket.readyState !== socket.CONNECTING) {
@@ -523,7 +525,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
                         from: localUserName,
                         data: localRoom,
                         type: 'offer',
-                        sdp: myPeerConnection.localDescription
+                        sdp: mypeerconnectionRef.current.localDescription
                     });
                 }
                 log('Negotiation Needed Event: SDP offer sent');
@@ -540,32 +542,32 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
         let desc = new RTCSessionDescription(message.sdp);
         //TODO test this
         if (desc != null && message.sdp != null) {
-            log('RTC Signalling state: ' + myPeerConnection.signalingState);
-            myPeerConnection.setRemoteDescription(desc).then(function () {
+            log('RTC Signalling state: ' + mypeerconnectionRef.current.signalingState);
+            mypeerconnectionRef.current.setRemoteDescription(desc).then(function () {
                 log("Set up local media stream");
                 return navigator.mediaDevices.getUserMedia(mediaConstraints);
             })
                 .then(function (stream) {
                     log("-- Local video stream obtained");
                     console.log("stream test5");
-                    localStream = stream;
+                    localStreamRef.current = stream;
                     try {
                         if (localVideo.current) {
-                            localVideo.current.srcObject = localStream;
+                            localVideo.current.srcObject = localStreamRef.current;
                         }
                     } catch (error) {
                         localVideo.src = window.URL.createObjectURL(stream);
                     }
                     log("-- Adding stream to the RTCPeerConnection");
-                    localStream.getTracks().forEach(track => myPeerConnection.addTrack(track, localStream));
+                    localStreamRef.current.getTracks().forEach(track => mypeerconnectionRef.current.addTrack(track, localStreamRef.current));
                 })
                 .then(function () {
                     log("-- Creating answer");
-                    return myPeerConnection.createAnswer();
+                    return mypeerconnectionRef.current.createAnswer();
                 })
                 .then(function (answer) {
                     log("-- Setting local description after creating answer");
-                    return myPeerConnection.setLocalDescription(answer);
+                    return mypeerconnectionRef.current.setLocalDescription(answer);
                 })
                 .then(function () {
                     log("Sending answer packet back to other peer");
@@ -573,7 +575,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
                         from: localUserName,
                         data: localRoom,
                         type: 'answer',
-                        sdp: myPeerConnection.localDescription
+                        sdp: mypeerconnectionRef.current.localDescription
                     });
 
                 })
@@ -582,7 +584,7 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
     }
 
     function handleAnswerMessage(message) {
-        myPeerConnection.setRemoteDescription(message.sdp).catch(handleErrorMessage);
+        mypeerconnectionRef.current.setRemoteDescription(message.sdp).catch(handleErrorMessage);
         // log("The peer has accepted request");
         // let desc = new RTCSessionDescription(message.sdp);
         // if (desc != null && message.sdp != null) {
@@ -657,12 +659,16 @@ const ChatRoom = ({sendUser, receiverUser, setShowRtcChat,type2,setType2,lang}) 
     function handleNewICECandidateMessage(message) {
         let candidate = new RTCIceCandidate(message.candidate);
         log("Adding received ICE candidate: " + JSON.stringify(candidate));
-        myPeerConnection.addIceCandidate(candidate).catch(handleErrorMessage);
+        mypeerconnectionRef.current.addIceCandidate(candidate).catch(handleErrorMessage);
+    }
+
+    const isMinimizeHandle = (isMinimize) => {
+        isMinimize2(isMinimize);
     }
 
     return (
-        <main role="main" className="container-fluid text-center">
-            <RtcChatDrag onClose={handleDragClose} localVideo={localVideo} remoteVideo={remoteVideo} show={rtcChatDrag} localRoom={localRoom} toggleVideo={toggleVideo} toggleAudio={toggleAudio} toggleMike={toggleMike} exitRoom={exitRoom} toggleRecording={toggleRecording} isRecording={isRecording} lang={lang}></RtcChatDrag>
+        <main role="main" className="container-fluid text-center" style={{position: 'fixed', zIndex : '3'}}>
+            <RtcChatDrag onClose={handleDragClose} localVideo={localVideo} remoteVideo={remoteVideo} show={showRtcChat} localRoom={localRoom} toggleVideo={toggleVideo} toggleAudio={toggleAudio} toggleMike={toggleMike} exitRoom={exitRoom} toggleRecording={toggleRecording} isRecording={isRecording} lang={lang} isMinimize={isMinimizeHandle} rtcMini={rtcMini}></RtcChatDrag>
             {/*<h1>ChatForYOU with WebRTC</h1>*/}
             {/*<div className="col-lg-12 mb-3">*/}
             {/*    <div className="mb-3">Local User Id</div>*/}

@@ -31,7 +31,6 @@ const CateChatListItem = React.memo(({room, onCateRoomAndChatDivUpdate, shouldIm
                 alert("logout s");
                 return;
             }
-            console.log(response);
             if (response.ok) {
                 const data = await response.json(); // 응답본문을 JSON 객체로 변환
                 if (data.noRoom) {

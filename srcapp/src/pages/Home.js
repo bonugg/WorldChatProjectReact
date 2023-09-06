@@ -1,5 +1,4 @@
-import {GoogleLogin, useGoogleLogin} from "@react-oauth/google";
-import {GoogleOAuthProvider} from "@react-oauth/google";
+import {useGoogleLogin} from "@react-oauth/google";
 import jwtDecode from 'jwt-decode';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -12,14 +11,12 @@ import {useFrame, useThree, Canvas} from "@react-three/fiber";
 import {Suspense} from "react";
 import * as THREE from "three";
 import {keyframes} from 'styled-components';
-import Logo from "../img/logo_img.png";
 import Logo_text from "../img/logo_text3.png";
 import Login from "../img/login.png";
 import Signup from "../img/signup.png";
 import Earth from "../components/earth/index";
 import MyPage from './MyPage';
 import FreindsList from './FreindsList';
-import PasswordChange from './PasswordChange';
 import ChatComponent from "../components/rtc/rtcChat";
 import ChatVoiceComponent from "../components/rtc/rtcVoiceChat"
 import CateChatDrag from "./CateChatDrag";
@@ -41,17 +38,14 @@ import Italy from "../img/flag/IT.png";
 import Russia from "../img/flag/RU.png";
 import Philippines from "../img/flag/PH.png";
 import GoogleIcon from "../img/google_icon.png";
+import LoadingSpinner from "../img/spinner.gif";
 import PersonIcon from '@mui/icons-material/Person';
 import KeyIcon from '@mui/icons-material/Key';
 import {useDispatch, useSelector} from "react-redux";
-import chatRandom from "../reducers/chatRandom";
 import UserListContext from '../context/UserListContext';
-import SockJS from 'sockjs-client';
-// import socket from "ws/lib/websocket";
 
 import NotificationModal from "../components/rtc/NotificationModal.js";
 import NotificationDeclineModal from '../components/rtc/NotificationDeclineModal.js';
-import {type} from '@testing-library/user-event/dist/type';
 
 const CanvasContainer = styled.div`
   flex: 1;
@@ -116,6 +110,8 @@ const Home = React.memo(() => {
         const [selectedCountry, setSelectedCountry] = useState(" ");
         const loginUserRef = useRef(null);
         const dispatch = useDispatch();
+        const [rtcMini, setRtcMini] = useState(false);
+        const [voiceMini, setVoiceMini] = useState(false);
         const randomMini = useSelector((state) => state.chatminimum.randomMax);
         const randomDrag = useSelector((state) => state.chatminimum.randomChatDrag);
         const cateMini = useSelector((state) => state.chatminimumCate.cateMax);
@@ -179,8 +175,6 @@ const Home = React.memo(() => {
                 e
             ) => {
                 setSelectedNationally(e.target.value);
-                console.log("언어선택 했어요. 진짜로 했어요");
-                console.log(e.target.value);
             }
         ;
 
@@ -212,6 +206,10 @@ const Home = React.memo(() => {
         };
         const removeItemFromHomeComponent2 = (id) => {
             setFrdId2(id);
+            //친구의 수가 0이면 셀렉트창 초기화
+            if(id == 0){
+                setSelectedNationally(" ");
+            }
         };
         const frdaddHanddle = (id) => {
             setFrdId3(id);
@@ -228,6 +226,12 @@ const Home = React.memo(() => {
         };
         const handleIsMinimized = (mini) => {
             dispatch({type: "SET_RANDOMMAX", payload: false});
+        }
+        const isMinimize2Handle = (mini) => {
+            setRtcMini(mini);
+        }
+        const isMinimize2Handle2 = (mini) => {
+            setVoiceMini(mini);
         }
         const handleIsMinimizedCate = (mini) => {
             dispatch({type: "SET_CATEMAX", payload: false});
@@ -456,7 +460,6 @@ const Home = React.memo(() => {
         const localRoom = sendUser + "님과 " + receiverUser + "님의 음성채팅방"
 
 
-
         useEffect(() => {
             console.log("receiver2");
             if (socket) {
@@ -516,10 +519,13 @@ const Home = React.memo(() => {
                         setShowDeclineModal(true);
                         setChatType('');
 
-                    } else if(receivedMessage.includes("접속")){
+                    } else if (receivedMessage.includes("접속")) {
                         console.log("접속 들어옴")
                         setFriendListUpdated(prevState => !prevState);
                     } else {
+                        if(showRtcChat || showRtcVoiceChat){
+                            console.log("요청들어옴");
+                        }
                         // 기존의 메시지 처리 로직
                         setModalContent(receivedMessage);
                         setShowModal(true);
@@ -587,8 +593,6 @@ const Home = React.memo(() => {
 //         };
 //     }
 // },[socket]);
-
-
 
 
 //console.log("홈 모달창 샌드유저 이미지 확인값@@@@@@" + sendUserProfile);
@@ -752,7 +756,6 @@ const Home = React.memo(() => {
         }, []);
 
 
-
         //토큰 검증 로직
         useEffect(() => {
             const verifyToken = async (retry = true) => {
@@ -883,6 +886,7 @@ const Home = React.memo(() => {
                 }
             }
         }
+
         const OauthLoginUser = async (username, password) => {
             let host = "";
             host = window.location.host;
@@ -1418,12 +1422,18 @@ const Home = React.memo(() => {
         const FriendHandleMinimizeClick = () => {
             dispatch({type: "SET_FRIENDMAX", payload: true});
         }
+        const RtcHandleMinimizeClick = () => {
+            setRtcMini(false);
+        }
+        const VoiceHandleMinimizeClick = () => {
+            setVoiceMini(false);
+        }
 
-        const [displayStyle, setDisplayStyle] = useState('hidden');
+        const [displayStyle, setDisplayStyle] = useState('0');
 
         useEffect(() => {
             const timer = setTimeout(() => {
-                setDisplayStyle('visible');
+                setDisplayStyle('1');
             }, 500);
             return () =>
                 clearTimeout(timer); // 컴포넌트가 unmount될 때 타이머를 정리합니다.
@@ -1431,17 +1441,24 @@ const Home = React.memo(() => {
 
         function Fallback() {
             return (
-                <>
-                    <div className={"loading"}>
-                        <div className="spinner"></div>
-                    </div>
-                </>
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "black", // 배경색 설정
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center", // 중앙 정렬을 위한 설정
+                    zIndex: '10000'
+                }}>
+                    <img src={LoadingSpinner} alt="Loading..." />
+                </div>
             );
+
         }
-
-        console.log("home userList" + userList);
-
-
         return (
             <>
                 <Suspense fallback={<Fallback/>}>
@@ -1450,7 +1467,7 @@ const Home = React.memo(() => {
                             <div className={"SelectCountry_div"}>
                                 <div className={"SelectCountry_div_1"}>
                                     <span>Please select a country</span>
-                                    <span>  before logging in</span>
+                                    <span>before logging in</span>
                                 </div>
                                 <div className={"SelectCountry_div_2"}>
                                     <Select className={"custom_select"}
@@ -1497,22 +1514,29 @@ const Home = React.memo(() => {
                             </div>
 
                         </div>
-                        <RandomChatDrag style={{visibility: displayStyle}} randomMax={randomMini}
-                                        isMinimize={handleIsMinimized} show={randomDrag}
-                                        logoutApiCate={logoutApiCate} frdadd={frdaddHanddle} frdaddResponse={frdaddResponseHanddle}
-                                        onClose={handleRandomShowDragClose} socket={socket}/>
+                        <div style={{opacity: displayStyle}}>
+                            <RandomChatDrag  randomMax={randomMini}
+                                            isMinimize={handleIsMinimized} show={randomDrag}
+                                            logoutApiCate={logoutApiCate} frdadd={frdaddHanddle}
+                                            frdaddResponse={frdaddResponseHanddle}
+                                            onClose={handleRandomShowDragClose} socket={socket}/>
+                        </div>
 
-                        <OneOnOneChatDrag style={{visibility: displayStyle}} friendMax={firendMini}
+                        <div style={{opacity: displayStyle}}>
+                        <OneOnOneChatDrag friendMax={firendMini}
                                           isMinimize={handleIsMinimizedFriend}
                                           show={firendDrag} oneOnOneUserId={oneOnOneUserId}
                                           oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
                                           onClose={handleOneOnOneShowDragClose}/>
-                        <CateChatDrag style={{visibility: displayStyle}} cateMax={cateMini}
+                        </div>
+                        <div style={{opacity: displayStyle}}>
+                        <CateChatDrag cateMax={cateMini}
                                       isMinimize={handleIsMinimizedCate}
                                       show={cateDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
+                        </div>
                         <aside
                             className={MyPageDiv ? `side-bar one` : `side-bar`}
-                            style={{visibility: displayStyle}}
+                            style={{opacity: displayStyle}}
                         >
                             <div className={"logo_div"}>
                                 <img
@@ -1674,19 +1698,21 @@ const Home = React.memo(() => {
                                                     <GroupIcon fontSize="small"/>
                                                 </Button>
                                             </div>
-                                            <div className={"line_create one"}>
+                                            <div className={!rtcMini ? "line_create one" : "line_create"}>
                                                 <Button
-                                                    disabled={true}
+                                                    disabled={!rtcMini}
                                                     type={'submit'}
+                                                    onClick={RtcHandleMinimizeClick}
                                                     className={"R_maximum_btn"}
                                                 >
                                                     <VideoChatIcon fontSize="small"/>
                                                 </Button>
                                             </div>
-                                            <div className={"line_create one"}>
+                                            <div className={!voiceMini ? "line_create one" : "line_create"}>
                                                 <Button
-                                                    disabled={true}
+                                                    disabled={!voiceMini}
                                                     type={'submit'}
+                                                    onClick={VoiceHandleMinimizeClick}
                                                     className={"R_maximum_btn"}
                                                 >
                                                     <PhoneIcon fontSize="small"/>
@@ -1949,7 +1975,7 @@ const Home = React.memo(() => {
                                 onAccept={handleModalConfirm}
                                 onDecline={handleModalDecline}
                                 message={modalContent}
-                               sendUserProfile={sendUserProfile}
+                                sendUserProfile={sendUserProfile}
                             />
                         </UserListContext.Provider>
                         {/*rtc*/}
@@ -1959,22 +1985,16 @@ const Home = React.memo(() => {
                             message={modalContent}
                             onDeclineAccept={handleSendDeclineModal}
                         />
-
-                        <DivStyledMenu visible={showRtcChat}>
-                            {showRtcChat &&
-                                <ChatComponent sendUser={sendUser} receiverUser={receiverUser}
-                                               setShowRtcChat={setShowRtcChat}
-                                               type2={type2} setType2={setType2} onClose={handleRtcShowDragClose}
-                                               lang={setLang}/>}
-                        </DivStyledMenu>
-
+                        <ChatComponent sendUser={sendUser} receiverUser={receiverUser}
+                                       showRtcChat={showRtcChat} setShowRtcChat={setShowRtcChat}
+                                       type2={type2} setType2={setType2} onClose={handleRtcShowDragClose}
+                                       lang={setLang} isMinimize2={isMinimize2Handle} rtcMini={rtcMini}/>
                         <UserListContext.Provider value={{userList, setUserList}}>
-                            <DivStyledMenu visible={showRtcVoiceChat}>
-                                {showRtcVoiceChat && <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser}
-                                                                         setShowRtcVoiceChat={setShowRtcVoiceChat}
-                                                                         type2={type2}
-                                                                         setType2={setType2} lang={setLang}/>}
-                            </DivStyledMenu>
+                            <ChatVoiceComponent sendUser={sendUser} receiverUser={receiverUser}
+                                                showRtcVoiceChat={showRtcVoiceChat}
+                                                setShowRtcVoiceChat={setShowRtcVoiceChat}
+                                                type2={type2} isMinimize2={isMinimize2Handle2} voiceMini={voiceMini}
+                                                setType2={setType2} lang={setLang}/>}
                         </UserListContext.Provider>
 
 

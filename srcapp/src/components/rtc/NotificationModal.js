@@ -71,7 +71,7 @@ const NotificationModal = ({ show, onHide, onAccept, onDecline, message,sendUser
     return (
         <Modal className="request-modal" show={show} onHide={onHide}>
             <Modal.Header closeButton>
-                <Modal.Title>통화 요청</Modal.Title>
+                <Modal.Title>Call request</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <div className='modal-image-box'>
@@ -92,10 +92,10 @@ const NotificationModal = ({ show, onHide, onAccept, onDecline, message,sendUser
             </Modal.Body>
             <Modal.Footer>
                 <Button className="request-primary" variant="primary" onClick={onAccept}>
-                    수락
+                    accept
                 </Button>
                 <Button className="request-secondary" variant="secondary" onClick={onDecline}>
-                    거절
+                    refuse
                 </Button>
             </Modal.Footer>
         </Modal>

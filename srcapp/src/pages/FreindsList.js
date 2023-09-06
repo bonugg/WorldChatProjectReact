@@ -20,7 +20,6 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
     const [unreadCount, setUnreadCount] = useState({});
     const freindsList = async (retry = true) => {
         try {
-            console.log(FriendNationally);
             const response = await fetch('/friends/friends-list/' + FriendNationally, {
                 method: 'GET',
                 headers: {
@@ -37,7 +36,6 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
                 return;
             }
             const data = await response.json();
-            console.log(data);
             if(data && data.items) {
                 setUserList(() => data.items);
                 getUnreadMessageCount(data.items);
@@ -52,7 +50,6 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
     }
 
     useEffect(() => {
-        console.log(FriendListApi);
         if (FriendListApi) {
             freindsList();
         }else {
@@ -74,7 +71,6 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
     };
 
     const removeItemFromList = (id) => {
-        console.log("아이디 출력 "+id)
         setUserList(prevList => {
             const updatedList = prevList.filter(item => item.id != id);
             onRemove(updatedList.length);
@@ -100,11 +96,8 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
     //메시지 안읽은 개수 웹소켓
     useEffect(() => {
         if (socket) {
-            console.log("연결---");
             socket.onmessage = (event) => {
                 const msg = JSON.parse(event.data);
-                console.log("서버에서 받은 보낸사람");
-                console.log(msg);
                 //unreadCounts를 업데이트합니다.
                 setUnreadCount(prevCounts => ({
                     ...prevCounts,
@@ -117,11 +110,7 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
     // //db에서 안읽은거 불러오기
     const getUnreadMessageCount = async (users) => {
         try {
-            console.log("유저리스트");
-            console.log(users);
             const userNickNames = users.map(user => user.friends.userNickName);
-            console.log("유저 리스트안에 친구 닉네임들");
-            console.log(userNickNames);
 
             const response = await axios.post('/chatroom/unread-messages',
                 {userNickName: userNickNames},
@@ -130,10 +119,7 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
                         "Authorization": localStorage.getItem("Authorization")
                     }
                 })
-            console.log("안읽은 메시지 개수")
-            console.log(response);
             if(response.data && response.data.items) {
-                console.log(response.data.items);
                 const unreadCnt = {};
                 response.data.items.forEach((count, index) => {
                     unreadCnt[userNickNames[index]] = count;
@@ -142,7 +128,6 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
             }
 
         } catch (e) {
-            console.log(e);
         }
     }
 

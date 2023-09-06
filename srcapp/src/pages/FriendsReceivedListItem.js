@@ -17,13 +17,11 @@ const FriendsReceivedListItem = ({list, onRemove}) => {
                             Authorization: `${localStorage.getItem('Authorization')}`
                         }
                     });
-                console.log(response);
                 if (response.data.item.msg == 'request approved') {
                     setStatements('APPROVED');
-                    onRemove(id);
+                    setTimeout(() => onRemove(id), 1000);  // Add this line
                 }
             } catch (e) {
-                console.log(e);
             }
         }
         acceptFrdAxios();
@@ -38,13 +36,11 @@ const FriendsReceivedListItem = ({list, onRemove}) => {
                             Authorization: `${localStorage.getItem('Authorization')}`
                         }
                     });
-                console.log(response);
                 if (response.data.item.msg == 'request denied') {
                     setStatements('DECLINE');
-                    onRemove(id);
+                    setTimeout(() => onRemove(id), 1000);  // Add this line
                 }
             } catch (e) {
-                console.log(e);
             }
         }
         denyRequestAxios();

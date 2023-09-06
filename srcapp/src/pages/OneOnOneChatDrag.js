@@ -233,7 +233,6 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                 });
 
                 if (response.data && response.data.items) {
-                    console.log(response.data.items);
                     // checkRead가 false인 객체만 골라서 해당 속성을 true로 변경
                     const updatedItems = response.data.items.reduce((acc, item) => {
                         if (item.checkRead === false && item.sender != userNickNameRef.current) {
@@ -247,7 +246,6 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                     setMessages(() => updatedItems);
                 }
             } catch (e) {
-                console.log(e);
             }
         }
 
@@ -271,7 +269,6 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                     logoutApiCate(true);
                     return;
                 }
-                console.log("실행");
                 const responseData = await response.json();
                 if (responseData.item && responseData.item.chatroom.id) {
                     dispatch({ type: "SET_FRIENDROOM_NUM", payload: responseData.item.chatroom.id });
@@ -284,7 +281,6 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                     }
                 }
             } catch (e) {
-                console.log(e);
                 if (retry) {
                     await createChatAxios(false);
                 }
@@ -309,8 +305,6 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                     const responseData = JSON.parse(messageOutput.body);// 이 부분 추가
                     if(responseData.msg === "updated") {
                         const updatedMessages = responseData.updatedMsgList;
-                        console.log("업데이트된 메시지 리스트")
-                        console.log(updatedMessages);
                         setMessages(prevMessages => prevMessages.map(msg => {
                             const updateMsg = updatedMessages.find(uMsg => uMsg.id === msg.id);
                             return updateMsg ? updateMsg : msg;

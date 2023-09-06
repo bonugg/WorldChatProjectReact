@@ -222,7 +222,6 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
 
 //--------------드래그 창 보임/숨김-----------------------
     useEffect(() => {
-        console.log(show + " show")
         if (!show) {
             setMenuDiv(false);
             setMenuDiv2(false);

@@ -1,9 +1,25 @@
 import React, {useState, useEffect} from 'react'
-import Draggable from 'react-draggable';
 import Button from "@mui/material/Button";
+import {Rnd} from "react-rnd";
+import Logo from "../../img/logo_img.png";
+import "./rtcdrag.css";
 
-function Drag({show, onClose, remoteVideo, localVideo, localRoom, toggleVideo, toggleAudio, toggleMike, exitRoom,toggleRecording,isRecording, lang}) {
-    const [position, setPosition] = useState({x: -183, y: -286});
+function Drag({
+                  show,
+                  onClose,
+                  remoteVideo,
+                  localVideo,
+                  localRoom,
+                  toggleVideo,
+                  toggleAudio,
+                  toggleMike,
+                  exitRoom,
+                  toggleRecording,
+                  isRecording,
+                  lang,
+                  isMinimize,
+                  rtcMini,
+              }) {
     const [isMinimized, setIsMinimized] = useState(false);
     const [isClosed, setIsClosed] = useState(false);
     const [selectLang, setSelectLang] = useState("eng");
@@ -15,6 +31,50 @@ function Drag({show, onClose, remoteVideo, localVideo, localRoom, toggleVideo, t
     const [button3Active, setButton3Active] = useState(false);
     const [changeVideo, setChangeVideo] = useState(true);
     const [dotCount, setDotCount] = useState(0);
+
+
+    //본욱 추가
+    const [windowSize, setWindowSize] = useState({
+        width: window.innerWidth,
+        height: window.innerHeight,
+    });
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+
+            const newPosition = {
+                x: (window.innerWidth / 2) - (450 / 2),  //450은 Draggable 컴포넌트의 너비
+                y: (window.innerHeight / 2) - (500 / 2), //230은 Draggable 컴포넌트의 높이
+            };
+            setPosition(newPosition);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+    const initialPosition = {
+        x: (windowSize.width / 2) - (450 / 2), // 450은 Draggable 컴포넌트의 너비
+        y: (windowSize.height / 2) - (500 / 2), // 200은 Draggable 컴포넌트의 높이
+    };
+    const [position, setPosition] = useState(initialPosition);
+    const [size, setSize] = useState({width: "450px", height: "500px"});
+    const [resizing, setResizing] = useState(false);
+    const handleResizeStart = () => {
+        // 사이즈 결정
+        setResizing(true);
+    };
+    const handleResizeStop = (e, direction, ref) => {
+        // 사이즈 결정
+        setSize({width: ref.style.width, height: ref.style.height});
+        setResizing(false); // resizing 상태 업데이트
+    };
+    //본욱 추가
+
     // const [showLanguageMenu, setShowLanguageMenu] = useState(false);
 
     // useEffect(() => {
@@ -26,12 +86,12 @@ function Drag({show, onClose, remoteVideo, localVideo, localRoom, toggleVideo, t
     //         }
     //     }
     // }, [localVideo]);
-const Language = (language)=>{
-    console.log("선택언어: " + language)
-    setSelectLang(language);
-    lang(language);
-    localStorage.setItem('language', language);
-}
+    const Language = (language) => {
+        console.log("선택언어: " + language)
+        setSelectLang(language);
+        lang(language);
+        localStorage.setItem('language', language);
+    }
     useEffect(() => {
         let interval;
         if (isRecording) {
@@ -54,7 +114,7 @@ const Language = (language)=>{
             }
         };
     }, [isRecording]);
-    const buttonText = isRecording ? `번역중${'.'.repeat(dotCount)}` : '녹음 번역';
+    const buttonText = isRecording ? `Translating${'.'.repeat(dotCount)}` : 'recording translation';
     const buttonColor = isRecording ? 'red' : '';  // 녹음 중일 때 빨간색 배경, 아니면 기본 배경색
 
     // useEffect(() => {
@@ -69,6 +129,9 @@ const Language = (language)=>{
 
 
     useEffect(() => {
+        console.log("---------------------------------------");
+        console.log(show);
+        console.log("---------------------------------------");
         if (!show) {
             setIsClosed(false);
         }
@@ -79,11 +142,13 @@ const Language = (language)=>{
     };
 
     const handleMinimizeClick = () => {
-        setIsMinimized(!isMinimized);
+        // setIsMinimized(!isMinimized);
+        isMinimize(true);
     };
 
     const handleCloseClick = () => {
         exitRoom();
+        isMinimize(false);
         setIsClosed(true);
         if (onClose) {
             onClose();
@@ -94,7 +159,7 @@ const Language = (language)=>{
         return null;
     }
 
-const toggleLang=()=>{
+    const toggleLang = () => {
         toggleRecording(selectLang);
         // lang(selectLang);
         // console.log("선택된 언어: " + selectLang);
@@ -105,31 +170,64 @@ const toggleLang=()=>{
         <div className="Drag">
             {!isClosed && (
                 <>
-                    <Draggable defaultPosition={position} onDrag={(e, data) => trackPos(data)} disabled={isMinimized}>
+                    <Rnd
+                        size={size}
+                        minWidth={450}
+                        minHeight={500}
+                        maxWidth={650}
+                        maxHeight={650}
+                        disabled={!isMinimized}
+                        onResizeStop={handleResizeStop}
+                        onResizeStart={handleResizeStart}
+                        default={{x: position.x, y: position.y}}
+                        // onDragStop={(e, d) => {
+                        //     dispatch({type: "SET_RANDOMDRAG_POSITION", payload: {x: d.x, y: d.y}});
+                        // }}
+                        enableResizing={{
+                            top: false,
+                            right: true,
+                            bottom: true,
+                            left: false,
+                            topRight: true,
+                            bottomRight: true,
+                            bottomLeft: false,
+                            topLeft: false,
+                        }}
+                        style={{
+                            borderRadius: "15px",
+                            zIndex: "9999",
+                            position: "fixed",
+                            visibility: !rtcMini ? "visible" : "hidden",
+                            opacity: !rtcMini ? "1" : "0",
+                            transition: resizing ? 'none' : 'opacity 0.25s ease-in-out, width 0.25s ease-in-out, height 0.25s ease-in-out'
+                        }}
+                        dragHandleClassName="headerChat"
+                        bounds="window"
+                        // bounds="window"
+                    >
                         <div
                             className="box"
                             style={{
-                                position: isMinimized ? 'absolute' : 'fixed',
-                                display: isMinimized ? 'none' : 'block',
-                                top: '0',
+                                display: !rtcMini ? 'block' : 'none',
                                 cursor: 'auto',
                                 color: 'black',
-                                width: '450px',
-                                height: '500px',
+                                width: '100%',
+                                height: '100%',
                                 borderRadius: '15px',
                                 borderTopLeftRadius: '15px',
                                 borderBottomLeftRadius: '15px',
-                                padding: '1em',
+                                padding: '0px',
                                 margin: 'auto',
                                 userSelect: 'none',
-                                zIndex: '2',
-                                background: 'rgb(50, 50, 50,0.8)',
-                                transition: 'height 0.25s ease-in-out'
+                                zIndex: '9999',
                             }}
                         >
-                            <div className={"header"}>
+                            <div className={"headerChat"}>
                                 <div className={"btnDiv_create"}>
-
+                                    <img
+                                        className={"logo_img"}
+                                        src={Logo}
+                                    ></img>
                                 </div>
                                 <div className={"title_cate"}>
                                     video chat
@@ -147,116 +245,112 @@ const toggleLang=()=>{
                                     >
                                     </Button>
                                 </div>
-
                             </div>
-                            <br/>
-                            <div style={{textAlign: 'center', color: 'white', fontSize: '20px'}}>{localRoom}</div>
-                            <br/>
-                            <div className="Drag" style={{ position: 'relative', display: 'flex' }}>
-                                <video
-                                    id="remote_video"
-                                    ref={remoteVideo}
-                                    onClick={()=>setChangeVideo(!changeVideo)}
-                                    autoPlay playsInline
-                                    style={changeVideo ? {
-                                        width: '100%',
-                                        height: 'auto',
-                                        zIndex: 1
-                                    }:{
-                                        width: '40%',
-                                        height: '40%',
-                                        position: 'absolute',
-                                        bottom: 0,
-                                        left: 0,
-                                        zIndex: 2
-                                    }}
-                                ></video>
+                            <div className={"content_rtc"}>
+                                <div className={"localRoom_text"}>{localRoom}</div>
+                                <div className="localRoom_content">
+                                    <video
+                                        id="remote_video"
+                                        ref={remoteVideo}
+                                        onClick={() => setChangeVideo(!changeVideo)}
+                                        autoPlay playsInline
+                                        style={changeVideo ? {
+                                            width: '100%',
+                                            height: '100%',
+                                            zIndex: 1,
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            left: 0,
+                                            transition: 'all 0.3s ease-in-out'
+                                        } : {
+                                            width: '40%',
+                                            height: '40%',
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            left: 0,
+                                            zIndex: 2,
+                                            transition: 'all 0.3s ease-in-out'
+                                        }}
+                                    ></video>
 
-                                <video
-                                    muted
-                                    id="local_video"
-                                    ref={localVideo}
-                                    onClick={()=>{setChangeVideo(!changeVideo)}}
-                                    autoPlay playsInline
-                                    style={changeVideo ? {
-                                        width: '40%',
-                                        height: '40%',
-                                        position: 'absolute',
-                                        bottom: 0,
-                                        left: 0,
-                                        zIndex: 2
-                                    }:{
-                                        width: '100%',
-                                        height: 'auto',
-                                        zIndex: 1
-                                    }}
-                                ></video>
-                            </div>
-                            <div className="button-container" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-                                <Button
-                                    onClick={() => {setButton1Active(!button1Active); toggleVideo()}}
-                                    style={{
-                                        backgroundColor: button1Active ? '#f05650' : '',
-                                        transition: 'background-color 0.3s',
-                                        color: 'white',
-                                        width: '30%'
-                                    }}
-                                >
-                                    video {button1Active ? 'OFF' : 'ON'}
-                                </Button>
-                                <Button
-                                    onClick={() => {setButton2Active(!button2Active); toggleMike()}}
-                                    style={{
-                                        backgroundColor: button2Active ? '#f05650' : '',
-                                        transition: 'background-color 0.3s',
-                                        color: 'white',
-                                        width: '30%'
-                                    }}
-                                >
-                                    mike {button2Active ? 'OFF' : 'ON'}
-                                </Button>
-                                <Button
-                                    onClick={() => {setButton3Active(!button3Active); toggleAudio()}}
-                                    style={{
-                                        backgroundColor: button3Active ? '#f05650' : '',
-                                        transition: 'background-color 0.3s',
-                                        color: 'white',
-                                        width: '30%'
-                                    }}
-                                >
-                                    volume {button3Active ? 'OFF' : 'ON'}
-                                </Button>
-                                <Button
-                                    onClick={toggleLang}
-                                    style={{
-                                        backgroundColor:buttonColor,
-                                        transition: 'background-color 0.3s',
-                                        color: 'white',
-                                        width: '30%'
-                                    }}
-                                >
-                                    {buttonText}
-                                </Button>
-                                <div
-                                    // onMouseOver={() => setShowLanguageMenu(true)}
-                                    // onMouseLeave={() => setShowLanguageMenu(false)}
-                                >
+                                    <video
+                                        muted
+                                        id="local_video"
+                                        ref={localVideo}
+                                        onClick={() => {
+                                            setChangeVideo(!changeVideo)
+                                        }}
+                                        autoPlay playsInline
+                                        style={changeVideo ? {
+                                            width: '40%',
+                                            height: '40%',
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            left: 0,
+                                            zIndex: 2,
+                                            transition: 'all 0.3s ease-in-out'
+                                        } : {
+                                            bottom: 0,
+                                            left: 0,
+                                            position: 'absolute',
+                                            width: '100%',
+                                            height: '100%',
+                                            zIndex: 1,
+                                            transition: 'all 0.3s ease-in-out'
+                                        }}
+                                    ></video>
+                                </div>
+                                <div className="button-container">
+                                    <Button
+                                        onClick={() => {
+                                            setButton1Active(!button1Active);
+                                            toggleVideo()
+                                        }}
+                                        className={button1Active ? "rtc_btn active": "rtc_btn"}
+                                    >
+                                        video {button1Active ? 'OFF' : 'ON'}
+                                    </Button>
+                                    <Button
+                                        onClick={() => {
+                                            setButton2Active(!button2Active);
+                                            toggleMike()
+                                        }}
+                                        className={button2Active ? "rtc_btn active": "rtc_btn"}
+                                    >
+                                        mike {button2Active ? 'OFF' : 'ON'}
+                                    </Button>
+                                    <Button
+                                        onClick={() => {
+                                            setButton3Active(!button3Active);
+                                            toggleAudio()
+                                        }}
+                                        className={button3Active ? "rtc_btn active one": "rtc_btn one"}
+                                    >
+                                        volume {button3Active ? 'OFF' : 'ON'}
+                                    </Button>
+                                </div>
 
+                                <div className="button-container">
+                                    <Button
+                                        onClick={toggleLang}
+                                        className={isRecording ? "rtc_trans_btn one": "rtc_trans_btn"}
+                                    >
+                                        {buttonText}
+                                    </Button>
 
-                                        <div style={{position: 'absolute', backgroundColor: '#fff', border: '1px solid #ccc'}}>
-                                            <div onClick={() => Language('Kor')}>Kor</div>
-                                            <div onClick={() => Language('Eng')}>Eng</div>
-                                            <div onClick={() => Language('Jpn')}>Jpn</div>
-                                            <div onClick={() => Language('Chn')}>Chn</div>
-                                        </div>
-
+                                    <div className={"na_trans"}>
+                                        <div className={"na_select"} onClick={() => Language('Kor')}>Kor</div>
+                                        <div className={"na_select"} onClick={() => Language('Eng')}>Eng</div>
+                                        <div className={"na_select"} onClick={() => Language('Jpn')}>Jpn</div>
+                                        <div className={"na_select one"} onClick={() => Language('Chn')}>Chn</div>
+                                    </div>
                                 </div>
                             </div>
                             {/*<Button style={{right:'10%', textAlign:'center'}}>test</Button>*/}
                             {/*<Button style={{left:'10%', top:'5%'}}>test</Button>*/}
                             {/*<div style={{color:'white', fontSize: '22px'}}>x: {position.x.toFixed(0)}, y: {position.y.toFixed(0)}</div>*/}
                         </div>
-                    </Draggable>
+                    </Rnd>
                     {isMinimized && (
                         <Button
                             onClick={handleMinimizeClick}

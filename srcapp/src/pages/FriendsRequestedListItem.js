@@ -17,15 +17,11 @@ const RequestedListItem = ({list, onRemove}) => {
                             Authorization: `${localStorage.getItem('Authorization')}`
                         }
                     });
-                console.log(response);
-                console.log(response.data);
-                console.log(response.data.item);
                 if (response.data && response.data.item) {
                     setStatements('CANCLE');
-                    onRemove(id);
+                    setTimeout(() => onRemove(id), 1000);  // Add this line
                 }
             } catch (e) {
-                console.log(e);
             }
         }
         cancleRequestAxios();

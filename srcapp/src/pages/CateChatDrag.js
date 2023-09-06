@@ -370,14 +370,10 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
         const client = Stomp.over(socket);
         const onConnect = (frame) => {
             setIsChatReadOnly(true);
-            console.log("Connected: " + frame);
 
             client.subscribe("/cateSub/" + CateRoom.cateId, async (messageOutput) => {
                 const responseData = JSON.parse(messageOutput.body);
-                console.log(responseData);
-
                 if (responseData.sender !== userNickNameRef.current && selectedLanguageRef.current != " ") {
-                    console.log(responseData);
                     const translatedText = await detectAndTranslate(responseData.cateChatContent);
                     if (translatedText) {
                         responseData.translatedMessage = translatedText;
@@ -404,7 +400,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
         };
 
         const onError = (error) => {
-            console.log("Error: " + error);
             connect();
         };
 
@@ -423,7 +418,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
             }));
             stompClient.disconnect();
         }
-        console.log('Disconnected');
 
         setSelectedLanguage(" ");
         setSendMessage('');
@@ -434,12 +428,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
 
     //--------------번역----------------------
     const detectAndTranslate = async (text) => {
-
-        console.log(text);
-        console.log("선택된 언어 제발요");
-        console.log(selectedLanguage);
         const targetLanguage = selectedLanguageRef.current;
-        console.log(targetLanguage);
 
         try {
             const detectResponse = await axios.post("/language/detect", {query: text}, {
@@ -447,12 +436,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                     Authorization: `${localStorage.getItem('Authorization')}`
                 }
             });
-
-            console.log(detectResponse);
-            console.log(detectResponse.data);
-
-            console.log("여기에 문제가 있을거같긴해 나도. 이게 제일 못미더워");
-
             if (detectResponse.data && detectResponse.data.langCode) {
                 const detectedLanguage = detectResponse.data.langCode;
 
@@ -466,19 +449,13 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                     }
                 });
 
-                console.log("번역해주세여~~~~");
-                console.log(translateResponse);
-                console.log(translateResponse.data.message.result.translatedText)
-
                 if (translateResponse.data && translateResponse.data.message.result.translatedText) {
                     return translateResponse.data.message.result.translatedText;
                 } else {
-                    console.error("Error translating text");
                     return null;
                 }
 
             } else {
-                console.error("Error detecting language");
                 return null;
             }
 
@@ -490,8 +467,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
 
     const handleLanguageChange = (e) => {
         setSelectedLanguage(e.target.value);
-        console.log("언어선택 했어요. 진짜로 했어요");
-        console.log(e.target.value);
     };
 //--------------번역----------------------
 
@@ -693,7 +668,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
             }
             const data = await response.json();
             if (data) {
-                console.log(data.items);
                 if (data.items.length == 0) {
                     setRoomList(() => []);
                     setCateLoadingText("No room");
@@ -729,14 +703,11 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                 return;
             }
             const rs_cateRoom = await response.json(); // JSON 데이터를 추출합니다.
-            console.log(rs_cateRoom); // rs_cateRoom 객체를 출력합니다.
-
             if (rs_cateRoom.cateId) {
                 CloseCreateRoom();
                 setCreateRoomId(rs_cateRoom.cateId);
                 roomListAdd([rs_cateRoom]);
             } else {
-                console.log("cateRoomCreate 재시도")
                 if (retry) {
                     await cateRoomCreate(false);
                 }
@@ -802,7 +773,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
 //--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환----------------------
     //좋아요
     const likeOn = (data) => {
-        console.log(data)
         // setLikes({
         //     ...likes,
         //     [data]: !likes[data],  // 기존에 좋아요가 눌러져 있었다면 false로, 아니라면 true로 설정
@@ -904,8 +874,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
             })
                 .then((response) => {
                     const data = response.data;
-                    console.log(data);
-                    console.log("---");
                     const chatMessage = {
                         type: "CHAT",
                         cateId: CateRoom.cateId,
@@ -929,8 +897,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
 //--------------업로드 파일----------------------
 //--------------다운로드 파일----------------------
     const downloadFile = (name, dir) => {
-        console.log(name);
-        console.log(dir);
         const url = `/catechat/download/${name}`;
 
         axios({
@@ -1193,7 +1159,6 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
                                             <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
                                                 {messages.map((message, index) => {
                                                     const isMyMessage = message.sender === userNickNameRef.current;
-                                                    console.log(likes);
                                                     return (
                                                         <MessageStyled
                                                             key={message.cateChatId}

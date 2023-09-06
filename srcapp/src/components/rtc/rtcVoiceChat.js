@@ -10,7 +10,11 @@ import RtcVoiceChatDrag from "./RtcVoiceChatDrag";
 
 // const addr = "localhost:3001"
 
-const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setType2}) => {
+const RtcVoiceChat = ({showRtcVoiceChat, sendUser, receiverUser, setShowRtcVoiceChat, type2, setType2,  isMinimize2, voiceMini}) => {
+    const mypeerconnectionRef = useRef(null);
+    const localStreamRef = useRef(null);
+    const remoteStreamRef = useRef(null);
+
     const [senderIsTalking, setSenderIsTalking] = useState(false);
     const [receiverIsTalking, setReceiverIsTalking] = useState(false);
     const [socket, setSocket] = useState(null);
@@ -32,10 +36,10 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     const handleDragClose = () => {
         setRtcChatDrag(false);
     };
-    useEffect(() => {
-        handleRtcVoiceShowDrag();
-        // alert("드래그 실행");
-    }, [])
+    // useEffect(() => {
+    //     handleRtcVoiceShowDrag();
+    //     // alert("드래그 실행");
+    // }, [])
     const toggleMike = () => {
         setToggleAudio(!toggleAudio);
         if (localAudio&& localAudio.srcObject) {
@@ -71,7 +75,6 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                     console.log("음성내용@@@@@@@@@" + recordedChunksArray)
                 }
             };
-
 
 
             recorder.onstop = () => {
@@ -122,38 +125,44 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
     useEffect(() => {
+        console.log(showRtcVoiceChat + "값 출력");
+        if(showRtcVoiceChat){
+            console.log("ChatRoom 실행")
+            let host = "";
+            host = window.location.host;
+            console.log(host)
+            host = host.slice(0, -4);
+            console.log("wss://" + host + "9002" + "/voice")
+            const ws = new WebSocket("wss://" + host + "9002" + "/voice");
+            setSocket(ws);
 
-        console.log("ChatRoom 실행")
-        let host = "";
-        host = window.location.host;
-        console.log(host)
-        host = host.slice(0, -4);
-        console.log("wss://" + host + "9002" + "/voice")
-        const ws = new WebSocket("wss://" + host + "9002" + "/voice");
-        setSocket(ws);
+            updateUserList();
 
-        updateUserList();
+            // 컴포넌트가 언마운트될 때 WebSocket 연결을 종료
+            // let loginUserName = "";
+            // console.log(rtcUserName+"이게 넘어온 이름")
 
-        // 컴포넌트가 언마운트될 때 WebSocket 연결을 종료
-        // let loginUserName = "";
-        // console.log(rtcUserName+"이게 넘어온 이름")
+            if (localStorage.getItem('userName')) {
+                console.log("발신 유저 이름: " + sendUser)
+                console.log("수신 유저 이름: " + receiverUser)
+                setLocalUserName(localStorage.getItem('userName'));
 
-        if (localStorage.getItem('userName')) {
-            console.log("발신 유저 이름: " + sendUser)
-            console.log("수신 유저 이름: " + receiverUser)
-            setLocalUserName(localStorage.getItem('userName'));
-
+            }
+            console.log(sendUser+"WWWWWWWWWWWWWWW");
+            console.log(localStorage.getItem('userName'));
+            // if(localStorage.getItem('userName') == sendUser){
+            //     isSender = true;
+            //     console.log("발신자@@@@@@@@@@@@" + isSender);
+            // }
+            // return () => {
+            //     ws.close();
+            // }
+        }else {
+            if(mypeerconnectionRef.current){
+                stop();
+            }
         }
-        console.log(sendUser+"WWWWWWWWWWWWWWW");
-        console.log(localStorage.getItem('userName'));
-        // if(localStorage.getItem('userName') == sendUser){
-        //     isSender = true;
-        //     console.log("발신자@@@@@@@@@@@@" + isSender);
-        // }
-        // return () => {
-        //     ws.close();
-        // }
-    }, [])
+    }, [showRtcVoiceChat])
 
     //STUN 서버 설정을 포함하는 WebRTC 연결 설정
     const peerConnectionConfig = {
@@ -167,9 +176,9 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     const mediaConstraints = {
         audio: true,
     };
-    let localStream;
-    let remoteStream;
-    let myPeerConnection;
+    // let localStream;
+    // let remoteStream;
+    // let myPeerConnection;
     const localRoom = sendUser + "님과 " + receiverUser + "님의 음성채팅방";
     // const localAudio = document.getElementById('local_Audio');
     const localAudio = useRef(null);
@@ -280,6 +289,13 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 //음성감지
 
     useEffect(() => {
+        console.log("+************************+=777777*******+");
+        console.log(remoteAudio?.current?.srcObject);
+        console.log(!remoteAudio?.current?.srcObject);
+        console.log(!remoteAudio);
+        console.log(!remoteAudio.current);
+        console.log(!remoteAudio?.current?.srcObject);
+        console.log("+******************77777777777*************+");
         if (!remoteAudio?.current?.srcObject) {
             console.log("여기 어딨오....................")
             return;
@@ -438,7 +454,9 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 //     }
 
     useEffect(() => {
-
+        console.log("+*******************************+");
+        console.log(localAudio.srcObject);
+        console.log("+*******************************+");
         if(!localAudio.srcObject){return;}
         // navigator.mediaDevices.getUserMedia({audio: true})
         //     .then(stream => {
@@ -535,7 +553,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         // };
 
 
-    }, [localAudio, localAudio.srcObject,disconnect2,localStream]); // 이 useEffect는 컴포넌트가 마운트될 때 한 번만 실행됩니다.
+    }, [localAudio, localAudio.srcObject,disconnect2,localStreamRef.current]); // 이 useEffect는 컴포넌트가 마운트될 때 한 번만 실행됩니다.
 
 
 // 방 나가기 함수
@@ -543,6 +561,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         console.log("exit@@@@@@@@@@@" + type2);
         stop(); // 웹소켓 연결 종료 및 비디오/오디오 정지
         setShowRtcVoiceChat(false);
+        isMinimize2(false);
         console.log("exit되고나서 @@@@@@@@@@@" + type2);
 
     };
@@ -552,14 +571,12 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         setType2('');
         console.log("보이스스탑메소드" + type2);
 
-        alert("상대방과의 연결이 끊어졌습니다.");
-
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
+        if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => track.stop());
         }
 
-        if (remoteStream) {
-            remoteStream.getTracks().forEach(track => track.stop());
+        if (remoteStreamRef.current) {
+            remoteStreamRef.current.getTracks().forEach(track => track.stop());
         }
 
         cleanupAudioResources();
@@ -578,26 +595,26 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         }
 
         setShowRtcVoiceChat(false);
-
+        isMinimize2(false);
 
         remoteAudio.current = null;
         localAudio.current = null;
 
-        myPeerConnection = null;
-        localStream = null;
-
-        if (myPeerConnection) {
+        mypeerconnectionRef.current = null;
+        localStreamRef.current = null;
+        localAudio.srcObject = null;
+        if (mypeerconnectionRef.current) {
             log('Close the RTCPeerConnection');
 
             // disconnect all our event listeners
-            myPeerConnection.onicecandidate = null;
-            myPeerConnection.ontrack = null;
-            myPeerConnection.onnegotiationneeded = null;
-            myPeerConnection.oniceconnectionstatechange = null;
-            myPeerConnection.onsignalingstatechange = null;
-            myPeerConnection.onicegatheringstatechange = null;
-            myPeerConnection.onnotificationneeded = null;
-            myPeerConnection.onremovetrack = null;
+            mypeerconnectionRef.current.onicecandidate = null;
+            mypeerconnectionRef.current.ontrack = null;
+            mypeerconnectionRef.current.onnegotiationneeded = null;
+            mypeerconnectionRef.current.oniceconnectionstatechange = null;
+            mypeerconnectionRef.current.onsignalingstatechange = null;
+            mypeerconnectionRef.current.onicegatheringstatechange = null;
+            mypeerconnectionRef.current.onnotificationneeded = null;
+            mypeerconnectionRef.current.onremovetrack = null;
 
             // 비디오 정지
 
@@ -634,7 +651,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
             const response = await axios.post('/webrtc/usercount', qs.stringify(params), config);
             console.log("방 인원수: " + response.data.toString())
             if (response.data.toString() === "true") {
-                myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
+                mypeerconnectionRef.current.onnegotiationneeded = handleNegotiationNeededEvent;
             }
             return response.data;
         } catch (error) {
@@ -696,9 +713,9 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 // initialize media stream
     function getMedia(constraints) {
         console.log("stream test3");
-        if (localStream) {
+        if (localStreamRef.current) {
             console.log("stream test3-1??");
-            localStream.getTracks().forEach(track => {
+            localStreamRef.current.getTracks().forEach(track => {
                 track.stop();
             });
         }
@@ -713,15 +730,16 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 
         if (message.data === "true") {
 
-            myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
+            mypeerconnectionRef.current.onnegotiationneeded = handleNegotiationNeededEvent;
         }
     }
 
     function createPeerConnection() {
-        myPeerConnection = new RTCPeerConnection(peerConnectionConfig);
+        console.log("제발요")
+        mypeerconnectionRef.current = new RTCPeerConnection(peerConnectionConfig);
 
-        myPeerConnection.onicecandidate = handleICECandidateEvent;
-        myPeerConnection.ontrack = handleTrackEvent;
+        mypeerconnectionRef.current.onicecandidate = handleICECandidateEvent;
+        mypeerconnectionRef.current.ontrack = handleTrackEvent;
 
         // the following events are optional and could be realized later if needed
         // myPeerConnection.onremovetrack = handleRemoveTrackEvent;
@@ -732,10 +750,10 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 
     function getLocalMediaStream(mediaStream) {
         console.log("stream test4");
-        localStream = mediaStream;
+        localStreamRef.current = mediaStream;
         localAudio.srcObject = mediaStream;
         console.log("유효확인 로컬: " + mediaStream + "///" + mediaStream.getAudioTracks());
-        localStream.getTracks().forEach(track => myPeerConnection.addTrack(track, localStream));
+        localStreamRef.current.getTracks().forEach(track => mypeerconnectionRef.current.addTrack(track, localStreamRef.current));
     }
 
 // handle get media error
@@ -765,12 +783,15 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                 type: 'ice',
                 candidate: event.candidate
             });
+            console.log("실행합니다.")
             log('ICE Candidate Event: ICE candidate sent');
         }
     }
 
     function handleTrackEvent(event) {
         log('Track Event: set stream to remote Audio element');
+        console.log("------제발--------------")
+        console.log(remoteAudio.current);
         if (remoteAudio.current) { // remoteAudio가 null이 아닌지 확인
             remoteAudio.current.srcObject = event.streams[0];
             console.log("유효확인 리모트: " + event.streams[0] + "//" + event.streams[0].getAudioTracks());
@@ -784,8 +805,8 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 // 2. local media description 생성?
 // 3. 미디어 형식, 해상도 등에 대한 내용을 서버에 전달
     function handleNegotiationNeededEvent() {
-        myPeerConnection.createOffer().then(function (offer) {
-            return myPeerConnection.setLocalDescription(offer);
+        mypeerconnectionRef.current.createOffer().then(function (offer) {
+            return mypeerconnectionRef.current.setLocalDescription(offer);
         })
             .then(function () {
                 if (socket.readyState !== socket.CONNECTING) {
@@ -793,7 +814,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                         from: localUserName,
                         data: localRoom,
                         type: 'offer',
-                        sdp: myPeerConnection.localDescription
+                        sdp: mypeerconnectionRef.current.localDescription
                     });
                 }
                 log('Negotiation Needed Event: SDP offer sent');
@@ -810,32 +831,32 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
         let desc = new RTCSessionDescription(message.sdp);
         //TODO test this
         if (desc != null && message.sdp != null) {
-            log('RTC Signalling state: ' + myPeerConnection.signalingState);
-            myPeerConnection.setRemoteDescription(desc).then(function () {
+            log('RTC Signalling state: ' + mypeerconnectionRef.current.signalingState);
+            mypeerconnectionRef.current.setRemoteDescription(desc).then(function () {
                 log("Set up local media stream");
                 return navigator.mediaDevices.getUserMedia(mediaConstraints);
             })
                 .then(function (stream) {
                     log("-- Local Audio stream obtained");
                     console.log("stream test5");
-                    localStream = stream;
+                    localStreamRef.current = stream;
                     try {
                         if (localAudio) {
-                            localAudio.srcObject = localStream;
+                            localAudio.srcObject = localStreamRef.current;
                         }
                     } catch (error) {
                         localAudio.src = window.URL.createObjectURL(stream);
                     }
                     log("-- Adding stream to the RTCPeerConnection");
-                    localStream.getTracks().forEach(track => myPeerConnection.addTrack(track, localStream));
+                    localStreamRef.current.getTracks().forEach(track => mypeerconnectionRef.current.addTrack(track, localStreamRef.current));
                 })
                 .then(function () {
                     log("-- Creating answer");
-                    return myPeerConnection.createAnswer();
+                    return mypeerconnectionRef.current.createAnswer();
                 })
                 .then(function (answer) {
                     log("-- Setting local description after creating answer");
-                    return myPeerConnection.setLocalDescription(answer);
+                    return mypeerconnectionRef.current.setLocalDescription(answer);
                 })
                 .then(function () {
                     log("Sending answer packet back to other peer");
@@ -843,7 +864,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
                         from: localUserName,
                         data: localRoom,
                         type: 'answer',
-                        sdp: myPeerConnection.localDescription
+                        sdp: mypeerconnectionRef.current.localDescription
                     });
 
                 })
@@ -852,7 +873,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     }
 
     function handleAnswerMessage(message) {
-        myPeerConnection.setRemoteDescription(message.sdp).catch(handleErrorMessage);
+        mypeerconnectionRef.current.setRemoteDescription(message.sdp).catch(handleErrorMessage);
         // log("The peer has accepted request");
         // let desc = new RTCSessionDescription(message.sdp);
         // if (desc != null && message.sdp != null) {
@@ -869,7 +890,7 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     function handleNewICECandidateMessage(message) {
         let candidate = new RTCIceCandidate(message.candidate);
         log("Adding received ICE candidate: " + JSON.stringify(candidate));
-        myPeerConnection.addIceCandidate(candidate).catch(handleErrorMessage);
+        mypeerconnectionRef.current.addIceCandidate(candidate).catch(handleErrorMessage);
     }
 
     const cleanupAudioResources = () => {
@@ -890,16 +911,20 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
     // console.log("샌드 이미지 " + sendUserProfile)
     // console.log("샌드 이미지 " + receiverUserProfile)
 // rtcVoiceChat 컴포넌트 내부에서...
-
+    const isMinimizeHandle = (isMinimize) => {
+        isMinimize2(isMinimize);
+    }
 //-----------------여기부터 이제 추가될 화상채팅에서 끌어온 로직
     return (
-        <div className="rtcVoiceChat">
-            <RtcVoiceChatDrag onClose={handleDragClose} remoteAudio={remoteAudio} show={rtcChatDrag}
+        <div className="rtcVoiceChat" style={{position: 'fixed', zIndex : '3'}}>
+            <RtcVoiceChatDrag onClose={handleDragClose} remoteAudio={remoteAudio} show={showRtcVoiceChat}
                               localRoom={localRoom} exitRoom={exitRoom} senderIsTalking={senderIsTalking}
                               receiverIsTalking={receiverIsTalking}
                               toggleMike={toggleMike}
                               toggleRecording={toggleRecording}
                               isRecording={isRecording}
+                              voiceMini={voiceMini}
+                              isMinimize={isMinimizeHandle}
                               src1={sendUserProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + sendUserProfile : Profile}
                               src2={receiverUserProfile ? "https://kr.object.ncloudstorage.com/bitcamp-bukkit-132/userProfile/" + receiverUserProfile : Profile}></RtcVoiceChatDrag>
             {/*<div className="users">*/}
@@ -932,8 +957,6 @@ const RtcVoiceChat = ({sendUser, receiverUser, setShowRtcVoiceChat, type2, setTy
 
 
             {/*</div>*/}
-
-
         </div>
     );
 

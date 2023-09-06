@@ -96,7 +96,6 @@ const MyPage = React.memo(({
 
         useEffect(() => {
             if (MyPageG) {
-                console.log("마이")
                 setMypageOnClick(true);
                 setFriendsReceivedOnClick(false);
                 setFriendsRequesteddOnClick(false);
@@ -104,7 +103,6 @@ const MyPage = React.memo(({
         }, [MyPageG]);
         useEffect(() => {
             if (FriendsReceived) {
-                console.log("리시브")
                 setMypageOnClick(false);
                 setFriendsReceivedOnClick(true);
                 setFriendsRequesteddOnClick(false);
@@ -112,7 +110,6 @@ const MyPage = React.memo(({
         }, [FriendsReceived]);
         useEffect(() => {
             if (FriendsReqested) {
-                console.log("리퀘")
                 setMypageOnClick(false);
                 setFriendsReceivedOnClick(false);
                 setFriendsRequesteddOnClick(true);
@@ -143,13 +140,10 @@ const MyPage = React.memo(({
                                 Authorization: `${localStorage.getItem('Authorization')}`
                             }
                         });
-                        console.log(response);
-                        console.log(response.data.items);
                         if (response.data && response.data.items) {
                             setReceivedList(() => response.data.items);
                         }
                     } catch (e) {
-                        console.log(e);
                     }
                 }
                 getReceivedListAxios();
@@ -165,12 +159,10 @@ const MyPage = React.memo(({
                                 Authorization: `${localStorage.getItem('Authorization')}`
                             }
                         });
-                        console.log(response);
                         if (response.data && response.data.items) {
                             setRequestedList(() => response.data.items);
                         }
                     } catch (e) {
-                        console.log(e);
                     }
                 }
                 getRequestedListAxios();
