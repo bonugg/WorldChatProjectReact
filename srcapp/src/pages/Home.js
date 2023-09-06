@@ -456,7 +456,8 @@ const Home = React.memo(() => {
         const localRoom = sendUser + "님과 " + receiverUser + "님의 음성채팅방"
 
 
-
+        const [message, setMessage] = useState(null);
+        const [addMessage, setAddMessage] = useState(null);
         useEffect(() => {
             console.log("receiver2");
             if (socket) {
@@ -519,6 +520,17 @@ const Home = React.memo(() => {
                     } else if(receivedMessage.includes("접속")){
                         console.log("접속 들어옴")
                         setFriendListUpdated(prevState => !prevState);
+                    }else if(receivedMessage.includes("채팅")){
+                        receivedMessage = receivedMessage.substring(2);
+                        const msg = JSON.parse(receivedMessage);
+                        console.log("채팅 들어옴" + msg)
+                        setMessage(msg);
+                    }else if(receivedMessage.includes("친구")){
+                        console.log("친구 들어옴" + receivedMessage)
+                        receivedMessage = receivedMessage.substring(2);
+                        const msg = receivedMessage;
+                        console.log("친구 들어옴",msg)
+                        setAddMessage(msg);
                     } else {
                         // 기존의 메시지 처리 로직
                         setModalContent(receivedMessage);
@@ -1500,7 +1512,7 @@ const Home = React.memo(() => {
                         <RandomChatDrag style={{visibility: displayStyle}} randomMax={randomMini}
                                         isMinimize={handleIsMinimized} show={randomDrag}
                                         logoutApiCate={logoutApiCate} frdadd={frdaddHanddle} frdaddResponse={frdaddResponseHanddle}
-                                        onClose={handleRandomShowDragClose} socket={socket}/>
+                                        onClose={handleRandomShowDragClose} addMessage={addMessage} socket={socket}/>
 
                         <OneOnOneChatDrag style={{visibility: displayStyle}} friendMax={firendMini}
                                           isMinimize={handleIsMinimizedFriend}
@@ -1754,6 +1766,7 @@ const Home = React.memo(() => {
                                 onRemove={removeItemFromHomeComponent2}
                                 socket={socket}
                                 friendListUpdated={friendListUpdated}
+                                message={message}
                             />
                             {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>
@@ -1949,7 +1962,7 @@ const Home = React.memo(() => {
                                 onAccept={handleModalConfirm}
                                 onDecline={handleModalDecline}
                                 message={modalContent}
-                               sendUserProfile={sendUserProfile}
+                                sendUserProfile={sendUserProfile}
                             />
                         </UserListContext.Provider>
                         {/*rtc*/}

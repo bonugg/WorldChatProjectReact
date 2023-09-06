@@ -60,7 +60,22 @@ const MenuPanel = styled.div`
   background: rgba(30, 30, 30, 1);
 `;
 
-const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isMinimize, socket, frdadd, frdaddResponse}) => {
+const RandomChatDrag = React.memo(({
+                                       randomMax,
+                                       show,
+                                       onClose,
+                                       logoutApiCate,
+                                       isMinimize,
+                                       addMessage,
+                                       frdadd,
+                                       frdaddResponse,
+                                       socket
+                                   }) => {
+    useEffect(() => {
+        if (addMessage) {
+            onMessage(addMessage);
+        }
+    }, [addMessage]);
     const dispatch = useDispatch();
     const randomDragPosition = useSelector((state) => state.chatminimum.position);
     const [isChatDiv, setIsChatDiv] = useState(false);
@@ -396,7 +411,9 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
     };
     const disconnect = () => {
         if (client.current && typeof client.current.disconnect === "function") {
+            console.log("왜 꺼짐?;")
             if (client.current.connected) { // Check connection status
+                console.log("왜 꺼짐?;")
                 leaveEvent();
             }
             client.current.disconnect(() => {
@@ -418,6 +435,7 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
     }
 
     async function onReceived(payload) {
+        console.log("코드가 너무 어렵다.." + payload.body);
         let payloadData = JSON.parse(payload.body);
         if (payloadData.type == "LEAVE") {
             if (payloadData.sender != LoginUserNickName.current) {
@@ -427,9 +445,11 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
             }
             setIsChatDiv(false);
         } else if (payloadData.type == "CHAT") {
+            console.log("chat 들어옴!");
             if (payloadData.sender !== LoginUserNickName.current) {
                 otherUserId.current = payloadData.userId;
             }
+            console.log("chat 들어옴!" + payloadData.userId);
         }
 
         if (payloadData.sender !== LoginUserNickName.current && selectedLanguageRef.current != " ") {
@@ -627,23 +647,48 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                         }
                     });
                 console.log(response);
-                console.log(response.data.item.msg);
-                console.log(response.data.item.friends);
-                if (response.data.item.msg === "request ok") {
+                console.log("response.data.item.msg: " + response.data.item.msg);
+                console.log("response.data.item.friends: " + response.data.item.friends);
+                if (response.data.item.msg === "requestok") {
+                    console.log("여기까진 들어옴");
                     friendIdRef.current = response.data.item.friends.id;
                     setFriendAddText("Friend request completed");
                     const friendRequest = {
                         type: "friendRequest",
                         receiverId: otherId,
                         requesterId: LoginUserNickName.current,
-                        friendsId: response.data.item.friends.id
+                        friendsId: response.data.item.friends.id,
+                        sendUser: localStorage.getItem("userName")
                     };
-                    socket.send(JSON.stringify(friendRequest));
+                    try {
+                        // 서버로 POST 요청을 보냅니다.
+                        const response = await axios.post('/webrtc/request2', friendRequest, {});
+                        console.log('Request successful:', response);
+                    } catch (error) {
+                        console.error('An error occurred while sending the request:', error);
+                    }
+
+
+                    console.log("웹소켓 send", JSON.stringify(friendRequest));
+                    console.log(friendRequest);
+                    console.log(typeof otherId);
+                    console.log(typeof LoginUserNickName.current);
+                    console.log(typeof response.data.item.friends.id);
+                    // socket.send("채팅" + (JSON.stringify(friendRequest)));
+                    // if (friendRequest.type === 'friendRequest') {
+                    //     console.log("11111111111111111111111111111111111111111111111111")
+                    //     friendAddRef.current = friendRequest;
+                    //     setFirendaddDiv(true);
+                    // }else if(friendRequest.type === 'friendResponse') {
+                    //     console.log("22222222222222222222222222222222222222222222222222")
+                    //     frdaddResponse(friendAddRef.current.friendsId);
+                    // }
                     setTimeout(() => {
                         setFriendAddText(null);
                     }, 1500);
-                }else {
+                } else {
                     setFriendAddText("Already friend or pending request");
+                    console.log("other아이디 확인" + otherId);
                     setTimeout(() => {
                         setFriendAddText(null);
                     }, 1500);
@@ -654,29 +699,33 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
         }
         requestFrdAxios();
     };
+    // useEffect(()=>{
 
-    if (socket) {
-        socket.onmessage = async (event) => {
-            const receivedMessage = JSON.parse(event.data);
-            console.log("친구 신청 받아오는지?");
-            console.log(receivedMessage);
-            if (receivedMessage.type === 'friendRequest') {
-                friendAddRef.current = receivedMessage;
-                setFirendaddDiv(true);
-            }else if(receivedMessage.type === 'friendResponse') {
-                frdaddResponse(friendAddRef.current.friendsId);
-            }
-            ;
-        };
+    const onMessage = (addMessage) => {
+        // socket.onmessage = async (event) => {
+        // const receivedMessage = JSON.parse(event.data);
+        // console.log("친구 신청 받아오는지?");
+        console.log("메시지 왔다 ++++++++++ ", addMessage);
+        addMessage = JSON.parse(addMessage);
+        if (addMessage.type === 'friendRequest' && addMessage.sendUser != localStorage.getItem("userName")) {
+            console.log("11111111111111111111111111111111111111111111111111")
+            friendAddRef.current = addMessage;
+            setFirendaddDiv(true);
+        } else if (addMessage.type === 'friendResponse') {
+            console.log("22222222222222222222222222222222222222222222222222")
+            frdaddResponse(friendAddRef.current.friendsId);
+        }
     }
-    ;
+
+
+
     const approve = async () => {
         const response = await axios.post("/friends/approve", {id: friendAddRef.current.friendsId}, {
             headers: {
                 Authorization: `${localStorage.getItem('Authorization')}`
             }
         });
-        console.log(response);
+        console.log(response.data.item.msg);
         if (response.data.item.msg == 'request approved') {
             setFirendaddDiv(false);
             frdadd(friendAddRef.current.friendsId);
@@ -1025,14 +1074,14 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                                                 <div className={"EnterRoomClose"}>
                                                     {otherUserId.current !== null ? (
                                                         <Button
-                                                            className={friendAddText === null ? "userAdd_btn" : friendAddText === "Friend request completed" ? "userAdd_btn one" : "userAdd_btn two" }
+                                                            className={friendAddText === null ? "userAdd_btn" : friendAddText === "Friend request completed" ? "userAdd_btn one" : "userAdd_btn two"}
                                                             onClick={() => {
                                                                 friendAddClick(otherUserId.current)
                                                             }}
                                                         >
                                                             {friendAddText === null ?
 
-                                                                (<PersonAddIcon style={{fontSize: 'small'}}/>):
+                                                                (<PersonAddIcon style={{fontSize: 'small'}}/>) :
                                                                 friendAddText
                                                             }
 

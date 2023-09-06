@@ -184,7 +184,7 @@ const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setC
                 <div className={"friendsList_item_btn_div"}>
                     <Button
                         className={"friendsList_item_btn"}
-                        style={status ? {opacity: 1} : {opacity: 0.3,pointerEvents: 'none'}}
+                        style={status ? {opacity: 1} : {opacity: 0.3}}
                         onClick={() => friendsChatDivOn(friends.userId, friends.userNickName)}
                     >
                         <ChatIcon/>
