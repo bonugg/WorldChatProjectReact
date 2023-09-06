@@ -11,3 +11,9 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+.ld{
+  background-color: yellow;
+  width: 100vw;
+  height: 100vh;
+  color: #e1cab5;
+}

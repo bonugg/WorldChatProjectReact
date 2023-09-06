@@ -34,7 +34,7 @@ const RequestedListItem = ({list, onRemove}) => {
     return (
         <div
             className={statements === "WAITING" ? "received_item" : "received_item2"}>
-            <div className={"request_user"}>{friends.userName}</div>
+            <div className={"request_user"}>{friends.userNickName}</div>
             <div className={`statement`}>
                <span>
                        {statements}

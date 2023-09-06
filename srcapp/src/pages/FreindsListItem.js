@@ -201,8 +201,12 @@ const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setC
                     </Button>
                 </div>
             </div>
-            <div className={"userMessage_div"}>
-                {friends.userMessage}
+            <div className={deleteDiv ? "userMessage_div one": "userMessage_div"}>
+                {friends.userMessage == "" ?
+                    "No status Message"
+                    :
+                    <span className={"userMessage"}>{friends.userMessage}</span>
+                }
             </div>
         </div>
     );

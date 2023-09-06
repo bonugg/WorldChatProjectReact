@@ -22,6 +22,7 @@
     "axios": "^1.4.0",
     "bootstrap": "^5.3.1",
     "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
     "cors": "^2.8.5",
     "d3": "^7.8.5",
     "emoji-mart": "^5.5.2",
@@ -36,6 +37,7 @@
     "qs": "^6.11.2",
     "re-resizable": "^6.9.11",
     "react": "^18.2.0",
+    "react-bootstrap": "^2.8.0",
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.5",
     "react-globe": "^5.0.2",
@@ -96,5 +98,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "customize-cra": "^1.0.0",
+    "react-app-rewired": "^2.2.1"
   }
 }

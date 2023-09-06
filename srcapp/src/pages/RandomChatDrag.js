@@ -17,7 +17,8 @@ import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import {useDispatch, useSelector} from "react-redux";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
-
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 const MessageStyled = styled.p`
 `;
 const slideDownUserList = keyframes`
@@ -88,7 +89,7 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
 
         const initialPosition = {
             x: (windowSize.width / 2) - (450 / 2), // 450은 Draggable 컴포넌트의 너비
-            y: (windowSize.height / 2) - (600 / 2), // 200은 Draggable 컴포넌트의 높이
+            y: (windowSize.height / 2) - (250 / 2), // 200은 Draggable 컴포넌트의 높이
         };
         const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -153,6 +154,8 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
 
         const [size, setSize] = useState({width: "450px", height: "250px"});
         const [resizing, setResizing] = useState(false);
+
+        const [likes, setLikes] = useState({});  // likes라는 state 생성
         const handleResizeStart = () => {
             // 사이즈 결정
             setResizing(true);
@@ -325,18 +328,83 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                 (error) => onError(error)
             );
         };
+
+        const leaveRandom = async (retry = true) => {
+            console.log("leaveRandom 실행");
+            try {
+                const response = await fetch("/randomRoom/leave", {
+                    method: 'DELETE',
+                    headers: {
+                        "Content-Type": "application/json",
+                        'Authorization': localStorage.getItem('Authorization'),
+                        'userName': localStorage.getItem('userName'),
+                    },
+                });
+
+                const accessToken = response.headers.get('Authorization');
+                if (accessToken != null) {
+                    localStorage.setItem('Authorization', accessToken);
+                }
+                if (response.headers.get('refresh') != null) {
+                    //로그아웃 처리
+                    alert("로그아웃 leaveRandom");
+                    return;
+                }
+
+                if (!response.ok) {
+                    if (retry) {
+                        await leaveRandom(false);
+                    }
+                    return console.error(`Error: ${response.status}`)
+                }
+
+                const result = await response.json();
+                if (!result) {
+                    if (retry) {
+                        await leaveRandom(false);
+                    }
+                    return console.error(result.errorMessage);
+                }
+                console.log(`leaved random room name: ${result}`);
+                if (result.status == 'success') {
+                    console.log("방 삭제 완료");
+                } else {
+                    console.log("방 삭제 실패");
+                }
+
+                return result;
+                // navigate(`/random/${result.randomRoomId}`, {state: {room: result}});
+
+            } catch (error) {
+                console.log(error);
+                if (retry) {
+                    await leaveRandom(false);
+                }
+                return;
+            }
+        };
         const disconnect = () => {
+            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@")
             if (client.current && typeof client.current.disconnect === "function") {
+<<<<<<< HEAD
                 otherUserId.current = null;
                 setSelectedLanguage(" ");
                 setMessages([]);
                 setIsChatReadOnly(false);
                 //나갔다고 메시지는 보내줌
+=======
+                console.log("!!!!!!!!!!!!!!!!!!!!!!!!")
+>>>>>>> bb129c169bb7759ee427791e632cab1c85af02f9
                 leaveEvent();
 
                 //여기서 웹소켓 해제하지 않고 백엔드에 웹소켓 해제 요청 및 채팅방 삭제 요청
                 
                 client.current.disconnect(() => {
+                    console.log("33333333333333333333333333")
+                    leaveRandom();
+                    setMessages([]);
+                    setSelectedLanguage(" ");
+                    setIsChatReadOnly(false);
                     console.log("websocket disconnected");
                 });
             }
@@ -357,9 +425,9 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
             let payloadData = JSON.parse(payload.body);
             if (payloadData.type == "LEAVE") {
                 if (payloadData.sender != LoginUserNickName.current) {
-                    setRandomStartText("A stranger has left");
-                } else {
-                    setRandomStartText("start a random chat");
+                    if (otherUserId.current != null) {
+                        setRandomStartText("A stranger has left");
+                    }
                 }
                 setIsChatDiv(false);
             } else if (payloadData.type == "CHAT") {
@@ -367,6 +435,7 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                     otherUserId.current = payloadData.userId;
                 }
             }
+
             if (payloadData.sender !== LoginUserNickName.current && selectedLanguageRef.current != " ") {
                 console.log(payloadData);
                 const translatedText = await detectAndTranslate(payloadData.content);
@@ -380,10 +449,17 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                 setTyping(prevList => prevList.filter(item => !item.includes(payloadData.sender)));
                 setDots("");
             } else {
-                setTyping(prevList => prevList.filter(item => !item.includes(payloadData.sender)));
-                setDots("");
-                setIsTyping("f");
-                setMessages((prev) => [...prev, payloadData]);
+                if(payloadData.type == "LIKE"){
+                    setLikes(prevLikes => ({
+                        ...prevLikes,
+                        [payloadData.randomChatId]: !prevLikes[payloadData.randomChatId],
+                    }));
+                }else {
+                    setTyping(prevList => prevList.filter(item => !item.includes(payloadData.sender)));
+                    setDots("");
+                    setIsTyping("f");
+                    setMessages((prev) => [...prev, payloadData]);
+                }
             }
         }
 
@@ -407,6 +483,7 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                 randomRoomId: room.randomRoomId,
             };
             client.current.send(`/randomPub/randomChat/${randomRoomId}/leave`, headers, JSON.stringify(leaveMessage));
+            otherUserId.current = null;
         }
 
         const sendChatMessage = (msgText) => {
@@ -438,6 +515,7 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                 setMenuDiv(false);
                 setMenuDiv2(false);
                 setSendMessage('');
+                setRandomStartText("start a random chat");
                 connect();
             } else {
                 setSize({width: "450px", height: "250px"});
@@ -451,15 +529,15 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
         };
 
         const handleCloseClick = () => {
+            console.log("-=-=-")
+            disconnect();
             setIsChatDiv(false);
-            setIsClosed(true);
             dispatch({type: "SET_RANDOMDRAG_POSITION", payload: initialPosition});
-            if (isChatDiv) {
-                disconnect();
-            }
             if (onClose) {
-                setRandomStartText("start a random chat");
+                console.log("-=-45233=-")
+                setIsClosed(true);
                 onClose();
+                console.log("-=-=1-")
             }
         };
 
@@ -529,6 +607,8 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
             };
             startRandomC();
         }
+
+
         const exitChatDiv = () => {
             setRandomStartText("start a random chat");
             setIsChatDiv(false);
@@ -625,6 +705,26 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
             setInputChange(false);
         };
 //--------------인풋창 클릭 시 파일에서 일반 텍스트 채팅으로 전환---------------------
+        //좋아요
+        const likeOn = (data) => {
+            console.log(data)
+            // setLikes({
+            //     ...likes,
+            //     [data]: !likes[data],  // 기존에 좋아요가 눌러져 있었다면 false로, 아니라면 true로 설정
+            // });
+            if (client.current) {
+                const headers = {
+                    Authorization: localStorage.getItem("Authorization"),
+                };
+                const messageData = {
+                    type: "LIKE",
+                    randomChatId: data,
+                    randomRoomId: room.randomRoomId,
+                };
+                client.current.send(`/randomPub/randomChat/${room.randomRoomId}/like`, headers, JSON.stringify(messageData));
+            }
+        };
+
 //--------------파일 버튼 클릭 시 동작----------------------
         const handleFileButtonClick = () => {
             setSendMessage("");
@@ -857,7 +957,7 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                                                                 const isMyMessage = message.sender === LoginUserNickName.current;
                                                                 return (
                                                                     <MessageStyled
-                                                                        key={index}
+                                                                        key={message.randomChatId}
                                                                         className={message.type !== 'CHAT' ? "userJoin" : isMyMessage ? "userY" : "userX"}
                                                                     >
                                                                         {message.type !== 'CHAT' ? (
@@ -904,9 +1004,20 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                                                                                     </div>
                                                                                 )}
                                                                                 <span
-                                                                                    className="content_user">{message.content}</span>
+                                                                                    className="content_user">{message.content}
+                                                                                </span>
                                                                                 <span
                                                                                     className="message-regdate">{message.time}</span>
+                                                                                {likes[message.randomChatId] ?
+                                                                                    (
+                                                                                        <FavoriteIcon
+                                                                                            className={"like_btn2"}
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <FavoriteBorderIcon
+                                                                                            className={"like_btn2 one"}
+                                                                                        />
+                                                                                    )}
                                                                             </div>
                                                                         ) : (
                                                                             <div>
@@ -953,10 +1064,23 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                                                                                     <>
                                                                                     </>
                                                                                 }
-                                                                                <span
-                                                                                    className="content_other">{message.content}</span>
+                                                                                <span style={{position: 'relative'}}
+                                                                                      className="content_other">{message.content}
+                                                                                </span>
                                                                                 <span
                                                                                     className="message-regdate_other">{message.time}</span>
+                                                                                {likes[message.randomChatId] ?
+                                                                                    (
+                                                                                        <FavoriteIcon
+                                                                                            className={"like_btn"}
+                                                                                            onClick={() => likeOn(message.randomChatId)}
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <FavoriteBorderIcon
+                                                                                            className={"like_btn one"}
+                                                                                            onClick={() => likeOn(message.randomChatId)}
+                                                                                        />
+                                                                                    )}
                                                                             </div>
                                                                         )}
                                                                     </MessageStyled>
@@ -1019,7 +1143,8 @@ const RandomChatDrag = React.memo(({randomMax, show, onClose, logoutApiCate, isM
                                                                     multiple
                                                                     style={{display: 'none'}}
                                                                 />
-                                                                <Button disabled={!isChatReadOnly} className={"emoji"} type="button" onClick={toggleEmojiPicker}>😃</Button>
+                                                                <Button disabled={!isChatReadOnly} className={"emoji"}
+                                                                        type="button" onClick={toggleEmojiPicker}>😃</Button>
                                                                 {showEmojiPicker && (
                                                                     <Picker data={data} onEmojiSelect={addEmoji}/>
                                                                 )}

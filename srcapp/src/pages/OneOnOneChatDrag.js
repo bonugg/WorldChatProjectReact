@@ -18,6 +18,8 @@ import data from '@emoji-mart/data'
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Logo from "../img/logo_img.png";
 import {useDispatch, useSelector} from "react-redux";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 const MessageStyled = styled.p`
 `;
 const slideDownUserList = keyframes`
@@ -167,6 +169,9 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
         const [size, setSize] = useState({ width: "450px", height: "600px"});
         //rnd
         const [resizing, setResizing] = useState(false);
+
+        const [likes, setLikes] = useState({});  // likes라는 state 생성
+
         const handleResizeStart  = () => {
             // 사이즈 결정
             setResizing(true);
@@ -642,10 +647,15 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                 setTyping(prevList => prevList.filter(item => !item.includes(messageOutput.sender)));
                 setDots("");
             } else {
-                setTyping(prevList => prevList.filter(item => !item.includes(messageOutput.sender)));
-                setDots("");
-                setIsTyping("f");
-                setMessages((prevMessages) => [...prevMessages, messageOutput]);
+                if(messageOutput.type == "LIKE"){
+                    setMessages(prevMessages => prevMessages.map(item => item.id === messageOutput.id ? {...item, liked : messageOutput.liked} : item));
+                }
+                else {
+                    setTyping(prevList => prevList.filter(item => !item.includes(messageOutput.sender)));
+                    setDots("");
+                    setIsTyping("f");
+                    setMessages((prevMessages) => [...prevMessages, messageOutput]);
+                }
             }
         };
 //--------------메세지 배열에 추가----------------------
@@ -658,7 +668,20 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
             isMinimize(!false);
         };
 //--------------채팅창 최소화 -----------------------
+        const likeOn = (data, isLike) => {
+            const message = {
+                roomId: roomIdRef.current,
+                id: data,
+                like : isLike,
+                type : 'LIKE'
+            };
 
+            stompClient.send(
+                "/frdPub/friendchat/like",
+                {},
+                JSON.stringify(message)
+            );
+        };
 //--------------채팅창 닫기 -----------------------
         const handleCloseClick = () => {
             setIsClosed(true);
@@ -835,11 +858,11 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                             <div className={"EnterRoomChat_content_one"}>
 
                                                 <div className="EnterRoomChat_content_2" onScroll={handleScroll}>
-                                                    {messages.map((message, index) => {
+                                                    {messages.map((message) => {
                                                         const isMyMessage = message.sender === userNickNameRef.current;
                                                         return (
                                                             <MessageStyled
-                                                                key={index}
+                                                                key={message.id}
                                                                 className={isMyMessage ? "userY" : "userX"}
                                                             >
                                                                 {isMyMessage ? (
@@ -879,7 +902,20 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                                         <span
                                                                             className="content_user">{message.message}</span>
                                                                         <span
-                                                                            className="message-regdate">{message.createdAt}&nbsp;&nbsp;&nbsp;{message.checkRead ? (<div className={"on"}></div>) : (<div className={"off"}></div>)}</span>
+                                                                            className="message-regdate">{message.createdAt}&nbsp;{message.checkRead ? (<div className={"on"}></div>) : (<div className={"off"}></div>)}</span>
+                                                                        {message.liked ?
+                                                                            (
+                                                                                <FavoriteIcon
+                                                                                    className={"like_btn2"}
+                                                                                />
+                                                                            )
+                                                                            :
+                                                                            (
+                                                                                <FavoriteBorderIcon
+                                                                                    className={"like_btn2 one"}
+                                                                                />
+                                                                            )
+                                                                        }
                                                                     </div>
                                                                 ) : (
                                                                     <div>
@@ -926,7 +962,22 @@ const OneOnOneChatDrag = React.memo(({show, onClose, logoutApiCate, oneOnOneUser
                                                                         <span
                                                                             className="content_other">{message.message}</span>
                                                                         <span
-                                                                        className="message-regdate_other">{message.checkRead ? (<div className={"on"}></div>) : (<div className={"off"}></div>)}&nbsp;&nbsp;&nbsp;{message.createdAt}</span>
+                                                                        className="message-regdate_other">{message.checkRead ? (<div className={"on"}></div>) : (<div className={"off"}></div>)}&nbsp;{message.createdAt}</span>
+                                                                        {message.liked ?
+                                                                            (
+                                                                                <FavoriteIcon
+                                                                                    className={"like_btn"}
+                                                                                    onClick={() => likeOn(message.id, "off")}
+                                                                                />
+                                                                            )
+                                                                            :
+                                                                                (
+                                                                                    <FavoriteBorderIcon
+                                                                                        className={"like_btn one"}
+                                                                                        onClick={() => likeOn(message.id, "on")}
+                                                                                    />
+                                                                                )
+                                                                        }
                                                                     </div>
                                                                 )}
                                                             </MessageStyled>
