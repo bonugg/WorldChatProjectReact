@@ -476,6 +476,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
             setIsClosed(false);
             setIsChatDiv(false);
             setActiveButton(null);
+            setCateLoadingText("Select Category");
         }
     }, [show]);
 
@@ -600,6 +601,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
         }
     };
     const showUserListOutput = (messageOutput) => {
+        console.log(messageOutput);
         setuserList((prevUserList) => [...messageOutput]);
     };
     const roomListAdd = (roomListadd) => {
@@ -897,7 +899,7 @@ const Drag = React.memo(({show, onClose, logoutApiCate, cateMax, isMinimize}) =>
 //--------------업로드 파일----------------------
 //--------------다운로드 파일----------------------
     const downloadFile = (name, dir) => {
-        const url = `/catechat/download/${name}`;
+        const url = `/cateChat/download/${name}`;
 
         axios({
             method: 'get',

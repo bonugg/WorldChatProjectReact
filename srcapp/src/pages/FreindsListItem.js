@@ -146,7 +146,7 @@ const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setC
                         style={{opacity: 1}}
                         onClick={() => friendsChatDivOn(friends.userId, friends.userNickName)}
                     >
-                        <ChatIcon/>
+                        <ChatIcon style={{fontSize:'small'}}/>
                         {unreadCount > 0 && <span className="unread-count">{Math.min(unreadCount, 99)}</span>}
                     </Button>
                     <Button
@@ -154,20 +154,20 @@ const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setC
                         onClick={() => Rtc("video")}
                         className={"friendsList_item_btn2"}
                     >
-                        <VideoChatIcon/>
+                        <VideoChatIcon style={{fontSize:'small'}}/>
                     </Button>
                     <Button
                         style={status ? {opacity: 1} : {opacity: 0.3,pointerEvents: 'none'}}
                         onClick={() => Rtc("voice")}
                         className={"friendsList_item_btn2"}
                     >
-                        <PhoneIcon/>
+                        <PhoneIcon style={{fontSize:'small'}}/>
                     </Button>
                     <Button
                         onClick={deleteDivStart}
                         className={"friendsList_item_btn2 del"}
                     >
-                        <ClearIcon/>
+                        <ClearIcon style={{fontSize:'small'}}/>
                     </Button>
                 </div>
                 <div className={deleteDiv ? "userMessage_div one": "userMessage_div"}>

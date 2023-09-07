@@ -24,9 +24,6 @@ const ChatRoom = ({showRtcChat, sendUser, receiverUser, setShowRtcChat,type2,set
         setRtcChatDrag(false);
     };
 
-    console.log(type2+"asd");
-    console.log("ChatRoom 실행")
-
     // const [isAnswerReceived, setIsAnswerReceived] = useState(false);
     // WebSocket 연결 설정
     useEffect(() => {
@@ -55,8 +52,6 @@ const ChatRoom = ({showRtcChat, sendUser, receiverUser, setShowRtcChat,type2,set
     // console.log(rtcUserName+"이게 넘어온 이름")
 
     if (localStorage.getItem('userName')) {
-        console.log("발신 유저 이름: " + sendUser)
-        console.log("수신 유저 이름: " + receiverUser)
         localUserName = localStorage.getItem('userName');
     }
 

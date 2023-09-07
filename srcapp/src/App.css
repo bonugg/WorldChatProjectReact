@@ -1,6 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Noto+Sans+KR:wght@400;500&family=Orbit&family=Russo+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bayon&family=Encode+Sans+SC:wght@600;900&family=Francois+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bayon&family=Encode+Sans+SC:wght@600;900&family=Francois+One&family=Saira+Condensed:wght@700;900&display=swap');
 *{
-  font-family: 'Orbit', sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   text-decoration-line: none !important;
 }
 .App {
@@ -9,6 +10,21 @@
   /*font-family: 'Noto Sans KR', sans-serif;*/
   /*font-family: 'Orbit', sans-serif;*/
   /*font-family: 'Russo One', sans-serif;*/
+  /*font-family: 'Francois One', sans-serif;*/
+  /*font-family: 'Bayon', sans-serif;*/
+  /*font-family: 'Francois One', sans-serif;*/
+  /*font-family: 'Bayon', sans-serif;*/
+  /*font-family: 'Francois One', sans-serif;*/
+  /*font-family: 'Bayon', sans-serif;*/
+  /*font-family: 'Encode Sans SC', sans-serif;*/
+  /*font-family: 'Francois One', sans-serif;*/
+
+  /*font-family: 'Encode Sans SC', sans-serif;*/
+  /*font-family: 'Francois One', sans-serif;*/
+  /*font-family: 'Saira Condensed', sans-serif;*/
+
+
+
 
 }
 

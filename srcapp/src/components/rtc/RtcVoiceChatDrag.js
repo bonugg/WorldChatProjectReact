@@ -29,7 +29,7 @@ function Drag({
     const [button2Active, setButton2Active] = useState(false);
     const [button3Active, setButton3Active] = useState(false);
     const [recoderButton, setRecoderButton] = useState(false);
-
+    const [activeButton, setActiveButton] = useState(null);
     const [dotCount, setDotCount] = useState(0);
 
     useEffect(() => {
@@ -37,13 +37,11 @@ function Drag({
         console.log(show);
         console.log("---------------------------------------");
         if (!show) {
+            setButton2Active(false);
+            setActiveButton(null);
             setIsClosed(false);
         }
     }, [show]);
-    useEffect(() => {
-        console.log("))))))))))))))))))))))))))))))))))))");
-        console.log(isClosed);
-    }, [isClosed]);
 
     const trackPos = (data) => {
         setPosition({x: data.x, y: data.y});
@@ -327,10 +325,30 @@ function Drag({
                                         {buttonText}
                                     </Button>
                                     <div className={"na_trans"}>
-                                        <div className={"na_select"} onClick={() => Language('Kor')}>Kor</div>
-                                        <div className={"na_select"} onClick={() => Language('Eng')}>Eng</div>
-                                        <div className={"na_select"} onClick={() => Language('Jpn')}>Jpn</div>
-                                        <div className={"na_select one"} onClick={() => Language('Chn')}>Chn</div>
+                                        <div className={`na_select ${activeButton === 'Kor' ? 'active' : ''}`}
+                                             onClick={() => {
+                                                 Language('Kor');
+                                                 setActiveButton('Kor');
+                                             }}
+                                        >Kor</div>
+                                        <div className={`na_select ${activeButton === 'Eng' ? 'active' : ''}`}
+                                             onClick={() => {
+                                                 Language('Eng');
+                                                 setActiveButton('Eng');
+                                             }}
+                                        >Eng</div>
+                                        <div className={`na_select ${activeButton === 'Jpn' ? 'active' : ''}`}
+                                             onClick={() => {
+                                                 Language('Jpn');
+                                                 setActiveButton('Jpn');
+                                             }}
+                                        >Jpn</div>
+                                        <div className={`na_select ${activeButton === 'Chn' ? 'active' : ''}`}
+                                             onClick={() => {
+                                                 Language('Chn');
+                                                 setActiveButton('Chn');
+                                             }}
+                                        >Chn</div>
                                     </div>
                                 </div>
                             </div>

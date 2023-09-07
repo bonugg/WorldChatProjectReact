@@ -9,8 +9,6 @@ const NotificationModal = ({ show, onHide, onAccept, onDecline, message,sendUser
     const {userList, setUserList} = useContext(UserListContext);
 
     //const sendUserProfile = userList.find(u => u.userName === sendUser)?.userProfileName;
-    console.log("모달창 유저프로필 이미지" + sendUserProfile);
-
     const sender = message.split("님이")[0];
     const prefix = message.replace(sender, '');
 

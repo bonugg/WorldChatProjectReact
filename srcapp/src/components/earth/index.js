@@ -14,6 +14,7 @@ import Space from "../../assets/textures/black2.jpg";
 import {TextureLoader} from "three";
 import MarsMap from "../../assets/textures/mars.jpg";
 import SunMap from "../../assets/textures/sun.jpg";
+import Rings from "../../assets/textures/rings.webp";
 import KRMAP from "../../img/flag/KR.png";
 import USMAP from "../../img/flag/US.png";
 import CAMAP from "../../img/flag/CA.png";
@@ -42,15 +43,16 @@ const Earth = React.memo(({
                               FrdId4,
                               NationallyList,
                               selectedNationallyMove,
-                              resetCityName
+                              resetCityName,
+                              reNationally
                           }) => {
 
     const objectGroup = useRef();
     const spackBackground = useRef();
     const spackBackgroundRef = useRef();
-    const [spacebackground, ASTEROID, KR, US, CA, IT, JP, RU, AU, PH, CN, mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
+    const [ring, spacebackground, ASTEROID, KR, US, CA, IT, JP, RU, AU, PH, CN, mypageMap, cloudsMap2, nightMap, colorMap, normalMap, specularMap, cloudsMap, marsMap, sunMap] = useLoader(
         TextureLoader,
-        [Space, Asteroid, KRMAP, USMAP, CAMAP, ITMAP, JPMAP, RUMAP, AUMAP, PHMAP, CNMAP, Pluto_MadeMap, CloudsMap, EarthNightMap, EarthDayMap, EarthNormalMap, EarthSpecularMap, EarthCloudsMap, MarsMap, SunMap]
+        [Rings, Space, Asteroid, KRMAP, USMAP, CAMAP, ITMAP, JPMAP, RUMAP, AUMAP, PHMAP, CNMAP, Pluto_MadeMap, CloudsMap, EarthNightMap, EarthDayMap, EarthNormalMap, EarthSpecularMap, EarthCloudsMap, MarsMap, SunMap]
     );
     //클릭 도시 이름 저장 변수
 
@@ -151,7 +153,12 @@ const Earth = React.memo(({
             removeAllCircles();
         }
     }, [loggedIn, FrdId, FrdId2, FrdId3, FrdId4, isMapageZoom]);
-
+    useEffect(() => {
+        if (reNationally) {
+            console.log("새로고침");
+            handleEarthClick();
+        }
+    }, [reNationally]);
 
     // 5초 뒤 강제 클릭 이벤트
     // useEffect(() => {
@@ -321,7 +328,7 @@ void main() {
 
     const shaderMaterial = new THREE.ShaderMaterial({
         uniforms: {
-            glowColor: { type: "c", value: new THREE.Color(0x74b9ff) }
+            glowColor: {type: "c", value: new THREE.Color(0x74b9ff)}
         },
         vertexShader,
         fragmentShader,
@@ -373,13 +380,13 @@ void main() {
                         attach="material"
                         args={[{
                             uniforms: {
-                                glowColor: { value: new THREE.Color('rgba(175,106,67)') }
+                                glowColor: {value: new THREE.Color('rgba(175,106,67)')}
                             },
                             vertexShader,
                             fragmentShader,
                             side: THREE.BackSide,
                             blending: THREE.AdditiveBlending,
-                            transparent:true
+                            transparent: true
                         }]}
                     />
                 </mesh>
@@ -405,13 +412,13 @@ void main() {
                         attach="material"
                         args={[{
                             uniforms: {
-                                glowColor: { value: new THREE.Color('rgba(224,102,65)') }
+                                glowColor: {value: new THREE.Color('rgba(224,102,65)')}
                             },
                             vertexShader,
                             fragmentShader,
                             side: THREE.BackSide,
                             blending: THREE.AdditiveBlending,
-                            transparent:true
+                            transparent: true
                         }]}
                     />
                 </mesh>
@@ -430,7 +437,8 @@ void main() {
                 <ringGeometry args={[1.6, 2.2, 32]}/>
                 <meshPhongMaterial
                     color={'rgb(94,89,89)'}
-                    opacity={0.5}
+                    map={ring}
+                    opacity={0.7}
                     depthWrite={true}
                     transparent={true}
                     side={THREE.DoubleSide} // Add this line
@@ -456,13 +464,13 @@ void main() {
                         attach="material"
                         args={[{
                             uniforms: {
-                                glowColor: { value: new THREE.Color('rgb(229,216,204)') }
+                                glowColor: {value: new THREE.Color('rgb(229,216,204)')}
                             },
                             vertexShader,
                             fragmentShader,
                             side: THREE.BackSide,
                             blending: THREE.AdditiveBlending,
-                            transparent:true
+                            transparent: true
                         }]}
                     />
                 </mesh>
@@ -500,14 +508,14 @@ void main() {
                         attach="material"
                         args={[{
                             uniforms: {
-                                glowColor: { value: new THREE.Color('rgba(53,68,126)') },
-                                cameraDistance: { value: Infinity }
+                                glowColor: {value: new THREE.Color('rgba(53,68,126)')},
+                                cameraDistance: {value: Infinity}
                             },
                             vertexShader,
                             fragmentShader,
                             side: THREE.BackSide,
                             blending: THREE.AdditiveBlending,
-                            transparent:true
+                            transparent: true
                         }]}
                     />
                 </mesh>
@@ -682,8 +690,12 @@ void main() {
                             console.error(`Coordinates for country code ${countryCode} not found.`);
                         }
                     });
-                } else {
-
+                } else if(data.items == null){
+                    console.log("초기화");
+                    NationallyList([]);
+                    if(zoomIn){
+                        setZoomIn(false);
+                    }
                 }
             } catch (error) {
                 if (retry) {

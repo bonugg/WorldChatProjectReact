@@ -418,9 +418,9 @@ a {
 }
 
 .menu_li_sub{
-    font-size: 10px;
+    font-size: 13px;
     background-color: rgba(24, 24, 31, 1);
-    height: 40px;
+    height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -457,13 +457,13 @@ a {
     z-index :1;
 }
 .sub_test2_on{
-    height: 120px;
+    height: 150px;
     opacity: 1;
     visibility: visible;
     transition: all 0.25s ease-in-out;
 }
 .sub_test_on{
-    height: 80px;
+    height: 100px;
     opacity: 1;
     visibility: visible;
     transition: all 0.25s ease-in-out;
@@ -531,7 +531,7 @@ a {
     outline: none;
     font-size: 11px !important;
     color: white !important;
-    font-family: 'Orbit', sans-serif !important;
+   font-family: 'Noto Sans KR', sans-serif !important;
     transition: all 0.25s ease-in-out !important;
 }
 .select_search_friend_disabled{
@@ -551,7 +551,7 @@ a {
     outline: none;
     font-size: 11px !important;
     color: white !important;
-    font-family: 'Orbit', sans-serif !important;
+   font-family: 'Noto Sans KR', sans-serif !important;
     transition: all 0.25s ease-in-out !important;
     cursor: auto;
 }
@@ -580,7 +580,7 @@ a {
     font-size: 11px !important;
     background-color: black!important;
     color: rgba(255, 255, 255, 0.8) !important;
-    font-family: 'Orbit', sans-serif !important;
+   font-family: 'Noto Sans KR', sans-serif !important;
 }
 .select_search_friend_li:hover{
     background-color: rgba(255, 255, 255, 0.3) !important;
@@ -595,9 +595,13 @@ a {
     min-width: 30px !important;
     height: 30px !important;
     color: white !important;
-    font-family: 'Russo One', sans-serif!important;
+   font-family: 'Noto Sans KR', sans-serif !important;
     border-radius: 3px !important;
     transition: all 0.25s ease-in-out !important;
+}
+.move_nationally.one{
+    top: 5px !important;
+    right: 45px !important;
 }
 .move_nationally:hover{
     background-color: #272731 !important;
@@ -661,7 +665,6 @@ a {
     border: 0px solid #3b3e3f !important;
     border-top-width: 1px !important;
     color: white !important;
-    font-family: 'Russo One', sans-serif!important;
     border-radius: 5px !important;
     transition: all 0.25s ease-in-out !important;
 }
@@ -805,9 +808,10 @@ a {
     height: 25%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 50px;
+    position: relative;
 }
 .myPageDiv_profile_img{
     width: 150px;
@@ -816,6 +820,7 @@ a {
     border: 1px solid #3b3e3f !important;
     cursor: pointer;
     margin-bottom: 20px;
+    margin-top: 30px;
 }
 .myPageDiv3 {
     width: 100%;
@@ -1064,7 +1069,7 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
     color: indianred !important;
     border: 0px solid #3b3e3f !important;
     border-top-width: 1px !important;
-    font-family: 'Russo One', sans-serif !important;
+    font-family: 'Noto Sans KR', sans-serif !important;
     box-shadow: 2px 3px 0px 0px black;
 }
 .error_text:hover{
@@ -1163,7 +1168,7 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Russo One', sans-serif;
+    font-family: 'Russo One', sans-serif !important;
 }
 .social_login_blank_box{
     width: 60px;
@@ -1225,7 +1230,6 @@ input[type=text]:focus, input[type=password]:focus, input[type=file]:focus {
     color: white !important;
     width: 100%;
     height: 60px !important;
-    font-family: 'Orbit', sans-serif !important;
 
     background-color: #18181f !important;
     border: 0px solid #3b3e3f !important;
@@ -1375,7 +1379,7 @@ button[type=button]:hover {
     outline: none;
     font-size: 13px !important;
     color: rgba(220, 220, 220, 0.5) !important;
-    font-family: 'Orbit', sans-serif !important;
+   font-family: 'Noto Sans KR', sans-serif !important;
     transition: all 0.25s ease-in-out !important;
 }
 .custom_select * {

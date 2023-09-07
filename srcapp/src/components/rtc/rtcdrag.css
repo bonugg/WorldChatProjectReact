@@ -57,7 +57,7 @@
     border: 0px solid #3b3e3f !important;
     border-top-width: 1px !important;
     color: white !important;
-    font-family: 'Orbit', sans-serif !important;
+    font-family: 'Encode Sans SC', sans-serif;
     width: 33.3%;
     margin-right: 10px !important;
     background-color: #18181f !important;
@@ -95,7 +95,7 @@
     border: 0px solid #3b3e3f !important;
     border-top-width: 1px !important;
     color: white !important;
-    font-family: 'Orbit', sans-serif !important;
+    font-family: 'Encode Sans SC', sans-serif;
     width: 35%;
     margin-right: 10px;
     background-color: #18181f !important;
@@ -148,4 +148,8 @@
 .na_select:hover {
     background-color: rgba(79, 79, 93, 0.5);
     cursor: pointer;
+}
+
+.na_select.active{
+    background-color: #272731 !important;
 }

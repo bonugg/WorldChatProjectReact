@@ -15,7 +15,7 @@ import "./css/FreindsList.css";
 import axios from "axios";
 
 
-const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType, socket, friendListUpdated}) => {
+const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logoutApi3, FriendsList,isOneOnOneChatDiv,onData, setChatType, socket, friendListUpdated,message}) => {
     const [userList, setUserList] = useState([]);
     const [unreadCount, setUnreadCount] = useState({});
     const freindsList = async (retry = true) => {
@@ -38,7 +38,7 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
             const data = await response.json();
             if(data && data.items) {
                 setUserList(() => data.items);
-                getUnreadMessageCount(data.items);
+                await getUnreadMessageCount(data.items);
             }else {
                 setUserList([]);
             }
@@ -72,8 +72,11 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
 
     const removeItemFromList = (id) => {
         setUserList(prevList => {
+            const item = prevList.find(item => item.id == id);
+            // Get the country name from the found item
+            const countryName = item ? item.friends.userNationality : null;
             const updatedList = prevList.filter(item => item.id != id);
-            onRemove(updatedList.length);
+            onRemove(updatedList.length, countryName);
             return updatedList;
         });
     }
@@ -94,18 +97,30 @@ const FreindsList = React.memo(({onRemove, FriendListApi, FriendNationally, logo
         }));
     };
     //메시지 안읽은 개수 웹소켓
+    // useEffect(() => {
+    //     if (socket) {
+    //         console.log("연결---");
+    //         socket.onmessage = (event) => {
+    //             const msg = JSON.parse(event.data);
+    //             console.log("서버에서 받은 보낸사람");
+    //             console.log(msg);
+    //             //unreadCounts를 업데이트합니다.
+    //             setUnreadCount(prevCounts => ({
+    //                 ...prevCounts,
+    //                 [msg.sender]: (prevCounts[msg.sender] || 0) + 1
+    //             }));
+    //         }
+    //     }
+    // }, [socket]);
     useEffect(() => {
-        if (socket) {
-            socket.onmessage = (event) => {
-                const msg = JSON.parse(event.data);
-                //unreadCounts를 업데이트합니다.
-                setUnreadCount(prevCounts => ({
-                    ...prevCounts,
-                    [msg.sender]: (prevCounts[msg.sender] || 0) + 1
-                }));
-            }
+        if (message) {
+            console.log("서버에서 받은 메시지:", message);
+            setUnreadCount(prevCounts => ({
+                ...prevCounts,
+                [message.sender]: (prevCounts[message.sender] || 0) + 1
+            }));
         }
-    }, [socket]);
+    }, [message]);
 
     // //db에서 안읽은거 불러오기
     const getUnreadMessageCount = async (users) => {

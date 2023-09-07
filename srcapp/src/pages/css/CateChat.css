@@ -95,7 +95,7 @@
     width: 300px;
     height: 310px;
     border-radius: 4px;
-    background-color: rgba(200, 200, 200, 0.9);
+    background-color: rgb(41, 43, 47);
 }
 .creatRoom_Div_2{
     width: 100%;
@@ -162,7 +162,7 @@
     cursor: pointer;
     border: 1px solid rgba(200, 200, 200, 0.2) !important;
     transition: all 0.25s ease-in-out !important;
-    font-family: 'Orbit', sans-serif !important;
+    font-family: 'Russo One', sans-serif !important;
     padding-left: 15px !important;
     box-sizing: border-box;
     margin-bottom: 10px;
@@ -179,7 +179,7 @@
     cursor: pointer;
     border: 1px solid rgba(200, 200, 200, 0.2) !important;
     transition: all 0.25s ease-in-out !important;
-    font-family: 'Orbit', sans-serif !important;
+    font-family: 'Russo One', sans-serif !important;
     padding-left: 0px !important;
     box-sizing: border-box;
 }
@@ -1017,7 +1017,7 @@ input[type='number'] {
     background-color: rgb(67, 76, 98, 0.4) !important;
 }
 .Cate_btn.one.active {
-    background-color: rgb(23, 35, 77) !important;
+    background-color: rgb(16, 52, 87) !important;
 }
 .Cate_btn.one.active:hover{
     background-color: rgba(23, 35, 77, 0.65) !important;

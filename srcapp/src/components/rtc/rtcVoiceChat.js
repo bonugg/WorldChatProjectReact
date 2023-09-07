@@ -118,7 +118,6 @@ const RtcVoiceChat = ({showRtcVoiceChat, sendUser, receiverUser, setShowRtcVoice
 
     const {userList, setUserList} = useContext(UserListContext);
     // let localUserName = "";
-    console.log(userList+"TLQKF");
     const sendUserProfile = userList.find(u => u.userName === sendUser)?.userProfileName;
     const receiverUserProfile = userList.find(u => u.userName === receiverUser)?.userProfileName;
 
@@ -346,6 +345,7 @@ const RtcVoiceChat = ({showRtcVoiceChat, sendUser, receiverUser, setShowRtcVoice
                     setDisconnect2(true);
                     return;
                 }
+                console.log("tt+-+")
                 if (average > 15) {
                     if(localStorage.getItem('userName') == sendUser) {
                         setReceiverIsTalking(true);
@@ -511,16 +511,22 @@ const RtcVoiceChat = ({showRtcVoiceChat, sendUser, receiverUser, setShowRtcVoice
                     return;
                 }
 
+                console.log("ㅈ[발");
+
                 if (average > 15) {
                     if(localStorage.getItem('userName') == sendUser) {
+                        console.log("ㅈ[발111");
                         setSenderIsTalking(true);
                     } else {
+                        console.log("ㅈ[발222");
                         setReceiverIsTalking(true);
                     }
                 } else if (average < 10) {
                     if(localStorage.getItem('userName') == sendUser) {
+                        console.log("ㅈ[발333");
                         setSenderIsTalking(false);
                     } else {
+                        console.log("ㅈ[발444");
                         setReceiverIsTalking(false);
                     }
                 }

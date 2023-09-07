@@ -43,7 +43,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import KeyIcon from '@mui/icons-material/Key';
 import {useDispatch, useSelector} from "react-redux";
 import UserListContext from '../context/UserListContext';
-
+import UpdateIcon from '@mui/icons-material/Update';
 import NotificationModal from "../components/rtc/NotificationModal.js";
 import NotificationDeclineModal from '../components/rtc/NotificationDeclineModal.js';
 
@@ -122,7 +122,7 @@ const Home = React.memo(() => {
         //드래그 채팅창 기능
         const [oneOnOneUserId, setOneOnOneUserId] = useState('');
         const [oneOnOneUserNickName, setOneOnOneUserNickName] = useState('');
-
+        const [reNationally, setReNationally] = useState(false);
         const handleRtcShowDrag = () => {
             setShowRtcChat(true);
         };
@@ -180,6 +180,9 @@ const Home = React.memo(() => {
 
         const handleNationallyList = (data) => {
             setNationallyList(data);
+            if(data.length == 0){
+                setSelectedNationally(" ");
+            }
         };
         const handleResetCityName = (data) => {
             if (data) {
@@ -188,6 +191,13 @@ const Home = React.memo(() => {
         }
         const handleSearchNationally = () => {
             setSelectedNationallyMove(selectedNationally);
+        };
+
+        const handleReNationally= () => {
+            setReNationally(true);
+            setTimeout(() => {
+                setReNationally(false);
+            }, 3000);  // 3000 milliseconds = 3 seconds
         };
         //드래그 이벤트
         const handleShowDrag = () => {
@@ -204,11 +214,14 @@ const Home = React.memo(() => {
         const removeItemFromHomeComponent = (id) => {
             setFrdId(id);
         };
-        const removeItemFromHomeComponent2 = (id) => {
+        const removeItemFromHomeComponent2 = (id, na) => {
             setFrdId2(id);
             //친구의 수가 0이면 셀렉트창 초기화
-            if(id == 0){
+
+            if (id == 0) {
                 setSelectedNationally(" ");
+                const updatedList = nationallyList.filter(item => item !== na);
+                setNationallyList(updatedList);
             }
         };
         const frdaddHanddle = (id) => {
@@ -313,7 +326,56 @@ const Home = React.memo(() => {
             setFriendListApi(newValue);
         };
 
+        const userdelLogOut = async () => {
+            alert("Bye Bye ~");
+            setLoggedIn(false);
+            setLoggedOut(true);
+            console.log("로그아웃 요청 전");
+            fetch('/webrtc/request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: localStorage.getItem('userName'),
+                    // receivers: friend,
+                    type: "online"
+                })
+            });
+            console.log("로그아웃 요청 후")
+            try {
+                const response = await fetch('/webrtc/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    },
+                    body: localStorage.getItem('userName')
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Logout failed with status: ${response.status}`);
+                }
+                setNationallyList([]);
+                setHomeMyGo(false);
+                dispatch({type: "SET_RANDOMDRAG", payload: false});
+                dispatch({type: "SET_CATEDRAG", payload: false});
+                dispatch({type: "SET_FRIENDDRAG", payload: false});
+                console.log("Logout successful");
+            } catch (error) {
+                console.error("Error during logout:", error);
+            }
+            localStorage.removeItem('userName');
+            localStorage.removeItem('Authorization');
+            localStorage.removeItem('savedUsername');
+            localStorage.removeItem('savedPassword');
+            home();
+        }
+
         const logoutApi = (newValue) => {
+            if (newValue == "home") {
+                userdelLogOut();
+                return;
+            }
             if (newValue) {
                 logout();
             }
@@ -460,6 +522,8 @@ const Home = React.memo(() => {
         const localRoom = sendUser + "님과 " + receiverUser + "님의 음성채팅방"
 
 
+        const [message, setMessage] = useState(null);
+        const [addMessage, setAddMessage] = useState(null);
         useEffect(() => {
             console.log("receiver2");
             if (socket) {
@@ -497,6 +561,8 @@ const Home = React.memo(() => {
                                     audioElement.src = audioUrl;
                                     audioElement.controls = true;  // 재생, 일시정지 등의 컨트롤을 활성화한다.
 
+                                    audioElement.style.visibility = 'hidden';
+                                    audioElement.style.position = 'fixed';
                                     // audio 태그를 DOM에 추가한다.
                                     document.body.appendChild(audioElement);
 
@@ -522,8 +588,19 @@ const Home = React.memo(() => {
                     } else if (receivedMessage.includes("접속")) {
                         console.log("접속 들어옴")
                         setFriendListUpdated(prevState => !prevState);
+                    } else if (receivedMessage.includes("채팅")) {
+                        receivedMessage = receivedMessage.substring(2);
+                        const msg = JSON.parse(receivedMessage);
+                        console.log("채팅 들어옴" + msg)
+                        setMessage(msg);
+                    } else if (receivedMessage.includes("친구")) {
+                        console.log("친구 들어옴" + receivedMessage)
+                        receivedMessage = receivedMessage.substring(2);
+                        const msg = receivedMessage;
+                        console.log("친구 들어옴", msg)
+                        setAddMessage(msg);
                     } else {
-                        if(showRtcChat || showRtcVoiceChat){
+                        if (showRtcChat || showRtcVoiceChat) {
                             console.log("요청들어옴");
                         }
                         // 기존의 메시지 처리 로직
@@ -533,9 +610,6 @@ const Home = React.memo(() => {
                 };
             }
         }, [socket]);
-
-        console.log("샌드유저 스테이트 확인값 @@@@@@@@@@@@@@@@@" + sendUser);
-        console.log("리시버유버 스테이트 확인값 @@@@@@@@@@@@@@@@" + receiverUser);
 
         const handleDecline = async (sender) => {
 
@@ -596,9 +670,6 @@ const Home = React.memo(() => {
 
 
 //console.log("홈 모달창 샌드유저 이미지 확인값@@@@@@" + sendUserProfile);
-        console.log("샌드유저 스테이트 확인값 @@@@@@@@@@@@@@@@@" + sendUser);
-        console.log("리시버유버 스테이트 확인값 @@@@@@@@@@@@@@@@" + receiverUser);
-
 
         const sendRequestToServer = async () => {
 
@@ -808,12 +879,13 @@ const Home = React.memo(() => {
             flow: 'auth-code',
         })
         const TokenFromCode = async (code) => {
+            console.log(code);
             setButtonText("Logging in ...");
             const params = new URLSearchParams();
             params.append('code', code);
             params.append('client_id', '879795063670-a2a8avf7p2vnlqg9mc526r8ge2h5cgvc.apps.googleusercontent.com');
             params.append('client_secret', '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');
-            params.append('redirect_uri', 'https://localhost:3001');
+            params.append('redirect_uri', 'https://www.worldwidechat.co.kr:9002');
             params.append('grant_type', 'authorization_code');
 
 
@@ -1177,8 +1249,6 @@ const Home = React.memo(() => {
                 });
 
                 if (response.ok) {
-                    localStorage.removeItem('Authorization');
-
                     alert("Logout");
                     setLoggedIn(false);
                     setLoggedOut(true);
@@ -1217,6 +1287,7 @@ const Home = React.memo(() => {
                         console.error("Error during logout:", error);
                     }
                     localStorage.removeItem('userName');
+                    localStorage.removeItem('Authorization');
                     home();
 
                 } else {
@@ -1454,11 +1525,12 @@ const Home = React.memo(() => {
                     alignItems: "center", // 중앙 정렬을 위한 설정
                     zIndex: '10000'
                 }}>
-                    <img src={LoadingSpinner} alt="Loading..." />
+                    <img src={LoadingSpinner} alt="Loading..."/>
                 </div>
             );
 
         }
+
         return (
             <>
                 <Suspense fallback={<Fallback/>}>
@@ -1515,7 +1587,7 @@ const Home = React.memo(() => {
 
                         </div>
                         <div style={{opacity: displayStyle}}>
-                            <RandomChatDrag  randomMax={randomMini}
+                            <RandomChatDrag randomMax={randomMini} addMessage={addMessage}
                                             isMinimize={handleIsMinimized} show={randomDrag}
                                             logoutApiCate={logoutApiCate} frdadd={frdaddHanddle}
                                             frdaddResponse={frdaddResponseHanddle}
@@ -1523,16 +1595,16 @@ const Home = React.memo(() => {
                         </div>
 
                         <div style={{opacity: displayStyle}}>
-                        <OneOnOneChatDrag friendMax={firendMini}
-                                          isMinimize={handleIsMinimizedFriend}
-                                          show={firendDrag} oneOnOneUserId={oneOnOneUserId}
-                                          oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
-                                          onClose={handleOneOnOneShowDragClose}/>
+                            <OneOnOneChatDrag friendMax={firendMini}
+                                              isMinimize={handleIsMinimizedFriend}
+                                              show={firendDrag} oneOnOneUserId={oneOnOneUserId}
+                                              oneOnOneUserNickName={oneOnOneUserNickName} logoutApiCate={logoutApiCate}
+                                              onClose={handleOneOnOneShowDragClose}/>
                         </div>
                         <div style={{opacity: displayStyle}}>
-                        <CateChatDrag cateMax={cateMini}
-                                      isMinimize={handleIsMinimizedCate}
-                                      show={cateDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
+                            <CateChatDrag cateMax={cateMini}
+                                          isMinimize={handleIsMinimizedCate}
+                                          show={cateDrag} logoutApiCate={logoutApiCate} onClose={handleDragClose}/>
                         </div>
                         <aside
                             className={MyPageDiv ? `side-bar one` : `side-bar`}
@@ -1665,6 +1737,13 @@ const Home = React.memo(() => {
                                                 >
                                                     <SearchIcon fontSize="small"/>
                                                 </Button>
+                                                <Button
+                                                    type={'submit'}
+                                                    className={"move_nationally one"}
+                                                    onClick={handleReNationally}
+                                                >
+                                                    <UpdateIcon fontSize="small"/>
+                                                </Button>
                                             </div>
                                         </div>
                                         <div className="foot_3">
@@ -1750,6 +1829,7 @@ const Home = React.memo(() => {
                                     FrdId2={FrdId2}
                                     FrdId3={FrdId3}
                                     FrdId4={FrdId4}
+                                    reNationally={reNationally}
                                     NationallyList={handleNationallyList}
                                     selectedNationallyMove={selectedNationallyMove}
                                     resetCityName={handleResetCityName}
@@ -1780,6 +1860,7 @@ const Home = React.memo(() => {
                                 onRemove={removeItemFromHomeComponent2}
                                 socket={socket}
                                 friendListUpdated={friendListUpdated}
+                                message={message}
                             />
                             {/*{dataFromChild && <p>받은 데이터: {dataFromChild}</p>}*/}
                         </DivStyledMenu2>

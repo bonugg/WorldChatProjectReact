@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Noto+Sans+KR:wght@400;500&family=Orbit&family=Russo+One&display=swap');
 
 .friendsListDiv {
-    width: 450px;
+    width: 350px;
     height: 450px;
     border-radius: 4px;
     background-color: rgba(11, 11, 14, 0.9);
@@ -38,7 +38,7 @@
 .friendsList{
     height: calc(100% - 40px);
     width: 100%;
-    padding: 35px 20px 20px;
+    padding: 35px 10px 35px;
     box-sizing: border-box;
 }
 .friendsList_2{
@@ -166,31 +166,32 @@
     opacity: 0.8;
 }
 .friendsList_item_nickname{
-    width: 100px;
+    width: 90px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 15px;
     color: rgba(255, 255, 255, 0.7);
 }
 .friendsList_item_nickname_text{
     text-align: center;
-    width: 90px;
+    width: 60px;
+    font-size: 12px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .friendsList_item_btn_div{
-    width: calc(100% - 170px);
+    width: calc(100% - 160px);
     height: 100%;
     display: flex;
     justify-content: flex-start;
     align-items: center;
+    margin-right: 12px;
 }
 
 .friendsList_item_btn{
-    min-width: 20% !important;
-    height: 40px !important;
+    min-width: 22% !important;
+    height: 35px !important;
     background-color: rgba(0, 0, 0, 1) !important;
     border: 1px solid black !important;
     outline: none;
@@ -209,11 +210,11 @@
 }
 .unread-count{
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: -5px;
+    right: -5px;
     background-color: red;
-    width: 18px;
-    height: 18px;
+    width: 17px;
+    height: 17px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -221,14 +222,13 @@
     transform: scale(0.8);
 }
 .friendsList_item_btn2{
-    min-width: 20% !important;
-    height: 40px !important;
+    min-width: 22% !important;
+    height: 35px !important;
     background-color: rgba(17, 126, 0, 0.8) !important;
     border: 1px solid rgba(17, 126, 0, 1) !important;
     outline: none;
     transition: all 0.25s ease-in-out;
     cursor: pointer;
-    font-size: 10px !important;
     font-family: 'Russo One', sans-serif !important;
     color: rgba(255, 255, 255, 0.8) !important;
     margin-right: 7px !important;
@@ -247,7 +247,7 @@
     background-color: rgba(205, 92, 92, 0.35) !important;
 }
 .friend_del_text{
-    font-size: 14px;
+    font-size: 13px;
     color: white;
     margin-right: 14px;
     white-space: nowrap;
@@ -286,11 +286,12 @@
     margin-right: 10px !important;
 }
 .friend_del_btn_1{
-    width: 80px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
     height: 40px !important;
     min-height: 40px !important;
+    font-size: 10px !important;
     max-height: 40px !important;
     background-color: rgba(150, 150, 150, 0.6) !important;
     color: white !important;
