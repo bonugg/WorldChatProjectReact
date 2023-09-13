@@ -480,7 +480,7 @@ const Home = React.memo(() => {
             console.log(host)
             host = host.slice(0, -4);
             if (userName) {
-                //const ws = new WebSocket(`wss://localhost:9002/test`)
+                //const ws = new WebSocket(`wss://175.45.194.135:9002/test`)
                 const ws = new WebSocket(`wss://${host}9002/test?userName=${userName}`);
                 console.log("새로고침 - " + `wss://${host}9002/test?userName=${userName}`);
                 setRtcUserName(userName);
@@ -982,11 +982,9 @@ const Home = React.memo(() => {
                 setRtcUserName(userName);
 
                 if (username) {
-                    //const ws = new WebSocket(`wss://localhost:9002/test`)
-                    // response();
                     const ws = new WebSocket(`wss://${host}9002/test?userName=${userName}`);
                     setSocket(ws)
-                    // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
+                    // const ws = new WebSocket(`wss://175.45.194.135:9002/test?userName=${userName}`);
                     ws.onopen = (event) => {
                         console.log("요청 전");
                         fetch('/webrtc/request', {
@@ -1068,10 +1066,10 @@ const Home = React.memo(() => {
                 setRtcUserName(userName);
 
                 if (username) {
-                    //const ws = new WebSocket(`wss://localhost:9002/test`)
+                    //const ws = new WebSocket(`wss://175.45.194.135:9002/test`)
                     const ws = new WebSocket(`wss://${host}9002/test?userName=${userName}`);
                     setSocket(ws)
-                    // const ws = new WebSocket(`wss://localhost:9002/test?userName=${userName}`);
+                    // const ws = new WebSocket(`wss://175.45.194.135:9002/test?userName=${userName}`);
                     ws.onopen = (event) => {
                         console.log("요청 전");
                         fetch('/webrtc/request', {

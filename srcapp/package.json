@@ -71,12 +71,20 @@
     "start": "set HTTPS=true&&set PORT=3001&&react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject"g
   },
   "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
+    "extends": ["react-app"],
+    "rules" : {
+      "no-unused-vars": "warn"
+    },
+    "overrides": [
+      {
+        "files" : ["**/*.js"],
+        "rules": {
+          "max-len": "warn"
+        }
+      }
     ]
   },
   "browserslist": {
