@@ -52,12 +52,13 @@ const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setC
     const {id, user, friends, statement} = frd;
     //
     const [status, setStatus] = useState(false);
+
     async function checkOnlineStatus(name) {
         //친구목록 확인 시 온라인 유저 확인하는 비동기 요청
         const requestOptions = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name})
         };
         const response = await fetch('/online', requestOptions);
         const isOnline = await response.json();
@@ -68,7 +69,7 @@ const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setC
             setStatus(false);
         }
     }
-    
+
     checkOnlineStatus(friends.userName);
     const [deleteDiv, setDeleteDiv] = useState(false);
     const [statements, setStatements] = useState(false);
@@ -89,24 +90,21 @@ const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setC
     const deleteCancle = () => {
         setDeleteDiv(false);
     }
-    const deleteFriend = useCallback((e) => {
-        const deleteFriendAxios = async () => {
-            try {
-                const response = await axios.post('/friends/delete-friends', {userId: friends.userId},
-                    {
-                        headers: {
-                            "Authorization": localStorage.getItem("Authorization"),
-                        }
-                    });
-                if (response.data.item.msg == "delete ok") {
-                    setStatements(true);
-                    setTimeout(() => onRemove(id), 1000);  // Add this line
-                }
-            } catch (e) {
+    const deleteFriend = async () => {
+        try {
+            const response = await axios.post('/friends/delete-friends', {userId: friends.userId},
+                {
+                    headers: {
+                        "Authorization": localStorage.getItem("Authorization"),
+                    }
+                });
+            if (response.data.item.msg == "delete ok") {
+                setStatements(true);
+                setTimeout(() => onRemove(id), 1000);  // Add this line
             }
+        } catch (e) {
         }
-        deleteFriendAxios();
-    }, [onRemove]);
+    }
 
     return (
         <div className={"friendsList_item_div"}>
@@ -146,31 +144,31 @@ const FreindsListItem = React.memo(({onRemove, frd, friendsChatDiv, onData, setC
                         style={{opacity: 1}}
                         onClick={() => friendsChatDivOn(friends.userId, friends.userNickName)}
                     >
-                        <ChatIcon style={{fontSize:'small'}}/>
+                        <ChatIcon style={{fontSize: 'small'}}/>
                         {unreadCount > 0 && <span className="unread-count">{Math.min(unreadCount, 99)}</span>}
                     </Button>
                     <Button
-                        style={status ? {opacity: 1} : {opacity: 0.3,pointerEvents: 'none'}}
+                        style={status ? {opacity: 1} : {opacity: 0.3, pointerEvents: 'none'}}
                         onClick={() => Rtc("video")}
                         className={"friendsList_item_btn2"}
                     >
-                        <VideoChatIcon style={{fontSize:'small'}}/>
+                        <VideoChatIcon style={{fontSize: 'small'}}/>
                     </Button>
                     <Button
-                        style={status ? {opacity: 1} : {opacity: 0.3,pointerEvents: 'none'}}
+                        style={status ? {opacity: 1} : {opacity: 0.3, pointerEvents: 'none'}}
                         onClick={() => Rtc("voice")}
                         className={"friendsList_item_btn2"}
                     >
-                        <PhoneIcon style={{fontSize:'small'}}/>
+                        <PhoneIcon style={{fontSize: 'small'}}/>
                     </Button>
                     <Button
                         onClick={deleteDivStart}
                         className={"friendsList_item_btn2 del"}
                     >
-                        <ClearIcon style={{fontSize:'small'}}/>
+                        <ClearIcon style={{fontSize: 'small'}}/>
                     </Button>
                 </div>
-                <div className={deleteDiv ? "userMessage_div one": "userMessage_div"}>
+                <div className={deleteDiv ? "userMessage_div one" : "userMessage_div"}>
                     {friends.userMessage == "" ?
                         <span className={"userMessage"}>No status Message</span>
                         :

@@ -133,6 +133,22 @@ const MyPage = React.memo(({
                 setMypageOnClick(false);
                 setFriendsReceivedOnClick(true);
                 setFriendsRequesteddOnClick(false);
+                console.log("리시브")
+                const getReceivedListAxios = async () => {
+                    try {
+                        const response = await axios.get('/friends/received-list', {
+                            headers: {
+                                Authorization: `${localStorage.getItem('Authorization')}`
+                            }
+                        });
+                        if (response.data && response.data.items) {
+                            setReceivedList(() => response.data.items);
+                            console.log("리시브 완료")
+                        }
+                    } catch (e) {
+                    }
+                }
+                getReceivedListAxios();
             }
         }, [FriendsReceived]);
         useEffect(() => {
@@ -173,26 +189,6 @@ const MyPage = React.memo(({
         const removeItemFromList2 = (id) => {
             setRequestedList(prevList => prevList.filter(item => item.id != id));
         }
-
-        useEffect(() => {
-            if (friendsReceivedOnClick) {
-                const getReceivedListAxios = async () => {
-                    try {
-                        const response = await axios.get('/friends/received-list', {
-                            headers: {
-                                Authorization: `${localStorage.getItem('Authorization')}`
-                            }
-                        });
-                        if (response.data && response.data.items) {
-                            setReceivedList(() => response.data.items);
-                        }
-                    } catch (e) {
-                    }
-                }
-                getReceivedListAxios();
-            }
-        }, [friendsReceivedOnClick]);
-
 
         const userInfo = async (retry = true) => {
             setPreviewImage(null);

@@ -7,9 +7,8 @@ const RequestedListItem = ({list, onRemove}) => {
     const {id, user, friends, statement} = list;
     const [statements, setStatements] = useState(statement);
 
-    const cancleRequest = useCallback((e) => {
-        const id = e.target.dataset.id;
-        const cancleRequestAxios = async () => {
+        const cancleRequest = async () => {
+            console.log(id);
             try {
                 const response = await axios.post('/friends/decline', {id: id},
                     {
@@ -17,15 +16,15 @@ const RequestedListItem = ({list, onRemove}) => {
                             Authorization: `${localStorage.getItem('Authorization')}`
                         }
                     });
+                console.log(response);
                 if (response.data && response.data.item) {
+                    console.log(response.data.item);
                     setStatements('CANCLE');
                     setTimeout(() => onRemove(id), 1000);  // Add this line
                 }
             } catch (e) {
             }
         }
-        cancleRequestAxios();
-    }, [onRemove]);
 
     return (
         <div
